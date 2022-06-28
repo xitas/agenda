@@ -1,0 +1,114 @@
+
+
+.agenda{
+    padding: 1rem;
+}
+
+.agenda h1{
+    text-align: center;
+}
+
+.addEvents {
+    padding: 0.5rem;    
+}
+
+.addEvents .title input , 
+.editEvents .title input {
+    width:20%; 
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px #ddd solid;
+}
+
+.addEvents .title textarea, 
+.editEvents .title textarea{
+    width:20%; 
+    margin-right: 10px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px #ddd solid;
+}
+
+.addEvents .date input,
+.editEvents .date input {
+    width:20%; 
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px #ddd solid;
+    margin-top: 10px;
+}
+
+.editEvents .title input , 
+.editEvents .title textarea,
+.editEvents .date input  {
+    width:80%; 
+}
+
+.btn-agenda{
+    margin-top: 10px; 
+    display: inline-block;
+    color: #fff;
+    background: #333;
+    padding: 5px 15px;
+    border: #333 solid 1px;
+    cursor: pointer; 
+    margin-right: 10px;
+}
+
+.btn-agenda:hover{
+    color: #333;
+    background: #fff;
+    border: #333 solid 1px;
+}
+
+.btn-del{
+    background: #D11A2A;
+    border: #D11A2A solid 1px;
+}
+
+.btn-del:hover{
+    color: #D11A2A;
+    background: #fff;
+    border: #D11A2A solid 1px;
+}
+
+.agendas{
+    padding: 1rem;
+}
+
+.table-agendas{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.table-agendas thead tr {
+    background-color: #333;
+    color: #ffffff;
+    text-align: left;
+}
+
+.table-agendas  th,
+.table-agendas  td {
+    padding: 12px 15px;
+}
+
+.table-agendas  tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.table-agendas  tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.table-agendas  tbody tr:last-of-type {
+    border-bottom: 2px solid #333;
+}
+
+.model-content{
+    font-size: 20px;
+}
