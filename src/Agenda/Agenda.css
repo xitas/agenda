@@ -61,6 +61,17 @@
     border: #333 solid 1px;
 }
 
+.btn-update {
+    background: #4BB543;
+    border: #4BB543 solid 1px;
+}
+
+.btn-update:hover {
+    color: #4BB543;
+    background: #fff;
+    border: #4BB543 solid 1px;
+}
+
 .btn-del{
     background: #D11A2A;
     border: #D11A2A solid 1px;

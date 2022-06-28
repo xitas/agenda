@@ -4,8 +4,9 @@ import * as moment from 'moment';
 import { nanoid } from 'nanoid';
 import DatePicker from "react-datepicker";
 import Modal from "react-bootstrap/Modal";
-
-
+import ViewModel from './components/ViewModel';
+import EditModel from './components/EditModel';
+import DeleteModel from './components/DeleteModel';
 
 const events = [
     {
@@ -29,11 +30,9 @@ const events = [
 ];
 
 
-
 let Agenda = () => {
     const [newEvent, setNewEvent] = useState({id : "" , title: "", description: "", date: ""});
     const [allEvent, setAllEvent] = useState(events);
-    // const [updateEvent, setUpdateEvent] = useState({id: "" , title: "", description: "", date: ""});
 
     // modal to show
     const [ModelState, setModelState] = useState({id: "" , type: "", show: false});
@@ -55,6 +54,7 @@ let Agenda = () => {
         }
     }
 
+    // delete an event in state
     let handleDeleteEvent = (id) => {
         handleClose();
         if(id){
@@ -63,91 +63,37 @@ let Agenda = () => {
         }
     }
 
-    let handleUpdate = (e) => {
-        e.preventDefault();
-        // const fieldName = e.target.getAttribute("name"); 
-        const fieldValue = e.target.value;
-
-        console.log(fieldValue);
-        
-    }
-
+    //load model according to selected action 
     let GetModel = () => {
         if(ModelState.id){
             let agenda = allEvent.find(agenda => agenda.id === ModelState.id);
+            let index = allEvent.findIndex(({ id }) => id === ModelState.id);
+            console.log(index);
             if (ModelState.type === "view"){
                 return(
-                    <div>
-                        <Modal.Header closeButton>
-                            <Modal.Title>View Agenda</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <p className='model-content'><b>Id: </b>{agenda.id}</p>
-                            <p className='model-content'><b>Name:</b> {agenda.title}</p>
-                            <p className='model-content'><b>Description:</b> {agenda.description}</p>
-                            <p className='model-content'><b>Date:</b> {moment(agenda.date).format('DD/MM/YYYY')}</p>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <button className="btn-agenda" onClick={handleClose}>
-                                Close
-                            </button>
-                        </Modal.Footer>
-                    </div>
+                    <ViewModel 
+                        data={agenda}
+                        handleClose={handleClose}
+                    />    
                 );
             }
             if (ModelState.type === "edit"){
+                console.log(allEvent);
                 return(
-                    <div>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Edit Agenda</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <p className='model-content'><b>Id: </b>{agenda.id}</p>
-                            <div className='editEvents'>
-                                <div className='title'>
-                                    <input type="text" placeholder="Add title" value={agenda.title} 
-                                        onChange = {(e) => handleUpdate(e)}   
-                                    />
-                                </div>
-                                <div className='title'>
-                                    <textarea placeholder="Add Description" value={agenda.description} rows={5}
-                                   onChange = {(e) => agenda.description = e.target.value }  
-                                    ></textarea>
-                                </div>
-                                <div className='date'>
-                                    <DatePicker placeholderText='Date' selected={agenda.date} 
-                                    // onChange={ (date) => setUpdateEvent( {...updateEvent, date} ) }
-                                    />
-                                </div>
-                                {/* <button className='btn-agenda' onClick={handleAddEvent}>Add Event</button> */}
-                            </div>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <button className="btn-agenda" onClick={handleClose}>
-                                Close
-                            </button>
-                        </Modal.Footer>
-                    </div>
+                    <EditModel 
+                        index={index} 
+                        allEvent={allEvent}
+                        handleClose={handleClose}
+                    />
                 );
             }
             if (ModelState.type === "del"){
                 return(
-                    <div>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Delete Agenda</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <p className='model-content'>Are you sure you want to delete<b> {agenda.title}</b></p>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <button className="btn-agenda btn-del" onClick={() => handleDeleteEvent(agenda.id)}>
-                                Delete
-                            </button>
-                            <button className="btn-agenda" onClick={handleClose}>
-                                Close
-                            </button>
-                        </Modal.Footer>
-                    </div>
+                    <DeleteModel 
+                        data={agenda}
+                        handleClose={handleClose} 
+                        handleDeleteEvent={handleDeleteEvent}
+                    />
                 );
             }
         }else{
