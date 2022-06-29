@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import './Agenda.css';
 import * as moment from 'moment';
 import { nanoid } from 'nanoid';
-import DatePicker from "react-datepicker";
 import Modal from "react-bootstrap/Modal";
+import AddAgenda from './components/AddAgenda';
 import ViewModel from './components/ViewModel';
 import EditModel from './components/EditModel';
 import DeleteModel from './components/DeleteModel';
@@ -118,22 +118,11 @@ let Agenda = () => {
     return(
         <div className='agenda'>
             <h1>Agenda</h1>
-            <h2>Add New Events</h2>
-            <div className='addEvents'>
-                <div className='title'>
-                    <input type="text" placeholder="Add title" value={newEvent.title} 
-                    onChange = {(e) => setNewEvent({...newEvent, title: e.target.value})} />
-                </div>
-                <div className='title'>
-                    <textarea placeholder="Add Description" value={newEvent.description} rows={5}
-                    onChange = {(e) => setNewEvent({...newEvent, description: e.target.value})} ></textarea>
-                </div>
-                <div className='date'>
-                    <DatePicker placeholderText='Date' selected={newEvent.date} 
-                    onChange={ (date) => setNewEvent( {...newEvent, date , id: nanoid()} ) } />
-                </div>
-                <button className='btn-agenda' onClick={handleAddEvent}>Add Event</button>
-            </div>
+            <AddAgenda 
+             newEvent={newEvent} 
+             setNewEvent={setNewEvent} 
+             handleAddEvent={handleAddEvent}
+            />
             <div className='agendas'>
                 <table className='table-agendas'>
                     <thead>
