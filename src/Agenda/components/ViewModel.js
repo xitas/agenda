@@ -1,3 +1,4 @@
+import React from 'react';
 import * as moment from 'moment';
 import Modal from "react-bootstrap/Modal";
 

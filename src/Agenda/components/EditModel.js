@@ -1,3 +1,4 @@
+import React from 'react';
 import Modal from "react-bootstrap/Modal";
 import DatePicker from "react-datepicker";
 
@@ -8,7 +9,7 @@ let EditModel = ({allEvent, index, handleClose}) => {
                 <Modal.Title>Edit Agenda</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p className='model-content'><b>Id: </b>{allEvent[index].title}</p>
+                <p className='model-content'><b>Id: </b>{allEvent[index].id}</p>
                 <div className='editEvents'>
                     <div className='title'>
                         <input type="text" placeholder="Add title" defaultValue={allEvent[index].title} 

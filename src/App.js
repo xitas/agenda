@@ -1,3 +1,4 @@
+import React from 'react';
 import './App.css';
 import Agenda from './Agenda/Agenda';
 import 'bootstrap/dist/css/bootstrap.min.css';

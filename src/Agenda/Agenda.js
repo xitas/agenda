@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Agenda.css';
-import * as moment from 'moment';
 import { nanoid } from 'nanoid';
 import Modal from "react-bootstrap/Modal";
-import AddAgenda from './components/AddAgenda';
+import CreateTable from './components/CreateTable';
+import AddModel from './components/AddModel';
 import ViewModel from './components/ViewModel';
 import EditModel from './components/EditModel';
 import DeleteModel from './components/DeleteModel';
+import NotFoundModel from './components/NotFoundModel';
 
 const events = [
     {
@@ -37,22 +38,29 @@ let Agenda = () => {
     // modal to show
     const [ModelState, setModelState] = useState({id: "" , type: "", show: false});
     
+    //close model function
     const handleClose = () => {
         setModelState({id: "", type: "", show: false});
     }
+
+    //model show function
     const handleShow = (id , type) => {
         setModelState({id: id, type: type, show: true});
     }
 
     //add new event in state
     let handleAddEvent = () =>{
-        setNewEvent({id : nanoid()});
         if(newEvent.id){
             const updateEvent = [...allEvent , newEvent];
             setAllEvent (updateEvent);
             setNewEvent({id: "" , title: "", description: "", date: ""});
         }
     }
+
+    //close add model on adding record
+    useEffect(() => {
+        handleClose();
+    }, [ allEvent ]);
 
     // delete an event in state
     let handleDeleteEvent = (id) => {
@@ -63,12 +71,34 @@ let Agenda = () => {
         }
     }
 
+    //set id on add
+    let handleAddIdEvent = () => {
+        setNewEvent({id: nanoid()})
+    }
+
+    //wait for id set then call add model
+    useEffect(() => {
+        if(newEvent.id){
+            handleShow(newEvent.id , "add");
+        }
+    }, [newEvent.id]);
+
     //load model according to selected action 
     let GetModel = () => {
         if(ModelState.id){
+            if(ModelState.type === "add"){
+                return(
+                    <AddModel
+                    newEvent={newEvent} 
+                    setNewEvent={setNewEvent} 
+                    handleAddEvent={handleAddEvent} 
+                    handleClose={handleClose}
+                    id={ModelState.id}
+                    /> 
+                );
+            }
             let agenda = allEvent.find(agenda => agenda.id === ModelState.id);
             let index = allEvent.findIndex(({ id }) => id === ModelState.id);
-            console.log(index);
             if (ModelState.type === "view"){
                 return(
                     <ViewModel 
@@ -78,7 +108,6 @@ let Agenda = () => {
                 );
             }
             if (ModelState.type === "edit"){
-                console.log(allEvent);
                 return(
                     <EditModel 
                         index={index} 
@@ -98,19 +127,9 @@ let Agenda = () => {
             }
         }else{
             return(
-                <div>
-                    <Modal.Header closeButton>
-                        <Modal.Title>404 Agenda</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p>No Id Found</p>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <button className="btn-agenda" onClick={handleClose}>
-                            Close
-                        </button>
-                    </Modal.Footer>
-                </div>
+                <NotFoundModel 
+                    handleClose={handleClose} 
+                />
             );
         }
     }
@@ -118,37 +137,13 @@ let Agenda = () => {
     return(
         <div className='agenda'>
             <h1>Agenda</h1>
-            <AddAgenda 
-             newEvent={newEvent} 
-             setNewEvent={setNewEvent} 
-             handleAddEvent={handleAddEvent}
-            />
-            <div className='agendas'>
-                <table className='table-agendas'>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th style={{width:"60%"}}>Agenda</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {allEvent.map((event) => (
-                            <tr key={event.id} >
-                                <td>{event.id}</td>
-                                <td>{event.title}</td>
-                                <td>{moment(event.date).format('DD/MM/YYYY')}</td>
-                                <td>
-                                    <button className='btn-agenda' onClick={() => handleShow(event.id , "view")}>View</button>
-                                    <button className='btn-agenda' onClick={() => handleShow(event.id , "edit")}>Edit</button>
-                                    <button className='btn-agenda' onClick={() => handleShow(event.id , "del")}>Del</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div>
+                <div className='agendas'>
+                    <button className='btn-agenda' onClick={handleAddIdEvent} >Add</button>
+                    <CreateTable 
+                        allEvent={allEvent}
+                        handleShow={handleShow}
+                    />
+                    <div>
                     <Modal show={ModelState.show} onHide={handleClose}>
                         {GetModel()}
                     </Modal>
