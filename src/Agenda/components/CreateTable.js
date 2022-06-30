@@ -2,6 +2,7 @@ import React from 'react';
 import * as moment from 'moment';
 
 let CreateTable = ({allEvent , handleShow}) => {
+    let count = 1;
     return(
         <table className='table-agendas'>
             <thead>
@@ -15,7 +16,7 @@ let CreateTable = ({allEvent , handleShow}) => {
             <tbody>
                 {allEvent.map((event) => (
                     <tr key={event.id} >
-                        <td>{event.id}</td>
+                        <td>{count++}</td>
                         <td>{event.title}</td>
                         <td>{moment(event.date).format('DD/MM/YYYY')}</td>
                         <td>

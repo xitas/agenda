@@ -7,6 +7,7 @@ import AddModel from './components/AddModel';
 import ViewModel from './components/ViewModel';
 import EditModel from './components/EditModel';
 import DeleteModel from './components/DeleteModel';
+import ImportModel from './components/ImportModel';
 import NotFoundModel from './components/NotFoundModel';
 
 const events = [
@@ -32,15 +33,23 @@ const events = [
 
 
 let Agenda = () => {
+    // set events
     const [newEvent, setNewEvent] = useState({id : "" , title: "", description: "", date: ""});
     const [allEvent, setAllEvent] = useState(events);
+
+    //error msg state
+    const [msgError, setMsgError] = useState({err: false, title: false, date: false,});
 
     // modal to show
     const [ModelState, setModelState] = useState({id: "" , type: "", show: false});
     
-    //close model function
+    //file state
+    const [file, setFile] = useState()
+    
+    //close model function 
     const handleClose = () => {
         setModelState({id: "", type: "", show: false});
+        setMsgError(false);
     }
 
     //model show function
@@ -48,12 +57,27 @@ let Agenda = () => {
         setModelState({id: id, type: type, show: true});
     }
 
+    let addValidation = () => {
+        if(!newEvent.id){
+            return false;
+        }
+        if (!newEvent.title){
+            return false;
+        }
+        if(!newEvent.date){
+            return false;
+        }
+        return true;
+    }
+
     //add new event in state
     let handleAddEvent = () =>{
-        if(newEvent.id){
+        if(addValidation()){
             const updateEvent = [...allEvent , newEvent];
             setAllEvent (updateEvent);
             setNewEvent({id: "" , title: "", description: "", date: ""});
+        }else{
+            setMsgError({err: true});
         }
     }
 
@@ -83,6 +107,56 @@ let Agenda = () => {
         }
     }, [newEvent.id]);
 
+    let handleEditEvent = (data) => {
+        if(data.title !== '' && data.date  !== null) {
+            let index = allEvent.findIndex(({ id }) => id === data.id);
+            allEvent[index].title = data.title;
+            allEvent[index].description = data.description;
+            allEvent[index].date = data.date;
+            handleClose();
+        }else{
+            if(data.title === ''){
+                setMsgError({err : true, title : true});
+            }
+            if(data.date  === ''){
+                setMsgError({err : true, date : true});
+            }
+            console.log("Got Error!");
+        }
+    }
+
+    let handleExportData = () => {
+        // console.log(allEvent);
+        const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+            JSON.stringify(allEvent)
+          )}`;
+          const link = document.createElement("a");
+          link.href = jsonString;
+          link.download = "AgendaData.json";
+          link.click();
+    }
+
+    let handleImportData = () => {
+        let reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = function (evt) {
+            let data = JSON.parse(evt.target.result);
+            data.map(agenda => {
+                agenda.date = new Date(agenda.date);
+            });
+            console.log(data)
+            const updateEvent = [...allEvent , ...data];
+            setAllEvent (updateEvent);
+        }
+        reader.onerror = function (evt) {
+          console.log("Error reading file");
+        }
+    }
+
+    function handleFileChange(event) {
+        setFile(event.target.files[0]);
+    }
+
     //load model according to selected action 
     let GetModel = () => {
         if(ModelState.id){
@@ -93,7 +167,7 @@ let Agenda = () => {
                     setNewEvent={setNewEvent} 
                     handleAddEvent={handleAddEvent} 
                     handleClose={handleClose}
-                    id={ModelState.id}
+                    msgError={msgError}
                     /> 
                 );
             }
@@ -108,11 +182,14 @@ let Agenda = () => {
                 );
             }
             if (ModelState.type === "edit"){
+                let data = JSON.parse(JSON.stringify(allEvent[index]));
+                data.date = new Date(data.date);
                 return(
                     <EditModel 
-                        index={index} 
-                        allEvent={allEvent}
+                        data={data}
                         handleClose={handleClose}
+                        handleEditEvent={handleEditEvent}
+                        msgError={msgError}
                     />
                 );
             }
@@ -125,11 +202,17 @@ let Agenda = () => {
                     />
                 );
             }
+        }else if( ModelState.type === "import" ){
+            return(
+                <ImportModel 
+                    handleClose={handleClose} 
+                    handleImportData={handleImportData}
+                    handleFileChange={handleFileChange}
+                />
+            );
         }else{
             return(
-                <NotFoundModel 
-                    handleClose={handleClose} 
-                />
+                <NotFoundModel handleClose={handleClose} />
             );
         }
     }
@@ -138,7 +221,16 @@ let Agenda = () => {
         <div className='agenda'>
             <h1>Agenda</h1>
                 <div className='agendas'>
-                    <button className='btn-agenda' onClick={handleAddIdEvent} >Add</button>
+                    <div className='header-button'>
+                        <div className='left'>
+                            <button className='btn-agenda' onClick={handleAddIdEvent} >Add</button>
+                        </div>
+                        <div className='right'>
+                            <button className='btn-agenda' onClick={handleExportData}>Export</button>
+                            <button className='btn-agenda' onClick={() => handleShow( null , "import")}>Import</button>
+                        </div>
+
+                    </div>
                     <CreateTable 
                         allEvent={allEvent}
                         handleShow={handleShow}
