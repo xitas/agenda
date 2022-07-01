@@ -149,3 +149,19 @@
 .file-model{
     padding: 2rem;
 }
+
+.file-select{
+    width: 60%;
+    text-align: center;
+    background-color: #1F4690 ;
+    border: #1F4690 solid 1px;
+}
+
+.file-select:hover{
+    color: #1F4690;
+    border: #1F4690 solid 1px;
+}
+
+.file-model input[type="file"] {
+    display: none;
+}

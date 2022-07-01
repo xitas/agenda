@@ -9,7 +9,10 @@ let ImportModel = ({handleClose, handleImportData, handleFileChange}) => {
             </Modal.Header>
             <Modal.Body>
             <div className='file-model'>
-                <input type="file" onChange={handleFileChange}/>
+                <label className='file-select btn-agenda'>
+                    <b>Select Import File</b>
+                    <input type="file" onChange={handleFileChange}/>
+                </label>
             </div>
             </Modal.Body>
             <Modal.Footer>

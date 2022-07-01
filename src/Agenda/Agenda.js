@@ -35,6 +35,7 @@ const events = [
 let Agenda = () => {
     // set events
     const [newEvent, setNewEvent] = useState({id : "" , title: "", description: "", date: ""});
+    const [updateEvent, setUpdateEvent] = useState({id : "" , title: "", description: "", date: ""});
     const [allEvent, setAllEvent] = useState(events);
 
     //error msg state
@@ -44,7 +45,7 @@ let Agenda = () => {
     const [ModelState, setModelState] = useState({id: "" , type: "", show: false});
     
     //file state
-    const [file, setFile] = useState()
+    const [file, setFile] = useState();
     
     //close model function 
     const handleClose = () => {
@@ -141,9 +142,9 @@ let Agenda = () => {
         reader.readAsText(file, "UTF-8");
         reader.onload = function (evt) {
             let data = JSON.parse(evt.target.result);
-            data.map(agenda => {
-                agenda.date = new Date(agenda.date);
-            });
+            data.map( (agenda) => (
+                agenda.date = new Date(agenda.date)
+            ));
             console.log(data)
             const updateEvent = [...allEvent , ...data];
             setAllEvent (updateEvent);
@@ -158,7 +159,7 @@ let Agenda = () => {
     }
 
     //load model according to selected action 
-    let GetModel = () => {
+    let getModel = () => {
         if(ModelState.id){
             if(ModelState.type === "add"){
                 return(
@@ -237,7 +238,7 @@ let Agenda = () => {
                     />
                     <div>
                     <Modal show={ModelState.show} onHide={handleClose}>
-                        {GetModel()}
+                        {getModel()}
                     </Modal>
                 </div>
             </div>
