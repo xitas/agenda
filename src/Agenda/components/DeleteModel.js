@@ -9,6 +9,7 @@ let DeleteModel = (props ) => {
             </Modal.Header>
             <Modal.Body>
                 <p className='model-content'>Are you sure you want to delete<b> {props.data.title}</b></p>
+                {props.formError ? <p className='msg-error'>{props.formError}</p> : ""}
             </Modal.Body>
             <Modal.Footer>
                 <button className="btn-agenda btn-del" onClick={() => props.handleDeleteEvent(props.data.id)}>

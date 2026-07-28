@@ -1,70 +1,35 @@
-# Getting Started with Create React App
+# Agenda
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A small agenda/event manager: add, view, edit, delete, import, and export events. Built with React (Create React App) on the frontend and a small Express + SQLite API on the backend, so your events persist in a real database instead of living only in browser state.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+- **Frontend**: React 18, react-bootstrap, react-datepicker
+- **Backend**: Express, [`node:sqlite`](https://nodejs.org/api/sqlite.html) (Node's built-in SQLite module — no native build step required)
+- **Requires**: Node.js 22.5+ (for `node:sqlite`)
 
-### `npm start`
+## Getting started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+npm install
+npm run dev
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+`npm run dev` starts both the API server (port 4001) and the React dev server (port 3000, proxying `/api/*` to the backend) together. Open [http://localhost:3000](http://localhost:3000).
 
-### `npm test`
+The database file is created automatically at `server/agenda.db` on first run, seeded with a few example events.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Available scripts
 
-### `npm run build`
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Runs the API server and the React dev server together (recommended for local development) |
+| `npm start` | Runs only the React dev server (expects the API to already be running separately) |
+| `npm run server` | Runs only the API server |
+| `npm test` | Runs the frontend test suite (Jest, via react-scripts) |
+| `npm run test:server` | Runs the backend test suite (Node's built-in test runner) |
+| `npm run build` | Builds the frontend for production into `build/` |
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Production
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+After `npm run build`, `npm run server` will serve the built frontend and the `/api/*` routes from the same process/port — no separate static server needed.

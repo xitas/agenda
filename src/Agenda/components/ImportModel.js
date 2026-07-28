@@ -1,7 +1,7 @@
 import React from 'react';
 import Modal from "react-bootstrap/Modal";
 
-let ImportModel = ({handleClose, handleImportData, handleFileChange}) => {
+let ImportModel = ({handleClose, handleImportData, handleFileChange, formError}) => {
     return(
         <div>
             <Modal.Header closeButton>
@@ -13,6 +13,7 @@ let ImportModel = ({handleClose, handleImportData, handleFileChange}) => {
                     <b>Select Import File</b>
                     <input type="file" onChange={handleFileChange}/>
                 </label>
+                {formError ? <p className='msg-error'>{formError}</p> : ""}
             </div>
             </Modal.Body>
             <Modal.Footer>

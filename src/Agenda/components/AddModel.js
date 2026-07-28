@@ -2,13 +2,14 @@ import React from 'react';
 import Modal from "react-bootstrap/Modal";
 import DatePicker from "react-datepicker";
 
-let AddModel = ({newEvent,setNewEvent,handleAddEvent,handleClose,msgError}) => {
+let AddModel = ({newEvent,setNewEvent,handleAddEvent,handleClose,msgError,formError}) => {
     return(
         <div>
             <Modal.Header closeButton>
                 <Modal.Title>Add New Agenda</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                {formError ? <p className='msg-error'>{formError}</p> : ""}
                 <div className='addEvents'>
                      <div className='title'>
                         <input type="text" placeholder="Add title" value={newEvent.title} 

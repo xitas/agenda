@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './Agenda.css';
-import { nanoid } from 'nanoid';
 import Modal from "react-bootstrap/Modal";
 import CreateTable from './components/CreateTable';
 import AddModel from './components/AddModel';
@@ -9,148 +8,109 @@ import EditModel from './components/EditModel';
 import DeleteModel from './components/DeleteModel';
 import ImportModel from './components/ImportModel';
 import NotFoundModel from './components/NotFoundModel';
-
-const events = [
-    {
-        id : nanoid(),
-        title: "Meeting",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
-        date: new Date(2022,6,0),
-    },
-    {
-        id : nanoid(),
-        title: "Vacation",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
-        date: new Date(2022,6,1),
-    },
-    {
-        id : nanoid(),
-        title: "Conference",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
-        date: new Date(2022,7,0),
-    }
-];
-
+import useAgendaEvents from './useAgendaEvents';
+import useEventModal from './useEventModal';
 
 let Agenda = () => {
-    // set events
-    const [newEvent, setNewEvent] = useState({id : "" , title: "", description: "", date: ""});
-    const [updateEvent, setUpdateEvent] = useState({id : "" , title: "", description: "", date: ""});
-    const [allEvent, setAllEvent] = useState(events);
+    const { events, loading, error, addEvent, editEvent, deleteEvent, importEvents } = useAgendaEvents();
+    const { modal, showModal, closeModal } = useEventModal();
 
-    //error msg state
-    const [msgError, setMsgError] = useState({err: false, title: false, date: false,});
-
-    // modal to show
-    const [ModelState, setModelState] = useState({id: "" , type: "", show: false});
-    
-    //file state
+    const [newEvent, setNewEvent] = useState({ title: "", description: "", date: "" });
+    const [msgError, setMsgError] = useState({ err: false, title: false, date: false });
+    const [formError, setFormError] = useState("");
     const [file, setFile] = useState();
-    
-    //close model function 
+
     const handleClose = () => {
-        setModelState({id: "", type: "", show: false});
-        setMsgError(false);
+        closeModal();
+        setMsgError({ err: false, title: false, date: false });
+        setFormError("");
+        setNewEvent({ title: "", description: "", date: "" });
+        setFile(undefined);
     }
 
-    //model show function
-    const handleShow = (id , type) => {
-        setModelState({id: id, type: type, show: true});
-    }
-
-    let addValidation = () => {
-        if(!newEvent.id){
-            return false;
+    const handleAddEvent = async () => {
+        const titleMissing = !newEvent.title;
+        const dateMissing = !newEvent.date;
+        if (titleMissing || dateMissing) {
+            setMsgError({ err: true, title: titleMissing, date: dateMissing });
+            return;
         }
-        if (!newEvent.title){
-            return false;
-        }
-        if(!newEvent.date){
-            return false;
-        }
-        return true;
-    }
-
-    //add new event in state
-    let handleAddEvent = () =>{
-        if(addValidation()){
-            const updateEvent = [...allEvent , newEvent];
-            setAllEvent (updateEvent);
-            setNewEvent({id: "" , title: "", description: "", date: ""});
-        }else{
-            setMsgError({err: true});
-        }
-    }
-
-    //close add model on adding record
-    useEffect(() => {
-        handleClose();
-    }, [ allEvent ]);
-
-    // delete an event in state
-    let handleDeleteEvent = (id) => {
-        handleClose();
-        if(id){
-            const updateEvent = allEvent.filter((event) => event.id !== id);
-            setAllEvent (updateEvent);
-        }
-    }
-
-    //set id on add
-    let handleAddIdEvent = () => {
-        setNewEvent({id: nanoid()})
-    }
-
-    //wait for id set then call add model
-    useEffect(() => {
-        if(newEvent.id){
-            handleShow(newEvent.id , "add");
-        }
-    }, [newEvent.id]);
-
-    let handleEditEvent = (data) => {
-        if(data.title !== '' && data.date  !== null) {
-            let index = allEvent.findIndex(({ id }) => id === data.id);
-            allEvent[index].title = data.title;
-            allEvent[index].description = data.description;
-            allEvent[index].date = data.date;
+        setMsgError({ err: false, title: false, date: false });
+        const result = await addEvent(newEvent);
+        if (result.ok) {
             handleClose();
-        }else{
-            if(data.title === ''){
-                setMsgError({err : true, title : true});
-            }
-            if(data.date  === ''){
-                setMsgError({err : true, date : true});
-            }
-            console.log("Got Error!");
+        } else {
+            setFormError(result.error);
         }
     }
 
-    let handleExportData = () => {
-        // console.log(allEvent);
-        const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
-            JSON.stringify(allEvent)
-          )}`;
-          const link = document.createElement("a");
-          link.href = jsonString;
-          link.download = "AgendaData.json";
-          link.click();
+    const handleEditEvent = async (data) => {
+        const titleMissing = !data.title;
+        const dateMissing = !data.date;
+        if (titleMissing || dateMissing) {
+            setMsgError({ err: true, title: titleMissing, date: dateMissing });
+            return;
+        }
+        setMsgError({ err: false, title: false, date: false });
+        const result = await editEvent(data);
+        if (result.ok) {
+            handleClose();
+        } else {
+            setFormError(result.error);
+        }
     }
 
-    let handleImportData = () => {
-        let reader = new FileReader();
+    const handleDeleteEvent = async (id) => {
+        if (!id) {
+            handleClose();
+            return;
+        }
+        const result = await deleteEvent(id);
+        if (result.ok) {
+            handleClose();
+        } else {
+            setFormError(result.error);
+        }
+    }
+
+    const handleExportData = () => {
+        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+            JSON.stringify(events)
+        )}`;
+        const link = document.createElement("a");
+        link.href = jsonString;
+        link.download = "AgendaData.json";
+        link.click();
+    }
+
+    const handleImportData = () => {
+        if (!file) {
+            setFormError("Please select a file first");
+            return;
+        }
+        const reader = new FileReader();
         reader.readAsText(file, "UTF-8");
-        reader.onload = function (evt) {
-            let data = JSON.parse(evt.target.result);
-            data.map( (agenda) => (
-                agenda.date = new Date(agenda.date)
-            ));
-            console.log(data)
-            const updateEvent = [...allEvent , ...data];
-            setAllEvent (updateEvent);
+        reader.onload = async (evt) => {
+            let data;
+            try {
+                data = JSON.parse(evt.target.result);
+            } catch (e) {
+                setFormError("Could not import file — make sure it's a valid Agenda export.");
+                return;
+            }
+            if (!Array.isArray(data)) {
+                setFormError("Could not import file — make sure it's a valid Agenda export.");
+                return;
+            }
+            const result = await importEvents(data);
+            if (result.ok) {
+                handleClose();
+            } else {
+                setFormError(result.error);
+            }
         }
-        reader.onerror = function (evt) {
-          console.log("Error reading file");
+        reader.onerror = () => {
+            setFormError("Error reading file");
         }
     }
 
@@ -158,89 +118,95 @@ let Agenda = () => {
         setFile(event.target.files[0]);
     }
 
-    //load model according to selected action 
+    //load model according to selected action
     let getModel = () => {
-        if(ModelState.id){
-            if(ModelState.type === "add"){
-                return(
-                    <AddModel
-                    newEvent={newEvent} 
-                    setNewEvent={setNewEvent} 
-                    handleAddEvent={handleAddEvent} 
+        if (modal.type === "add") {
+            return (
+                <AddModel
+                    newEvent={newEvent}
+                    setNewEvent={setNewEvent}
+                    handleAddEvent={handleAddEvent}
                     handleClose={handleClose}
                     msgError={msgError}
-                    /> 
-                );
+                    formError={formError}
+                />
+            );
+        }
+        if (modal.type === "import") {
+            return (
+                <ImportModel
+                    handleClose={handleClose}
+                    handleImportData={handleImportData}
+                    handleFileChange={handleFileChange}
+                    formError={formError}
+                />
+            );
+        }
+        if (modal.type === "view" || modal.type === "edit" || modal.type === "del") {
+            let agenda = events.find(event => event.id === modal.id);
+            if (!agenda) {
+                return <NotFoundModel handleClose={handleClose} />;
             }
-            let agenda = allEvent.find(agenda => agenda.id === ModelState.id);
-            let index = allEvent.findIndex(({ id }) => id === ModelState.id);
-            if (ModelState.type === "view"){
-                return(
-                    <ViewModel 
+            if (modal.type === "view") {
+                return <ViewModel data={agenda} handleClose={handleClose} />;
+            }
+            if (modal.type === "edit") {
+                return (
+                    <EditModel
                         data={agenda}
-                        handleClose={handleClose}
-                    />    
-                );
-            }
-            if (ModelState.type === "edit"){
-                let data = JSON.parse(JSON.stringify(allEvent[index]));
-                data.date = new Date(data.date);
-                return(
-                    <EditModel 
-                        data={data}
                         handleClose={handleClose}
                         handleEditEvent={handleEditEvent}
                         msgError={msgError}
+                        formError={formError}
                     />
                 );
             }
-            if (ModelState.type === "del"){
-                return(
-                    <DeleteModel 
+            if (modal.type === "del") {
+                return (
+                    <DeleteModel
                         data={agenda}
-                        handleClose={handleClose} 
+                        handleClose={handleClose}
                         handleDeleteEvent={handleDeleteEvent}
+                        formError={formError}
                     />
                 );
             }
-        }else if( ModelState.type === "import" ){
-            return(
-                <ImportModel 
-                    handleClose={handleClose} 
-                    handleImportData={handleImportData}
-                    handleFileChange={handleFileChange}
-                />
-            );
-        }else{
-            return(
-                <NotFoundModel handleClose={handleClose} />
-            );
         }
+        return null;
     }
 
-    return(
+    return (
         <div className='agenda'>
             <h1>Agenda</h1>
-                <div className='agendas'>
-                    <div className='header-button'>
-                        <div className='left'>
-                            <button className='btn-agenda' onClick={handleAddIdEvent} >Add</button>
+            <div className='agendas'>
+                {error ? (
+                    <p className='msg-error'>Could not reach the server: {error}</p>
+                ) : (
+                    <>
+                        <div className='header-button'>
+                            <div className='left'>
+                                <button className='btn-agenda' onClick={() => showModal(null, "add")}>Add</button>
+                            </div>
+                            <div className='right'>
+                                <button className='btn-agenda' onClick={handleExportData}>Export</button>
+                                <button className='btn-agenda' onClick={() => showModal(null, "import")}>Import</button>
+                            </div>
                         </div>
-                        <div className='right'>
-                            <button className='btn-agenda' onClick={handleExportData}>Export</button>
-                            <button className='btn-agenda' onClick={() => handleShow( null , "import")}>Import</button>
+                        {loading ? (
+                            <p>Loading agenda…</p>
+                        ) : (
+                            <CreateTable
+                                allEvent={events}
+                                handleShow={showModal}
+                            />
+                        )}
+                        <div>
+                            <Modal show={modal.show} onHide={handleClose}>
+                                {getModel()}
+                            </Modal>
                         </div>
-
-                    </div>
-                    <CreateTable 
-                        allEvent={allEvent}
-                        handleShow={handleShow}
-                    />
-                    <div>
-                    <Modal show={ModelState.show} onHide={handleClose}>
-                        {getModel()}
-                    </Modal>
-                </div>
+                    </>
+                )}
             </div>
         </div>
     );
