@@ -17,9 +17,9 @@ Agenda started as a teaching project: a single React (CRA) page plus a small Exp
 
 Keep `xitas/agenda` and restructure it in place:
 
-1. Tag the current state: `git tag v0-teaching && git push origin v0-teaching`.
+1. Tag the current state: `git tag legacy-agenda && git push origin legacy-agenda`.
 2. Optionally keep a `legacy` branch pointing at the same commit.
-3. Rebuild `main` as a monorepo (see `ARCHITECTURE.md`).
+3. Rebuild `master` as a monorepo (see `ARCHITECTURE.md`).
 
 This costs nothing, keeps the history that shows where the project started, and keeps the stars and links. Rename the repo later if you want; GitHub redirects old URLs.
 
@@ -50,13 +50,13 @@ This costs nothing, keeps the history that shows where the project started, and 
 
 ## Phases
 
-Each phase ends with something usable and merged to `main`. Work in small PRs, one feature per PR, with CI green.
+Each phase ends with something usable and merged to `master`. Work in small PRs, one feature per PR, with CI green.
 
 ### Phase 0: Foundation (about 1 week)
 
 **Learn:** monorepo tooling, TypeScript config, CI.
 
-- Tag `v0-teaching`; move old code out of `main`
+- Tag `legacy-agenda`; move old code out of `master`
 - pnpm workspaces + Turborepo; `apps/` and `packages/` folders
 - Shared `tsconfig`, ESLint + Prettier (or Biome), Vitest
 - GitHub Actions: install → lint → typecheck → test on every PR
@@ -95,7 +95,7 @@ Each phase ends with something usable and merged to `main`. Work in small PRs, o
 
 - API on a small host (Fly.io / Railway / a VPS with Docker); DB on Turso or a persistent volume
 - Web on Cloudflare Pages / Vercel / Netlify
-- GitHub Actions deploy on merge to `main`; nightly DB backup
+- GitHub Actions deploy on merge to `master`; nightly DB backup
 
 **Done when:** it's reachable at a real URL over HTTPS and survives a redeploy with data intact.
 

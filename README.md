@@ -29,7 +29,8 @@ Apps depend on packages through `workspace:*` links, so a change in `packages/co
 ## Requirements
 
 - Node.js 22.12 or newer (`.nvmrc` pins 24)
-- pnpm, through Corepack: run `corepack enable` once (from an administrator terminal on Windows). The exact pnpm version comes from `packageManager` in `package.json`.
+- pnpm, through Corepack: run `corepack enable` once (from an administrator terminal on Windows). The exact pnpm version (12.x) comes from `packageManager` in `package.json`.
+- Git checks files out with LF line endings on every OS (`.gitattributes`), so Prettier gives the same result everywhere.
 
 ## Getting started
 
@@ -58,7 +59,11 @@ All scripts run through [Turborepo](https://turborepo.com), which orders tasks b
 | `pnpm test`      | Vitest in every package                                  |
 | `pnpm format`    | Format the repo with Prettier (`format:check` to verify) |
 
-Add `--filter <package-name>` to any of them to limit the run to one package and its dependencies.
+Add `--filter @agenda/<name>` (for example `--filter @agenda/core`) to any of them to limit the run to one package and its dependencies.
+
+## Continuous integration
+
+Every pull request and push to `master` runs `.github/workflows/ci.yml`: a frozen-lockfile install, then `format:check`, `lint`, `typecheck`, `test` and `build`. Run the same checks locally before opening a PR.
 
 ## Legacy app
 

@@ -24,6 +24,13 @@ If a request conflicts with these docs, point it out and ask before deviating. I
 - **No AI attribution.** Never add `Co-Authored-By: Claude`, "Generated with Claude", or similar
   lines to commits, PR descriptions, code comments, or docs. Commits are authored by the repo owner only.
 
+## Toolchain
+
+- Node 24 (`.nvmrc`), pnpm 12 via Corepack (version pinned in `packageManager`), Turborepo 2.
+- TypeScript 6.0, kept below 6.1 until typescript-eslint supports newer versions.
+- LF line endings everywhere (`.gitattributes`); Prettier checks them.
+- CI: `.github/workflows/ci.yml`, runs on every PR and push to `master`.
+
 ## Commands
 
 ```
@@ -31,11 +38,12 @@ pnpm i                              # install (pnpm via Corepack; version pinned
 pnpm dev                            # run all apps in watch mode
 pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; desktop, extension, mobile later)
 pnpm build                          # build every package and app
-pnpm lint && pnpm typecheck && pnpm test   # must pass before a PR
-pnpm format                         # Prettier (format:check to verify)
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # what CI runs; must pass before a PR
+pnpm format                         # fix formatting with Prettier
 ```
 
 Filters need the full scoped package name (`@agenda/web`, not `web`).
+CI installs with `pnpm install --frozen-lockfile`: commit `pnpm-lock.yaml` together with any `package.json` change.
 Planned, not yet available: `pnpm --filter @agenda/api db:migrate` (apply Drizzle migrations).
 (Update this section as scripts are added.)
 

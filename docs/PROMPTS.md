@@ -30,7 +30,7 @@ Teach me: <concepts you want explained, optional>
 
 ```
 Context: Phase 0 of docs/PLAN.md. The current code is the v0 teaching app.
-Task: Create tag v0-teaching on the current main commit (I'll push it myself). Then convert the repo
+Task: Create tag legacy-agenda on the current master commit (I'll push it myself). Then convert the repo
 into a pnpm + Turborepo monorepo following docs/ARCHITECTURE.md §2: empty apps/{api,web} and
 packages/{core,tokens,ui,config}. Move the old src/ and server/ into legacy/ for reference
 (we'll delete it at the end of Phase 2).
@@ -45,7 +45,7 @@ Teach me: what pnpm workspaces and Turborepo pipelines actually do.
 **0.2 CI**
 
 ```
-Task: Add a GitHub Actions workflow: on PR and push to main → pnpm install (cached) → lint →
+Task: Add a GitHub Actions workflow: on PR and push to master → pnpm install (cached) → lint →
 typecheck → test, using Turborepo caching. Add a PR template with What/Why/How tested/Screenshots.
 Acceptance criteria: workflow passes on a test PR; a deliberately broken test makes it fail.
 ```
@@ -92,7 +92,7 @@ Teach me: how Drizzle migrations work and why soft deletes matter for sync later
 ```
 Task: Single-user auth per ARCHITECTURE.md §5: /auth/login (argon2 or bcrypt hash from env),
 session cookie for browsers + bearer token for other clients, rate limit on login, middleware
-protecting /events. A script `pnpm --filter api hash-password` to generate the env value.
+protecting /events. A script `pnpm --filter @agenda/api hash-password` to generate the env value.
 Acceptance criteria: unauthenticated → 401; tests for cookie and bearer paths; CORS limited to
 configured origins.
 ```
@@ -149,7 +149,7 @@ Acceptance criteria: Chrome shows "Install app"; Lighthouse PWA + a11y ≥ 90. T
 
 ```
 Task: Dockerfile for apps/api, deploy config for <Fly.io | Railway | my VPS>, DB on <Turso | volume>.
-Web on <Cloudflare Pages | Vercel>. GitHub Actions: deploy on merge to main using repo secrets.
+Web on <Cloudflare Pages | Vercel>. GitHub Actions: deploy on merge to master using repo secrets.
 Nightly DB backup job. Write docs/DEPLOY.md with every manual step I need to do once.
 Acceptance criteria: HTTPS URL works; redeploy keeps data; restoring a backup is documented and tested.
 Teach me: where each secret lives and why.

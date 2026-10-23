@@ -35,32 +35,36 @@ agenda/
 │  ├─ core/         schemas.ts, types.ts, api-client.ts, dates.ts, quick-add.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
-│  └─ config/       shared tsconfig, eslint, prettier
-├─ docs/            PLAN, ARCHITECTURE, DESIGN, prompts/
+│  └─ config/       shared tsconfig, eslint, prettier, vitest
+├─ legacy/          v0 CRA + Express app, reference only (deleted after Phase 2)
+├─ docs/            PLAN, ARCHITECTURE, DESIGN, PROMPTS
+├─ .github/         CI workflow, PR template
 ├─ CLAUDE.md
+├─ .nvmrc           Node version used locally and in CI
 ├─ pnpm-workspace.yaml
 └─ turbo.json
 ```
 
 ## 3. Tech choices (and why)
 
-| Concern       | Choice                                           | Why / alternative                                                                         |
-| ------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| Language      | TypeScript everywhere (+ a little Rust in Tauri) | One type system shared across 5 apps                                                      |
-| Monorepo      | pnpm workspaces + Turborepo                      | Fast, simple caching; Nx is the heavier alternative                                       |
-| Web build     | Vite                                             | CRA is deprecated                                                                         |
-| Routing (web) | React Router (or TanStack Router)                | Either is fine; pick one and keep it                                                      |
-| Server state  | TanStack Query                                   | Caching, optimistic updates, retries. Same library in mobile                              |
-| Validation    | Zod                                              | Same schema validates on client and server                                                |
-| Dates         | date-fns (+ `@date-fns/tz`)                      | moment is in maintenance mode                                                             |
-| NL quick add  | chrono-node                                      | "tomorrow 4pm" → Date                                                                     |
-| API framework | Hono                                             | Tiny, typed, runs on Node, Bun, or Cloudflare. Express is OK if you prefer familiarity    |
-| DB / ORM      | SQLite (libSQL) + Drizzle                        | Same SQLite you know, plus typed queries and real migrations                              |
-| Desktop       | Tauri 2                                          | Small installers and native APIs. **Alternative:** Electron, if you'd rather stay 100% JS |
-| Extension     | WXT                                              | Vite-based MV3 framework with hot reload; handles manifest generation                     |
-| Mobile        | Expo (SDK latest) + Expo Router                  | Fastest path to a real native app; EAS for builds                                         |
-| Tests         | Vitest, Testing Library, Playwright (web e2e)    | Same runner in every package                                                              |
-| CI/CD         | GitHub Actions                                   | Lint, typecheck, test on PR; deploy on `main`                                             |
+| Concern       | Choice                                                                      | Why / alternative                                                                         |
+| ------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Language      | TypeScript everywhere (+ a little Rust in Tauri)                            | One type system shared across 5 apps                                                      |
+| Monorepo      | pnpm workspaces + Turborepo                                                 | Fast, simple caching; Nx is the heavier alternative                                       |
+| Toolchain     | Node 24 (`.nvmrc`), pnpm 12 via Corepack (`packageManager`), TypeScript 6.0 | TS stays below 6.1 until typescript-eslint supports newer versions                        |
+| Web build     | Vite                                                                        | CRA is deprecated                                                                         |
+| Routing (web) | React Router (or TanStack Router)                                           | Either is fine; pick one and keep it                                                      |
+| Server state  | TanStack Query                                                              | Caching, optimistic updates, retries. Same library in mobile                              |
+| Validation    | Zod                                                                         | Same schema validates on client and server                                                |
+| Dates         | date-fns (+ `@date-fns/tz`)                                                 | moment is in maintenance mode                                                             |
+| NL quick add  | chrono-node                                                                 | "tomorrow 4pm" → Date                                                                     |
+| API framework | Hono                                                                        | Tiny, typed, runs on Node, Bun, or Cloudflare. Express is OK if you prefer familiarity    |
+| DB / ORM      | SQLite (libSQL) + Drizzle                                                   | Same SQLite you know, plus typed queries and real migrations                              |
+| Desktop       | Tauri 2                                                                     | Small installers and native APIs. **Alternative:** Electron, if you'd rather stay 100% JS |
+| Extension     | WXT                                                                         | Vite-based MV3 framework with hot reload; handles manifest generation                     |
+| Mobile        | Expo (SDK latest) + Expo Router                                             | Fastest path to a real native app; EAS for builds                                         |
+| Tests         | Vitest, Testing Library, Playwright (web e2e)                               | Same runner in every package                                                              |
+| CI/CD         | GitHub Actions                                                              | Lint, typecheck, test on PR; deploy on `master`                                           |
 
 ## 4. Data model
 
@@ -138,7 +142,9 @@ Each app provides its own implementation (`webPlatform`, `tauriPlatform`, `chrom
 
 ## 8. Quality gates
 
-- `pnpm lint && pnpm typecheck && pnpm test` must pass in CI.
+- CI (`.github/workflows/ci.yml`) runs `pnpm format:check`, `lint`, `typecheck`, `test` and `build` on every PR and push to `master`; all must pass.
+- CI installs with `pnpm install --frozen-lockfile`, so lockfile changes must be committed with the `package.json` change that caused them.
+- Line endings are LF everywhere (`.gitattributes`), so Prettier gives the same result on Windows, macOS and Linux.
 - `core` targets about 90% test coverage, since it holds the logic everything depends on. Apps get smoke tests.
 - Conventional commits (`feat:`, `fix:`, `chore:`), one squash merge per PR.
 - Secrets never go in the repo; use `.env.example` files.
