@@ -44,23 +44,23 @@ agenda/
 
 ## 3. Tech choices (and why)
 
-| Concern | Choice | Why / alternative |
-| --- | --- | --- |
-| Language | TypeScript everywhere (+ a little Rust in Tauri) | One type system shared across 5 apps |
-| Monorepo | pnpm workspaces + Turborepo | Fast, simple caching; Nx is the heavier alternative |
-| Web build | Vite | CRA is deprecated |
-| Routing (web) | React Router (or TanStack Router) | Either is fine; pick one and keep it |
-| Server state | TanStack Query | Caching, optimistic updates, retries. Same library in mobile |
-| Validation | Zod | Same schema validates on client and server |
-| Dates | date-fns (+ `@date-fns/tz`) | moment is in maintenance mode |
-| NL quick add | chrono-node | "tomorrow 4pm" → Date |
-| API framework | Hono | Tiny, typed, runs on Node, Bun, or Cloudflare. Express is OK if you prefer familiarity |
-| DB / ORM | SQLite (libSQL) + Drizzle | Same SQLite you know, plus typed queries and real migrations |
-| Desktop | Tauri 2 | Small installers and native APIs. **Alternative:** Electron, if you'd rather stay 100% JS |
-| Extension | WXT | Vite-based MV3 framework with hot reload; handles manifest generation |
-| Mobile | Expo (SDK latest) + Expo Router | Fastest path to a real native app; EAS for builds |
-| Tests | Vitest, Testing Library, Playwright (web e2e) | Same runner in every package |
-| CI/CD | GitHub Actions | Lint, typecheck, test on PR; deploy on `main` |
+| Concern       | Choice                                           | Why / alternative                                                                         |
+| ------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Language      | TypeScript everywhere (+ a little Rust in Tauri) | One type system shared across 5 apps                                                      |
+| Monorepo      | pnpm workspaces + Turborepo                      | Fast, simple caching; Nx is the heavier alternative                                       |
+| Web build     | Vite                                             | CRA is deprecated                                                                         |
+| Routing (web) | React Router (or TanStack Router)                | Either is fine; pick one and keep it                                                      |
+| Server state  | TanStack Query                                   | Caching, optimistic updates, retries. Same library in mobile                              |
+| Validation    | Zod                                              | Same schema validates on client and server                                                |
+| Dates         | date-fns (+ `@date-fns/tz`)                      | moment is in maintenance mode                                                             |
+| NL quick add  | chrono-node                                      | "tomorrow 4pm" → Date                                                                     |
+| API framework | Hono                                             | Tiny, typed, runs on Node, Bun, or Cloudflare. Express is OK if you prefer familiarity    |
+| DB / ORM      | SQLite (libSQL) + Drizzle                        | Same SQLite you know, plus typed queries and real migrations                              |
+| Desktop       | Tauri 2                                          | Small installers and native APIs. **Alternative:** Electron, if you'd rather stay 100% JS |
+| Extension     | WXT                                              | Vite-based MV3 framework with hot reload; handles manifest generation                     |
+| Mobile        | Expo (SDK latest) + Expo Router                  | Fastest path to a real native app; EAS for builds                                         |
+| Tests         | Vitest, Testing Library, Playwright (web e2e)    | Same runner in every package                                                              |
+| CI/CD         | GitHub Actions                                   | Lint, typecheck, test on PR; deploy on `main`                                             |
 
 ## 4. Data model
 
@@ -90,18 +90,18 @@ Event {
 
 All routes are under `/api/v1`, and all bodies are JSON validated by the Zod schemas in `core`.
 
-| Method | Path | Notes |
-| --- | --- | --- |
-| POST | `/auth/login` | `{ password }` → sets session cookie and returns `{ token }` |
-| POST | `/auth/logout` | |
-| GET | `/events?from&to&q&limit&cursor` | Range + search; excludes soft-deleted |
-| POST | `/events` | Client may send `id` (uuid) |
-| GET | `/events/:id` | |
-| PATCH | `/events/:id` | Partial update; bumps `updatedAt` |
-| DELETE | `/events/:id` | Sets `deletedAt` |
-| POST | `/events/import` | Accepts v0 and v1 JSON; returns `{ imported, skipped, errors[] }` |
-| GET | `/events/export.json` · `/events/export.ics` | |
-| GET/POST | `/sync` | Phase 7 |
+| Method   | Path                                         | Notes                                                             |
+| -------- | -------------------------------------------- | ----------------------------------------------------------------- |
+| POST     | `/auth/login`                                | `{ password }` → sets session cookie and returns `{ token }`      |
+| POST     | `/auth/logout`                               |                                                                   |
+| GET      | `/events?from&to&q&limit&cursor`             | Range + search; excludes soft-deleted                             |
+| POST     | `/events`                                    | Client may send `id` (uuid)                                       |
+| GET      | `/events/:id`                                |                                                                   |
+| PATCH    | `/events/:id`                                | Partial update; bumps `updatedAt`                                 |
+| DELETE   | `/events/:id`                                | Sets `deletedAt`                                                  |
+| POST     | `/events/import`                             | Accepts v0 and v1 JSON; returns `{ imported, skipped, errors[] }` |
+| GET      | `/events/export.json` · `/events/export.ics` |                                                                   |
+| GET/POST | `/sync`                                      | Phase 7                                                           |
 
 Errors always use the shape `{ error: { code, message, fields? } }` with proper HTTP status codes.
 
@@ -114,6 +114,7 @@ Errors always use the shape `{ error: { code, message, fields? } }` with proper 
 **Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
 
 **Extension (WXT, MV3).**
+
 - `entrypoints/popup`, `entrypoints/sidepanel`: React, reuses `packages/ui`
 - `entrypoints/background.ts`: service worker that owns `chrome.alarms` (refresh + reminders), the context menu, and the badge. It is **stateless**, because MV3 workers are killed when idle, so everything must persist in `chrome.storage`.
 - `host_permissions` limited to the API origin only
@@ -136,13 +137,16 @@ export interface Platform {
 Each app provides its own implementation (`webPlatform`, `tauriPlatform`, `chromePlatform`, `expoPlatform`). Shared code only ever sees `Platform`.
 
 ## 8. Quality gates
+
 - `pnpm lint && pnpm typecheck && pnpm test` must pass in CI.
 - `core` targets about 90% test coverage, since it holds the logic everything depends on. Apps get smoke tests.
 - Conventional commits (`feat:`, `fix:`, `chore:`), one squash merge per PR.
 - Secrets never go in the repo; use `.env.example` files.
 
 ## 9. Architecture decision log
+
 Record significant decisions in `docs/adr/NNNN-title.md` (context → decision → consequences). Start with:
+
 - 0001 Monorepo with pnpm + Turborepo
 - 0002 Tauri over Electron
 - 0003 Chrome Extension (MV3) instead of the discontinued Chrome Apps
