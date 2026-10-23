@@ -12,7 +12,7 @@
 /build
 
 # database
-server/agenda.db
+legacy/server/agenda.db
 
 # misc
 .DS_Store
