@@ -7,15 +7,21 @@
     "./tsconfig/*.json": "./tsconfig/*.json",
     "./eslint/base": "./eslint/base.js",
     "./eslint/react": "./eslint/react.js",
-    "./prettier": "./prettier/index.js"
+    "./prettier": "./prettier/index.js",
+    "./vitest": {
+      "types": "./vitest/base.d.ts",
+      "default": "./vitest/base.js"
+    }
   },
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "eslint": "^10.0.0",
-    "typescript": "~6.0.0"
+    "typescript": "~6.0.0",
+    "vitest": "^5.0.0"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
@@ -29,6 +35,7 @@
     "@types/node": "^24.19.2",
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
   }
 }
