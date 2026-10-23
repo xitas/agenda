@@ -1,5 +1,7 @@
 # Agenda
 
+[![CI](https://github.com/xitas/agenda/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/xitas/agenda/actions/workflows/ci.yml)
+
 Agenda is a personal agenda and calendar app. It started as a small teaching project (a Create React App frontend with an Express + SQLite API) and is being rebuilt as a TypeScript monorepo that will ship as:
 
 - a **web** app (Vite + React)
