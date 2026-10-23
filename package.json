@@ -16,6 +16,8 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@agenda/config": "workspace:*",
+    "prettier": "^3.9.10",
     "turbo": "^2.11.10"
   }
 }
