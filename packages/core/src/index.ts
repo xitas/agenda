@@ -4,6 +4,13 @@ export type { CalendarView, DateRange } from './dates.js';
 export { fromV0, ImportFormatError, parseImport, V0EventSchema } from './import.js';
 export type { ImportOptions, ImportResult, SkippedRow, V0Event } from './import.js';
 export { newId } from './ids.js';
+export { parseQuickAdd, QUICK_ADD_WARNINGS } from './quick-add.js';
+export type {
+  QuickAddMatch,
+  QuickAddMatchKind,
+  QuickAddOptions,
+  QuickAddResult,
+} from './quick-add.js';
 export {
   AgendaEventSchema,
   checkEventTiming,
