@@ -1,0 +1,20 @@
+[
+  {
+    "id": "5f0c7a9e-2b1d-4c3e-9a8f-1d2e3f4a5b6c",
+    "title": "Meeting",
+    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
+    "date": "2026-10-24T18:30:00.000Z"
+  },
+  {
+    "id": "8d3b1e52-6f7a-4b9c-8e2d-3a4b5c6d7e8f",
+    "title": "Vacation",
+    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
+    "date": "2026-10-26T18:30:00.000Z"
+  },
+  {
+    "id": "c1a2b3d4-e5f6-4a7b-b8c9-d0e1f2a3b4c5",
+    "title": "Conference",
+    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
+    "date": "2026-10-31T18:30:00.000Z"
+  }
+]
