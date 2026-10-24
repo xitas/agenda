@@ -93,6 +93,7 @@ The type is called `AgendaEvent`, not `Event`, so it doesn't shadow the DOM's gl
 **All-day events** store plain dates rather than instants, so a birthday stays on the same day wherever it is viewed. Timed events store UTC instants; days, weeks and months are computed in the viewer's time zone (`rangeForView` in `dates.ts`, weeks start Monday).
 
 **Migration from v0:** the v0 `{ id, title, description, date }` maps to `{ title, notes: description, start: <local date>, allDay: true }`. v0 stored picked dates as the UTC instant of local midnight, so `fromV0` reads the calendar day in the importer's time zone. UUID ids are kept; older nanoid ids get a new id. `parseImport` accepts both shapes in one file and reports skipped rows as `{ index, reason }`.
+**Quick add:** `parseQuickAdd(text, { now, timezone, locale })` in `quick-add.ts` returns an `EventCreate` draft, the matched parts of the text (for highlighting) and warnings. Its interpretation rules (past times move forward, "tonight" = 20:00, day-first `3/4` unless the locale is US, recurrence → first occurrence plus a warning) are documented in the comment block at the top of that file, which is the single source for them.
 
 ## 5. API (v1)
 
