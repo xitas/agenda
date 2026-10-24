@@ -13,12 +13,19 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@agenda/config": "workspace:*",
+    "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10.13.0",
     "typescript": "~6.0.3",
     "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@date-fns/tz": "^1.5.0",
+    "date-fns": "^4.4.0",
+    "uuid": "^14.0.3",
+    "zod": "^4.6.7"
   }
 }

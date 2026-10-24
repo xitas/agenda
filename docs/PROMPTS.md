@@ -56,7 +56,7 @@ Acceptance criteria: workflow passes on a test PR; a deliberately broken test ma
 
 ```
 Context: docs/ARCHITECTURE.md §4 (data model).
-Task: In packages/core implement Zod schemas + inferred types for Event, EventCreate, EventPatch,
+Task: In packages/core implement Zod schemas + inferred types for AgendaEvent, EventCreate, EventPatch,
 EventColor, plus a `fromV0()` converter for the old {id,title,description,date} format.
 Add date helpers (date-fns): startOfDayInTz, rangeForView(view, date, tz), formatEventTime.
 Acceptance criteria:

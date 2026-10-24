@@ -32,7 +32,7 @@ agenda/
 │  ├─ extension/    WXT (MV3): popup, sidepanel, background service worker
 │  └─ mobile/       Expo + Expo Router
 ├─ packages/
-│  ├─ core/         schemas.ts, types.ts, api-client.ts, dates.ts, quick-add.ts
+│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, import.ts, api-client.ts, quick-add.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -69,18 +69,18 @@ agenda/
 ## 4. Data model
 
 ```ts
-// packages/core/src/schemas.ts (target shape)
-Event {
+// packages/core/src/schemas.ts (AgendaEventSchema; type AgendaEvent in types.ts)
+AgendaEvent {
   id: string            // uuid v7 (sortable), generated on the client so offline creates work
   title: string         // 1..200 chars
   notes: string         // markdown-lite, may be ''
-  start: string         // ISO 8601 UTC
-  end: string | null    // ISO 8601 UTC; null = point-in-time
-  allDay: boolean       // when true, start/end are dates in the user's tz
+  start: string         // timed: ISO 8601 UTC instant; all-day: plain date YYYY-MM-DD
+  end: string | null    // same format as start, after start; all-day end is exclusive (iCal)
+  allDay: boolean       // null end = point-in-time (timed) or a single day (all-day)
   timezone: string      // IANA tz at creation, e.g. 'Asia/Karachi'
   location: string | null
   color: EventColor     // 'slate' | 'blue' | 'green' | 'amber' | 'red' | 'violet' | 'pink' | 'teal'
-  reminders: number[]   // minutes before start, e.g. [10, 60]
+  reminders: number[]   // whole minutes before start, unique, e.g. [10, 60]
   rrule: string | null  // v2
   createdAt: string
   updatedAt: string     // drives sync (last-write-wins)
@@ -88,7 +88,11 @@ Event {
 }
 ```
 
-**Migration from v0:** the v0 `{ id, title, description, date }` maps to `{ title, notes: description, start: date, allDay: true }`. The importer must accept both shapes.
+The type is called `AgendaEvent`, not `Event`, so it doesn't shadow the DOM's global `Event` type in web code. `EventCreate` (client may send `id`; other fields have defaults) and `EventPatch` (any subset, at least one field) are derived from the same fields. Unknown keys are dropped.
+
+**All-day events** store plain dates rather than instants, so a birthday stays on the same day wherever it is viewed. Timed events store UTC instants; days, weeks and months are computed in the viewer's time zone (`rangeForView` in `dates.ts`, weeks start Monday).
+
+**Migration from v0:** the v0 `{ id, title, description, date }` maps to `{ title, notes: description, start: <local date>, allDay: true }`. v0 stored picked dates as the UTC instant of local midnight, so `fromV0` reads the calendar day in the importer's time zone. UUID ids are kept; older nanoid ids get a new id. `parseImport` accepts both shapes in one file and reports skipped rows as `{ index, reason }`.
 
 ## 5. API (v1)
 
@@ -132,7 +136,7 @@ Anything that differs per platform goes behind one interface in `core`:
 ```ts
 export interface Platform {
   notify(title: string, body: string): Promise<void>;
-  scheduleReminder(event: Event): Promise<void>;
+  scheduleReminder(event: AgendaEvent): Promise<void>;
   storage: { get(k: string): Promise<string | null>; set(k: string, v: string): Promise<void> };
   openExternal(url: string): Promise<void>;
 }
