@@ -1,4 +1,6 @@
 export { APP_NAME } from './constants.js';
+export { formatEventTime, plainDateInTz, rangeForView, startOfDayInTz } from './dates.js';
+export type { CalendarView, DateRange } from './dates.js';
 export { newId } from './ids.js';
 export {
   AgendaEventSchema,
