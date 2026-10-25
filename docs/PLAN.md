@@ -72,7 +72,7 @@ Each phase ends with something usable and merged to `master`. Work in small PRs,
 - `apps/api`: Hono + Drizzle + SQLite (libSQL), with migrations
 - Endpoints: `GET/POST /events`, `GET/PATCH/DELETE /events/:id`, `GET /events?from=&to=&q=`, `POST /events/import`, `GET /events/export.ics`
 - Soft deletes plus `updatedAt` on every row (sets up sync for later)
-- Single-user auth: password login → httpOnly session cookie (web/desktop) and bearer token (extension/mobile)
+- Single-user auth: password login → httpOnly session cookie (web) and bearer token (desktop/extension/mobile)
 - Port the existing `server/db.test.js` cases to Vitest; add more
 
 **Done when:** API tests pass, and a v0 `AgendaData.json` imports cleanly.
