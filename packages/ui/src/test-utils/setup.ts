@@ -5,3 +5,12 @@ import { afterEach } from 'vitest';
 afterEach(() => {
   cleanup();
 });
+
+// jsdom has no pointer capture; Radix uses it for swipe-to-dismiss. Stand-ins only.
+// (The stylesheet test runs in the node environment, where there is no Element.)
+const proto = typeof Element === 'undefined' ? undefined : Element.prototype;
+for (const name of ['hasPointerCapture', 'setPointerCapture', 'releasePointerCapture'] as const) {
+  if (proto !== undefined && !(name in proto)) {
+    Object.defineProperty(proto, name, { value: () => false, configurable: true });
+  }
+}

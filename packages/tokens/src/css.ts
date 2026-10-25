@@ -55,7 +55,12 @@ function themeDeclarations(t: Tokens, theme: ThemeName): Declarations {
     const { strong, soft } = t.eventColor[name][theme];
     out.push([`${PREFIX}-event-${name}-strong`, strong], [`${PREFIX}-event-${name}-soft`, soft]);
   }
-  out.push([`${PREFIX}-shadow-floating`, t.elevation[theme].floating]);
+  const { floating, floatingBorder, overlay } = t.elevation[theme];
+  out.push(
+    [`${PREFIX}-shadow-floating`, floating],
+    [`${PREFIX}-color-floating-border`, floatingBorder],
+    [`${PREFIX}-color-overlay`, overlay],
+  );
   return out;
 }
 

@@ -43,6 +43,8 @@ describe('toCss', () => {
     expect(dark).toContain('color-scheme: dark;');
     expect(dark).toContain('--ag-color-bg: #0C0C0E;');
     expect(dark).toContain('--ag-shadow-floating: none;');
+    expect(dark).toContain('--ag-color-floating-border: #4A4A52;');
+    expect(dark).toContain('--ag-color-overlay: rgb(0 0 0 / 0.6);');
     expect(dark).not.toContain('--ag-space-');
   });
 

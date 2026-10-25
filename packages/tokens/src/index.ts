@@ -13,4 +13,11 @@ export {
   space,
   tokens,
 } from './tokens.js';
-export type { EventColor, EventColorName, ThemeColors, ThemeName, Tokens } from './tokens.js';
+export type {
+  Elevation,
+  EventColor,
+  EventColorName,
+  ThemeColors,
+  ThemeName,
+  Tokens,
+} from './tokens.js';

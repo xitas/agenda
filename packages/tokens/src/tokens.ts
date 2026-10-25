@@ -142,10 +142,23 @@ export const border = {
   focusOffset: 2,
 } as const;
 
+export interface Elevation {
+  /** Shadow under floating layers (dialogs, menus, toasts). */
+  floating: string;
+  /** Their border; dark mode has no shadow, so the border is stronger instead. */
+  floatingBorder: string;
+  /** The dimmed backdrop behind a modal dialog. */
+  overlay: string;
+}
+
 /** Shadows only on floating layers; dark mode uses a stronger border instead. */
-export const elevation: Record<ThemeName, { floating: string }> = {
-  light: { floating: '0 8px 24px rgb(0 0 0 / 0.12)' },
-  dark: { floating: 'none' },
+export const elevation: Record<ThemeName, Elevation> = {
+  light: {
+    floating: '0 8px 24px rgb(0 0 0 / 0.12)',
+    floatingBorder: '#E7E5E4',
+    overlay: 'rgb(28 25 23 / 0.4)',
+  },
+  dark: { floating: 'none', floatingBorder: '#4A4A52', overlay: 'rgb(0 0 0 / 0.6)' },
 };
 
 export const motion = {
