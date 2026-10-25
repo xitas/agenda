@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { newId } from '@agenda/core';
+import type { Session } from '@agenda/core';
 import { and, asc, eq, gt, isNull } from 'drizzle-orm';
 import type { Db } from '../db/client.js';
 import { sessions } from '../db/schema.js';
@@ -9,14 +10,8 @@ import type { SessionRow } from '../db/schema.js';
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 export const TOUCH_INTERVAL_MS = 60 * 1000;
 
-/** What clients see about a session; the token and its hash never leave the server. */
-export interface Session {
-  id: string;
-  label: string;
-  createdAt: string;
-  lastUsedAt: string;
-  expiresAt: string;
-}
+/** What clients see about a session (shared with the client as SessionSchema in core). */
+export type { Session };
 
 /** 32 random bytes; the token is the only secret, so it needs no other structure. */
 function newToken(): string {

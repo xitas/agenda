@@ -1,20 +1,10 @@
-import type { TimingIssue } from '@agenda/core';
+import type { ApiErrorCode, TimingIssue } from '@agenda/core';
 import type { z } from 'zod';
 
 export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 413 | 422 | 429 | 500;
 
-export type ErrorCode =
-  | 'invalid_json'
-  | 'invalid_query'
-  | 'validation_failed'
-  | 'unauthorized'
-  | 'invalid_credentials'
-  | 'csrf_rejected'
-  | 'not_found'
-  | 'conflict'
-  | 'payload_too_large'
-  | 'rate_limited'
-  | 'internal';
+/** The codes are shared with the client: see API_ERROR_CODES in @agenda/core. */
+export type ErrorCode = ApiErrorCode;
 
 /** Field path (dot-separated) → messages, e.g. `{ "title": ["Too small: …"] }`. */
 export type FieldErrors = Record<string, string[]>;

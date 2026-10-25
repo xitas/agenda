@@ -32,7 +32,8 @@ agenda/
 │  ├─ extension/    WXT (MV3): popup, sidepanel, background service worker
 │  └─ mobile/       Expo + Expo Router
 ├─ packages/
-│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, import.ts, api-client.ts, quick-add.ts
+│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, import.ts, ics.ts, quick-add.ts,
+│  │                api-schemas.ts, api-client.ts, http.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -127,6 +128,13 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 - **CSRF:** cookie-authenticated writes and browser logins must carry an `Origin` listed in `CORS_ORIGINS` (403 otherwise; a missing Origin too). Bearer requests need no check, because tokens are never attached automatically. **CORS** allows only `CORS_ORIGINS`, with credentials.
 - **Same site required for the cookie:** a SameSite=Lax cookie is only sent when the web app and the API are on the same _site_ (same registrable domain). Phase 3 must therefore serve both from one domain with subdomains, for example `agenda.<domain>` (web) and `api.<domain>` (API), and list the web origin in `CORS_ORIGINS`. Hosting them on unrelated domains (e.g. `*.pages.dev` and `*.fly.dev`) would break cookie login.
 - **Rate limit:** 5 failed logins per IP per 15 minutes, then 429 with `Retry-After`; only failures count. The IP is the socket address; `X-Forwarded-For` is only trusted behind our own proxy (`TRUST_PROXY`, Phase 3). Passwords and tokens are never logged.
+
+**API client:** `createApiClient({ baseUrl, auth, fetch })` in `packages/core/src/api-client.ts` is the only way apps talk to the API. `baseUrl` is the API origin (the client adds `/api/v1`).
+
+- `auth: { kind: 'cookie' }` (web) sends `credentials: 'include'`; `auth: { kind: 'token', getToken, onUnauthorized }` (desktop, extension, mobile) sends the bearer token. The client never stores the token; the app keeps it in its platform storage.
+- Every response is parsed with the shared schemas in `api-schemas.ts` (the same error codes and login schema the API imports). Anything that doesn't match is `ApiError` with code `invalid_response`; API errors keep their `status`, `code`, `message` and `fields`. Failures without a response are `NetworkError` (`timeout`, default 15 s; `aborted`; `network`). Every method takes an `AbortSignal`.
+- `fetch` is injected and described by small structural types (`http.ts`), so core needs no DOM or Node types and the same client runs in the browser, Tauri, an MV3 service worker and React Native.
+- `apps/api/test/client.contract.test.ts` drives the real API through the client in-process; it fails if the two drift apart or if a client method has no contract coverage.
 
 ## 6. Per-platform notes
 
