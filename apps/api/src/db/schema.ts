@@ -1,4 +1,4 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 /**
  * One row per AgendaEvent. Instants are stored as `toISOString()` strings (always with
@@ -32,3 +32,23 @@ export const events = sqliteTable(
 );
 
 export type EventRow = typeof events.$inferSelect;
+
+/**
+ * One row per logged-in device. Only a SHA-256 hash of the session token is stored, so a
+ * leaked database (or backup) can't be used to act as any of these devices.
+ */
+export const sessions = sqliteTable(
+  'sessions',
+  {
+    id: text('id').primaryKey(),
+    tokenHash: text('token_hash').notNull(),
+    label: text('label').notNull(),
+    createdAt: text('created_at').notNull(),
+    lastUsedAt: text('last_used_at').notNull(),
+    expiresAt: text('expires_at').notNull(),
+    revokedAt: text('revoked_at'),
+  },
+  (table) => [uniqueIndex('sessions_token_hash_idx').on(table.tokenHash)],
+);
+
+export type SessionRow = typeof sessions.$inferSelect;
