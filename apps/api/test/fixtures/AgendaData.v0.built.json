@@ -1,0 +1,31 @@
+[
+  {
+    "id": "V1StGXR8_Z5jdHi6B-myT",
+    "title": "Doctor appointment",
+    "description": "Bring the reports",
+    "date": "2022-06-09T19:00:00.000Z"
+  },
+  {
+    "id": "f3c9a1d2-8b4e-4c6f-9a2d-7e1b5c3d9f0a",
+    "title": "Team lunch",
+    "description": "",
+    "date": "2022-06-14T19:00:00.000Z"
+  },
+  {
+    "id": "Uakgb_J5m9g-0JDMbcJqLJ",
+    "title": "Pay electricity bill",
+    "date": "2022-06-19T19:00:00.000Z"
+  },
+  {
+    "id": "2b7e4f10-3c5d-4e8a-b1f2-9d0c6a5e4b3f",
+    "title": "Meeting",
+    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
+    "date": "2026-10-24T18:30:00.000Z"
+  },
+  {
+    "id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+    "title": "Vacation",
+    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, repellat.",
+    "date": "2026-10-26T18:30:00.000Z"
+  }
+]
