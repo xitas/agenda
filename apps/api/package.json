@@ -12,7 +12,8 @@
     "test": "vitest run --coverage",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env src/db/migrate-cli.ts",
-    "db:seed": "tsx --env-file-if-exists=.env src/db/seed.ts"
+    "db:seed": "tsx --env-file-if-exists=.env src/db/seed.ts",
+    "hash-password": "tsx src/cli/hash-password.ts"
   },
   "dependencies": {
     "@agenda/core": "workspace:*",
