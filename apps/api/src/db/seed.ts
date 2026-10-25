@@ -1,10 +1,10 @@
-import { loadEnv } from '../env.js';
+import { loadDbEnv } from '../env.js';
 import { createEventRepo } from '../events/repo.js';
 import { openMigratedDb } from './open.js';
 import { buildSeedEvents } from './seed-data.js';
 
 // Usage: pnpm --filter @agenda/api db:seed [time zone]   (defaults to this machine's zone)
-const { DATABASE_URL } = loadEnv(process.env);
+const { DATABASE_URL } = loadDbEnv(process.env);
 const timezone = process.argv[2] ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
 const repo = createEventRepo(await openMigratedDb(DATABASE_URL));
 

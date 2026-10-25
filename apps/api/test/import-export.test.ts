@@ -88,11 +88,16 @@ describe('POST /events/import', () => {
   });
 
   it('returns 413 for a body over 5 MB', async () => {
-    const { app } = await makeTestApp();
+    const { app, login } = await makeTestApp();
+    const token = await login();
     const body = JSON.stringify([{ title: 'x'.repeat(6 * 1024 * 1024), date: '2026-10-24' }]);
     const res = await app.request('/api/v1/events/import?tz=UTC', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': String(body.length) },
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': String(body.length),
+        Authorization: `Bearer ${token}`,
+      },
       body,
     });
     expect(res.status).toBe(413);
