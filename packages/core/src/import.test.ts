@@ -1,7 +1,8 @@
+import { v5 } from 'uuid';
 import { describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 import seed from './__fixtures__/v0-seed.json' with { type: 'json' };
-import { fromV0, ImportFormatError, parseImport } from './import.js';
+import { fromV0, ImportFormatError, parseImport, V0_ID_NAMESPACE } from './import.js';
 import type { AgendaEvent } from './types.js';
 
 const now = new Date('2026-11-01T08:00:00.000Z');
@@ -64,13 +65,17 @@ describe('fromV0', () => {
     expect(fromV0({ title: 'Plain', date: '2026-10-24' }, options).start).toBe('2026-10-24');
   });
 
-  it('replaces a nanoid or missing id with a new id', () => {
-    const fromNanoid = fromV0(
-      { id: 'V1StGXR8_Z5jdHi6B-myT', title: 'Old', date: '2022-06-10T19:00:00.000Z' },
-      options,
-    );
-    expect(fromNanoid.id).toBe(generatedId);
+  it('maps a nanoid to the same UUID v5 every time, so re-imports match', () => {
+    const row = { id: 'V1StGXR8_Z5jdHi6B-myT', title: 'Old', date: '2022-06-10T19:00:00.000Z' };
+    const first = fromV0(row, options).id;
+    expect(first).toBe(v5(row.id, V0_ID_NAMESPACE));
+    expect(first).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5/);
+    expect(fromV0(row, { ...options, newId: () => 'unused' }).id).toBe(first);
+  });
+
+  it('makes a new id for a row with no id', () => {
     expect(fromV0({ title: 'No id', date: '2026-10-24' }, options).id).toBe(generatedId);
+    expect(fromV0({ id: '', title: 'Empty id', date: '2026-10-24' }, options).id).toBe(generatedId);
   });
 
   it('turns a missing or null description into empty notes', () => {
@@ -112,6 +117,7 @@ describe('parseImport', () => {
     const result = parseImport(input, options);
 
     expect(result.events.map((event) => event.title)).toEqual(['Meeting', 'Dentist', 'Vacation']);
+    expect(result.indexes).toEqual([0, 1, 9]);
     expect(result.skipped).toEqual([
       { index: 2, reason: 'title: Too big: expected string to have <=200 characters' },
       { index: 3, reason: 'start: Expected a UTC ISO datetime' },
@@ -136,7 +142,7 @@ describe('parseImport', () => {
   });
 
   it('returns nothing for an empty file', () => {
-    expect(parseImport([], options)).toEqual({ events: [], skipped: [] });
+    expect(parseImport([], options)).toEqual({ events: [], indexes: [], skipped: [] });
   });
 
   it('throws ImportFormatError when the file is not an array', () => {

@@ -19,6 +19,7 @@
     "@agenda/config": "workspace:*",
     "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10.13.0",
+    "ical.js": "^2.2.1",
     "typescript": "~6.0.3",
     "vitest": "^5.0.5"
   },

@@ -99,20 +99,24 @@ The type is called `AgendaEvent`, not `Event`, so it doesn't shadow the DOM's gl
 
 All routes are under `/api/v1`, and all bodies are JSON validated by the Zod schemas in `core`.
 
-| Method   | Path                                         | Notes                                                             |
-| -------- | -------------------------------------------- | ----------------------------------------------------------------- |
-| POST     | `/auth/login`                                | `{ password }` → sets session cookie and returns `{ token }`      |
-| POST     | `/auth/logout`                               |                                                                   |
-| GET      | `/events?from&to&q&limit&cursor`             | Range + search; excludes soft-deleted                             |
-| POST     | `/events`                                    | Client may send `id` (uuid)                                       |
-| GET      | `/events/:id`                                |                                                                   |
-| PATCH    | `/events/:id`                                | Partial update; bumps `updatedAt`                                 |
-| DELETE   | `/events/:id`                                | Sets `deletedAt`                                                  |
-| POST     | `/events/import`                             | Accepts v0 and v1 JSON; returns `{ imported, skipped, errors[] }` |
-| GET      | `/events/export.json` · `/events/export.ics` |                                                                   |
-| GET/POST | `/sync`                                      | Phase 7                                                           |
+| Method   | Path                                         | Notes                                                                                                  |
+| -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| POST     | `/auth/login`                                | `{ password }` → sets session cookie and returns `{ token }`                                           |
+| POST     | `/auth/logout`                               |                                                                                                        |
+| GET      | `/events?from&to&tz&q&limit&cursor`          | Range (`tz` required with one) + search; excludes soft-deleted; returns `{ events, nextCursor }`       |
+| POST     | `/events`                                    | Client may send `id` (uuid); 409 if it exists, even soft-deleted                                       |
+| GET      | `/events/:id`                                |                                                                                                        |
+| PATCH    | `/events/:id`                                | Partial update, merged then re-checked with `checkEventTiming`; bumps `updatedAt`                      |
+| DELETE   | `/events/:id`                                | Sets `deletedAt` (soft delete, 204)                                                                    |
+| POST     | `/events/import?tz`                          | Accepts v0 and v1 JSON; returns `{ imported, skipped: [{ index, reason }] }`; existing ids are skipped |
+| GET      | `/events/export.json` · `/events/export.ics` | v1 JSON (re-importable) · iCalendar via core `toICalendar`                                             |
+| GET/POST | `/sync`                                      | Phase 7                                                                                                |
 
-Errors always use the shape `{ error: { code, message, fields? } }` with proper HTTP status codes.
+Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invalid_json` / `invalid_query`, 404 `not_found`, 409 `conflict`, 413 `payload_too_large`, 422 `validation_failed` (with `fields`), 500 `internal`.
+
+**Range queries:** `[from, to)` is half-open. Timed events overlap when they start before `to` and end after `from` (or, with no end, start at or after `from`). All-day events are matched on the local dates the range covers in `tz`, using their exclusive end. Instants are stored as `toISOString()` so string order in SQLite is time order. Paging is a keyset cursor on `(start, id)`.
+
+**Import ids:** UUIDs are kept; non-UUID v0 ids (old nanoid clients) become a UUID v5 in a fixed namespace, so re-importing the same file skips every row as "Already exists".
 
 **Auth (single user):** the password hash lives in an env var (`AGENDA_PASSWORD_HASH`). Web and desktop use an httpOnly, Secure, SameSite=Lax cookie. The extension and mobile app use a bearer token stored in `chrome.storage.local` or `expo-secure-store`. Rate-limit `/auth/login`.
 

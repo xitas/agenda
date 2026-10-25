@@ -44,7 +44,14 @@ pnpm format                         # fix formatting with Prettier
 
 Filters need the full scoped package name (`@agenda/web`, not `web`).
 CI installs with `pnpm install --frozen-lockfile`: commit `pnpm-lock.yaml` together with any `package.json` change.
-Planned, not yet available: `pnpm --filter @agenda/api db:migrate` (apply Drizzle migrations).
+API database (see `apps/api/README.md`):
+
+```
+pnpm --filter @agenda/api db:migrate    # apply Drizzle migrations (the server also migrates on start)
+pnpm --filter @agenda/api db:generate   # after editing src/db/schema.ts; commit the SQL in apps/api/drizzle/
+pnpm --filter @agenda/api db:seed [tz]  # sample events around today
+```
+
 (Update this section as scripts are added.)
 
 ## Definition of done for any task
