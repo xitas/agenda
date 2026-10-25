@@ -1,11 +1,13 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import { z } from 'zod';
 import { ApiError, notFound, validationFailed } from '../errors.js';
 import { readJson } from '../http.js';
-import { requireAuth } from './middleware.js';
+import { requireAllowedOrigin, requireAuth } from './middleware.js';
 import type { AuthEnv, CookieConfig } from './middleware.js';
 import { verifyPassword } from './password.js';
+import type { RateLimiter } from './rate-limit.js';
 import { SESSION_TTL_MS } from './sessions.js';
 import type { SessionStore } from './sessions.js';
 
@@ -21,21 +23,46 @@ export interface AuthRoutesOptions {
   store: SessionStore;
   passwordHash: string;
   cookie: CookieConfig;
+  allowedOrigins: readonly string[];
+  /** Counts failed logins per client IP. */
+  limiter: RateLimiter;
+  clientIp: (c: Context) => string;
 }
 
-export function authRoutes({ store, passwordHash, cookie }: AuthRoutesOptions) {
+export function authRoutes(options: AuthRoutesOptions) {
+  const { store, passwordHash, cookie, allowedOrigins, limiter, clientIp } = options;
   const routes = new Hono<AuthEnv>();
-  const auth = requireAuth(store, cookie);
+  const auth = requireAuth(store, cookie, allowedOrigins);
   const prefix = cookie.secure ? 'host' : undefined;
 
   routes.post('/login', async (c) => {
+    const ip = clientIp(c);
+    const limit = limiter.check(ip);
+    if (!limit.allowed) {
+      const retryAfter = String(limit.retryAfterSeconds);
+      throw new ApiError(
+        429,
+        'rate_limited',
+        'Too many failed logins; try again later',
+        undefined,
+        {
+          'Retry-After': retryAfter,
+        },
+      );
+    }
+
     const body = LoginSchema.safeParse(await readJson(c));
     if (!body.success) throw validationFailed(body.error.issues);
 
     const { password, client, label = DEFAULT_LABEL[client] } = body.data;
+    // A browser login sets a cookie, so it gets the same Origin check as cookie writes.
+    if (client === 'browser') requireAllowedOrigin(c, allowedOrigins);
+
     if (!(await verifyPassword(password, passwordHash))) {
+      limiter.fail(ip);
       throw new ApiError(401, 'invalid_credentials', 'Wrong password');
     }
+    limiter.reset(ip);
 
     const { token, session } = await store.create(label);
     if (client === 'token') return c.json({ token, session });

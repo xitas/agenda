@@ -1,8 +1,11 @@
+import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import type { Context } from 'hono';
+import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { requireAuth } from './auth/middleware.js';
 import type { CookieConfig } from './auth/middleware.js';
+import { createRateLimiter } from './auth/rate-limit.js';
 import { authRoutes } from './auth/routes.js';
 import { createSessionStore } from './auth/sessions.js';
 import type { Db } from './db/client.js';
@@ -31,17 +34,54 @@ export interface AppOptions {
 }
 
 export const COOKIE_NAME = 'agenda_session';
+export const LOGIN_LIMIT = { max: 5, windowMs: 15 * 60 * 1000 };
 
-export function createApp({ db, auth, now = () => new Date(), logRequests = false }: AppOptions) {
+/**
+ * The socket's remote address. X-Forwarded-For is deliberately ignored: any client can
+ * send it, so it's only trustworthy behind our own proxy (TRUST_PROXY, Phase 3).
+ */
+function socketIp(c: Context): string {
+  try {
+    return getConnInfo(c).remote.address ?? 'unknown';
+  } catch {
+    return 'unknown'; // e.g. app.request() in tests, where there is no socket
+  }
+}
+
+export function createApp(options: AppOptions) {
+  const { db, auth, now = () => new Date(), clientIp = socketIp, logRequests = false } = options;
   const app = new Hono();
   if (logRequests) app.use(logger());
 
+  // Browser apps on other origins may call the API (with cookies) only when listed.
+  app.use(
+    '/api/*',
+    cors({
+      origin: (origin) => (auth.corsOrigins.includes(origin) ? origin : null),
+      credentials: true,
+      allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
+      allowHeaders: ['Content-Type', 'Authorization'],
+      maxAge: 600,
+    }),
+  );
+
   const store = createSessionStore(db, now);
   const cookie: CookieConfig = { name: COOKIE_NAME, secure: auth.secureCookies };
-  const signedIn = requireAuth(store, cookie);
+  const signedIn = requireAuth(store, cookie, auth.corsOrigins);
+  const limiter = createRateLimiter({ ...LOGIN_LIMIT, now });
 
   const api = new Hono();
-  api.route('/auth', authRoutes({ store, passwordHash: auth.passwordHash, cookie }));
+  api.route(
+    '/auth',
+    authRoutes({
+      store,
+      passwordHash: auth.passwordHash,
+      cookie,
+      allowedOrigins: auth.corsOrigins,
+      limiter,
+      clientIp,
+    }),
+  );
   // Every events route needs a session (cookie or bearer token).
   api.use('/events', signedIn);
   api.use('/events/*', signedIn);
@@ -56,7 +96,7 @@ export function createApp({ db, auth, now = () => new Date(), logRequests = fals
   );
 
   app.onError((error, c) => {
-    if (error instanceof ApiError) return c.json(error.toBody(), error.status);
+    if (error instanceof ApiError) return c.json(error.toBody(), error.status, error.headers);
     console.error(error);
     return c.json(new ApiError(500, 'internal', 'Something went wrong').toBody(), 500);
   });
