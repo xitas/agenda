@@ -1,0 +1,111 @@
+/* Button and IconButton share the variant classes (.ag-button--primary etc.). */
+
+.ag-button,
+.ag-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ag-space-2);
+  border: var(--ag-border-hairline) solid transparent;
+  border-radius: var(--ag-radius-sm);
+  font: inherit;
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--ag-duration-fast) var(--ag-easing-standard),
+    border-color var(--ag-duration-fast) var(--ag-easing-standard),
+    color var(--ag-duration-fast) var(--ag-easing-standard);
+}
+
+.ag-button--md {
+  height: var(--ag-size-control-md);
+  padding: 0 var(--ag-space-4);
+}
+
+.ag-button--sm {
+  height: var(--ag-size-control-sm);
+  padding: 0 var(--ag-space-3);
+}
+
+.ag-button svg {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+  flex-shrink: 0;
+}
+
+.ag-button--primary {
+  background: var(--ag-color-accent);
+  color: var(--ag-color-accent-fg);
+}
+
+.ag-button--primary:hover {
+  background: color-mix(in srgb, var(--ag-color-accent) 88%, var(--ag-color-text));
+}
+
+.ag-button--secondary {
+  background: var(--ag-color-surface);
+  border-color: var(--ag-color-border-strong);
+  color: var(--ag-color-text);
+}
+
+.ag-button--secondary:hover,
+.ag-button--ghost:hover {
+  background: var(--ag-color-surface-2);
+}
+
+.ag-button--ghost {
+  background: transparent;
+  color: var(--ag-color-text);
+}
+
+.ag-button--danger {
+  background: var(--ag-color-danger);
+  color: var(--ag-color-danger-fg);
+}
+
+.ag-button--danger:hover {
+  background: color-mix(in srgb, var(--ag-color-danger) 88%, var(--ag-color-text));
+}
+
+.ag-button:disabled,
+.ag-icon-button:disabled,
+.ag-button[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ag-button__spinner {
+  animation: ag-spin calc(var(--ag-duration-dialog) * 4) linear infinite;
+}
+
+/* IconButton: square, icon only. */
+.ag-icon-button {
+  padding: 0;
+}
+
+.ag-icon-button--md {
+  width: var(--ag-size-control-md);
+  height: var(--ag-size-control-md);
+}
+
+.ag-icon-button--sm {
+  width: var(--ag-size-control-sm);
+  height: var(--ag-size-control-sm);
+}
+
+.ag-icon-button__icon {
+  display: inline-flex;
+}
+
+.ag-icon-button__icon svg {
+  width: var(--ag-size-icon-md);
+  height: var(--ag-size-icon-md);
+}
+
+.ag-icon-button--sm .ag-icon-button__icon svg {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+}
