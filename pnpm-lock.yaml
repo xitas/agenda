@@ -350,6 +350,12 @@ importers:
       '@agenda/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      '@vitest/coverage-v8':
+        specifier: ^5.0.5
+        version: 5.0.5(vitest@5.0.5)
       eslint:
         specifier: ^10.13.0
         version: 10.13.0
