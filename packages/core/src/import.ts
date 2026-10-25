@@ -1,3 +1,4 @@
+import { v5 } from 'uuid';
 import { z } from 'zod';
 import { plainDateInTz } from './dates.js';
 import { newId } from './ids.js';
@@ -24,9 +25,15 @@ export interface ImportOptions {
   timezone: string;
   /** Used for `createdAt` and `updatedAt`. Defaults to the current time. */
   now?: Date;
-  /** Makes ids for rows without a valid UUID. Defaults to `newId`. */
+  /** Makes ids for v0 rows that have no id at all. Defaults to `newId`. */
   newId?: () => string;
 }
+
+/**
+ * Namespace for turning old nanoid v0 ids into UUID v5s. The same v0 id always gives the
+ * same UUID, so importing one file twice doesn't create duplicates. Never change it.
+ */
+export const V0_ID_NAMESPACE = '6f1d2c3b-8a9e-4f7d-b2c1-0e9d8c7b6a5f';
 
 export interface SkippedRow {
   index: number;
@@ -35,6 +42,8 @@ export interface SkippedRow {
 
 export interface ImportResult {
   events: AgendaEvent[];
+  /** `indexes[i]` is the position in the input of `events[i]`. */
+  indexes: number[];
   skipped: SkippedRow[];
 }
 
@@ -56,6 +65,12 @@ function resolveOptions(options: ImportOptions): ResolvedOptions {
   };
 }
 
+/** Keeps a UUID, maps any other id (nanoid) to a stable UUID v5, and makes one if missing. */
+function v0Id(id: string | undefined, options: ResolvedOptions): string {
+  if (id === undefined || id === '') return options.newId();
+  return z.uuid().safeParse(id).success ? id : v5(id, V0_ID_NAMESPACE);
+}
+
 function v0Candidate(v0: V0Event, options: ResolvedOptions): Record<string, unknown> {
   const timestamp = options.now.toISOString();
   // v0 stored a picked date as the UTC instant of local midnight, so the
@@ -65,7 +80,7 @@ function v0Candidate(v0: V0Event, options: ResolvedOptions): Record<string, unkn
     : plainDateInTz(new Date(v0.date), options.timezone);
 
   return {
-    id: z.uuid().safeParse(v0.id).success ? v0.id : options.newId(),
+    id: v0Id(v0.id, options),
     title: v0.title,
     notes: v0.description ?? '',
     start,
@@ -84,8 +99,8 @@ function v0Candidate(v0: V0Event, options: ResolvedOptions): Record<string, unkn
 
 /**
  * Converts a v0 row into an all-day AgendaEvent. Keeps the v0 id when it is a UUID
- * (the v0 server used UUIDs; older clients used nanoid). Throws a ZodError if the
- * result is not a valid event, e.g. an empty title.
+ * (the v0 server used UUIDs); older nanoid ids become a stable UUID v5, so a re-import
+ * finds the same id. Throws a ZodError if the result is not a valid event.
  */
 export function fromV0(v0: V0Event, options: ImportOptions): AgendaEvent {
   return AgendaEventSchema.parse(v0Candidate(v0, resolveOptions(options)));
@@ -131,6 +146,7 @@ export function parseImport(input: unknown, options: ImportOptions): ImportResul
   const resolved = resolveOptions(options);
 
   const events: AgendaEvent[] = [];
+  const indexes: number[] = [];
   const skipped: SkippedRow[] = [];
   const seen = new Set<string>();
 
@@ -145,8 +161,9 @@ export function parseImport(input: unknown, options: ImportOptions): ImportResul
     } else {
       seen.add(result.id);
       events.push(result);
+      indexes.push(index);
     }
   });
 
-  return { events, skipped };
+  return { events, indexes, skipped };
 }

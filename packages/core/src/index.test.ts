@@ -18,6 +18,7 @@ describe('public API', () => {
       'TimeZoneSchema',
       'UtcInstantSchema',
       'V0EventSchema',
+      'V0_ID_NAMESPACE',
       'checkEventTiming',
       'formatEventTime',
       'fromV0',
