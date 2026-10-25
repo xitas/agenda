@@ -43,21 +43,26 @@ function toSession(row: SessionRow): Session {
 }
 
 export function createSessionStore(db: Db, now: () => Date) {
-  const iso = (offsetMs = 0) => new Date(now().getTime() + offsetMs).toISOString();
+  const iso = () => now().toISOString();
+  // Read the clock once, so the expiry is exactly SESSION_TTL_MS after the stamp.
+  const stampWithExpiry = () => {
+    const at = now().getTime();
+    return { at: new Date(at).toISOString(), expires: new Date(at + SESSION_TTL_MS).toISOString() };
+  };
   const active = () => and(isNull(sessions.revokedAt), gt(sessions.expiresAt, iso()));
 
   return {
     /** Starts a session and returns the token, which is shown to the client only once. */
     async create(label: string): Promise<{ token: string; session: Session }> {
       const token = newToken();
-      const stamp = iso();
+      const { at, expires } = stampWithExpiry();
       const row: SessionRow = {
         id: newId(),
         tokenHash: hashToken(token),
         label,
-        createdAt: stamp,
-        lastUsedAt: stamp,
-        expiresAt: iso(SESSION_TTL_MS),
+        createdAt: at,
+        lastUsedAt: at,
+        expiresAt: expires,
         revokedAt: null,
       };
       await db.insert(sessions).values(row);
@@ -76,7 +81,8 @@ export function createSessionStore(db: Db, now: () => Date) {
     /** Records use and slides the expiry, but writes at most once a minute per session. */
     async touch(session: Session): Promise<Session> {
       if (now().getTime() - Date.parse(session.lastUsedAt) < TOUCH_INTERVAL_MS) return session;
-      const touched = { ...session, lastUsedAt: iso(), expiresAt: iso(SESSION_TTL_MS) };
+      const { at, expires } = stampWithExpiry();
+      const touched = { ...session, lastUsedAt: at, expiresAt: expires };
       await db
         .update(sessions)
         .set({ lastUsedAt: touched.lastUsedAt, expiresAt: touched.expiresAt })
