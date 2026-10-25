@@ -28,6 +28,7 @@ describe('public API', () => {
       'plainDateInTz',
       'rangeForView',
       'startOfDayInTz',
+      'toICalendar',
     ]);
     expect(core.APP_NAME).toBe('Agenda');
   });

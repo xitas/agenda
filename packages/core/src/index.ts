@@ -8,6 +8,8 @@ export {
   V0_ID_NAMESPACE,
   V0EventSchema,
 } from './import.js';
+export { toICalendar } from './ics.js';
+export type { ICalendarOptions } from './ics.js';
 export type { ImportOptions, ImportResult, SkippedRow, V0Event } from './import.js';
 export { newId } from './ids.js';
 export { parseQuickAdd, QUICK_ADD_WARNINGS } from './quick-add.js';
