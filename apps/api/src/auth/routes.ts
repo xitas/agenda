@@ -1,7 +1,7 @@
+import { LoginRequestSchema } from '@agenda/core';
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
-import { z } from 'zod';
 import { ApiError, notFound, validationFailed } from '../errors.js';
 import { readJson } from '../http.js';
 import { requireAllowedOrigin, requireAuth } from './middleware.js';
@@ -10,12 +10,6 @@ import { verifyPassword } from './password.js';
 import type { RateLimiter } from './rate-limit.js';
 import { SESSION_TTL_MS } from './sessions.js';
 import type { SessionStore } from './sessions.js';
-
-const LoginSchema = z.object({
-  password: z.string().min(1).max(1024),
-  client: z.enum(['browser', 'token']),
-  label: z.string().trim().min(1).max(50).optional(),
-});
 
 const DEFAULT_LABEL = { browser: 'web', token: 'app' } as const;
 
@@ -51,7 +45,7 @@ export function authRoutes(options: AuthRoutesOptions) {
       );
     }
 
-    const body = LoginSchema.safeParse(await readJson(c));
+    const body = LoginRequestSchema.safeParse(await readJson(c));
     if (!body.success) throw validationFailed(body.error.issues);
 
     const { password, client, label = DEFAULT_LABEL[client] } = body.data;
