@@ -1,4 +1,21 @@
 export {
+  API_PREFIX,
+  ApiError,
+  createApiClient,
+  DEFAULT_TIMEOUT_MS,
+  NetworkError,
+} from './api-client.js';
+export type {
+  ApiClient,
+  ApiClientOptions,
+  AuthStrategy,
+  CallOptions,
+  ListParams,
+  LoginResult,
+  NetworkErrorKind,
+} from './api-client.js';
+export type { AbortSignalLike, FetchLike, ResponseLike } from './http.js';
+export {
   API_ERROR_CODES,
   ApiErrorBodySchema,
   EventListSchema,
