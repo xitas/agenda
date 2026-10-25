@@ -17,18 +17,20 @@ Defined once in `packages/tokens/tokens.ts`, emitted as CSS variables for web, d
 
 ### Color: neutrals and brand
 
-| Token        | Light     | Dark      | Use                                |
-| ------------ | --------- | --------- | ---------------------------------- |
-| `bg`         | `#FAFAF9` | `#0C0C0E` | App background                     |
-| `surface`    | `#FFFFFF` | `#16161A` | Cards, dialogs                     |
-| `surface-2`  | `#F4F4F2` | `#1E1E23` | Hover rows, inputs                 |
-| `border`     | `#E7E5E4` | `#2A2A30` | Hairlines                          |
-| `text`       | `#1C1917` | `#EDEDEF` | Primary text                       |
-| `text-muted` | `#6B6560` | `#9A9AA3` | Secondary text, times              |
-| `accent`     | `#4F46E5` | `#818CF8` | Primary buttons, focus, "now" line |
-| `accent-fg`  | `#FFFFFF` | `#0C0C0E` | Text on accent                     |
-| `danger`     | `#DC2626` | `#F87171` | Delete, errors                     |
-| `success`    | `#16A34A` | `#4ADE80` | Confirmations                      |
+| Token           | Light     | Dark      | Use                                                                     |
+| --------------- | --------- | --------- | ----------------------------------------------------------------------- |
+| `bg`            | `#FAFAF9` | `#0C0C0E` | App background                                                          |
+| `surface`       | `#FFFFFF` | `#16161A` | Cards, dialogs                                                          |
+| `surface-2`     | `#F4F4F2` | `#1E1E23` | Hover rows, inputs                                                      |
+| `border`        | `#E7E5E4` | `#2A2A30` | Decorative hairlines between areas                                      |
+| `border-strong` | `#888380` | `#717175` | Edges that identify a control (inputs, secondary buttons), at least 3:1 |
+| `text`          | `#1C1917` | `#EDEDEF` | Primary text                                                            |
+| `text-muted`    | `#6B6560` | `#9A9AA3` | Secondary text, times                                                   |
+| `accent`        | `#4F46E5` | `#818CF8` | Primary buttons, focus, "now" line                                      |
+| `accent-fg`     | `#FFFFFF` | `#0C0C0E` | Text on accent                                                          |
+| `danger`        | `#CB2323` | `#F87171` | Delete, errors                                                          |
+| `danger-fg`     | `#FFFFFF` | `#0C0C0E` | Text on danger                                                          |
+| `success`       | `#107937` | `#4ADE80` | Confirmations                                                           |
 
 ### Color: event categories
 
@@ -37,15 +39,17 @@ Each category has a soft background (event block fill) and a strong foreground (
 | Name   | Strong (light) | Soft (light) | Strong (dark) | Soft (dark) |
 | ------ | -------------- | ------------ | ------------- | ----------- |
 | slate  | `#475569`      | `#F1F5F9`    | `#94A3B8`     | `#1E293B`   |
-| blue   | `#2563EB`      | `#EFF6FF`    | `#60A5FA`     | `#172554`   |
-| green  | `#16A34A`      | `#F0FDF4`    | `#4ADE80`     | `#052E16`   |
-| amber  | `#D97706`      | `#FFFBEB`    | `#FBBF24`     | `#451A03`   |
-| red    | `#DC2626`      | `#FEF2F2`    | `#F87171`     | `#450A0A`   |
+| blue   | `#2460E3`      | `#EFF6FF`    | `#60A5FA`     | `#172554`   |
+| green  | `#117C38`      | `#F0FDF4`    | `#4ADE80`     | `#052E16`   |
+| amber  | `#A35904`      | `#FFFBEB`    | `#FBBF24`     | `#451A03`   |
+| red    | `#CB2323`      | `#FEF2F2`    | `#F87171`     | `#450A0A`   |
 | violet | `#7C3AED`      | `#F5F3FF`    | `#A78BFA`     | `#2E1065`   |
-| pink   | `#DB2777`      | `#FDF2F8`    | `#F472B6`     | `#500724`   |
-| teal   | `#0D9488`      | `#F0FDFA`    | `#2DD4BF`     | `#042F2E`   |
+| pink   | `#C5236B`      | `#FDF2F8`    | `#F472B6`     | `#500724`   |
+| teal   | `#0B7970`      | `#F0FDFA`    | `#2DD4BF`     | `#042F2E`   |
 
 Color is **never the only signal**: events also show their title and time, and categories have names.
+
+**Contrast:** every text color on every background it is used on is at least 4.5:1 (WCAG AA), with a 5:1 margin in the light theme; control edges and focus rings are at least 3:1. `packages/tokens` has a test that computes these ratios for both themes, so a token change that breaks contrast fails CI. The light `danger`, `success` and the blue, green, amber, red, pink and teal strongs were darkened from the first draft of this table to meet it; hues are unchanged.
 
 ### Typography
 

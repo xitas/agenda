@@ -24,11 +24,15 @@ export interface ThemeColors {
   surface2: string;
   /** Decorative hairlines between areas. */
   border: string;
+  /** Edges that identify a control (inputs, secondary buttons): at least 3:1. */
+  borderStrong: string;
   text: string;
   textMuted: string;
   accent: string;
   accentFg: string;
   danger: string;
+  /** Text on a danger fill (the danger button). */
+  dangerFg: string;
   success: string;
 }
 
@@ -39,29 +43,35 @@ export interface EventColor {
   soft: string;
 }
 
+// Light danger, success and six event strongs are darker than in the first DESIGN.md
+// draft so every text pair stays above 5:1 (see contrast.test.ts).
 export const color: Record<ThemeName, ThemeColors> = {
   light: {
     bg: '#FAFAF9',
     surface: '#FFFFFF',
     surface2: '#F4F4F2',
     border: '#E7E5E4',
+    borderStrong: '#888380',
     text: '#1C1917',
     textMuted: '#6B6560',
     accent: '#4F46E5',
     accentFg: '#FFFFFF',
-    danger: '#DC2626',
-    success: '#16A34A',
+    danger: '#CB2323',
+    dangerFg: '#FFFFFF',
+    success: '#107937',
   },
   dark: {
     bg: '#0C0C0E',
     surface: '#16161A',
     surface2: '#1E1E23',
     border: '#2A2A30',
+    borderStrong: '#717175',
     text: '#EDEDEF',
     textMuted: '#9A9AA3',
     accent: '#818CF8',
     accentFg: '#0C0C0E',
     danger: '#F87171',
+    dangerFg: '#0C0C0E',
     success: '#4ADE80',
   },
 };
@@ -72,19 +82,19 @@ export const eventColor: Record<EventColorName, Record<ThemeName, EventColor>> =
     dark: { strong: '#94A3B8', soft: '#1E293B' },
   },
   blue: {
-    light: { strong: '#2563EB', soft: '#EFF6FF' },
+    light: { strong: '#2460E3', soft: '#EFF6FF' },
     dark: { strong: '#60A5FA', soft: '#172554' },
   },
   green: {
-    light: { strong: '#16A34A', soft: '#F0FDF4' },
+    light: { strong: '#117C38', soft: '#F0FDF4' },
     dark: { strong: '#4ADE80', soft: '#052E16' },
   },
   amber: {
-    light: { strong: '#D97706', soft: '#FFFBEB' },
+    light: { strong: '#A35904', soft: '#FFFBEB' },
     dark: { strong: '#FBBF24', soft: '#451A03' },
   },
   red: {
-    light: { strong: '#DC2626', soft: '#FEF2F2' },
+    light: { strong: '#CB2323', soft: '#FEF2F2' },
     dark: { strong: '#F87171', soft: '#450A0A' },
   },
   violet: {
@@ -92,11 +102,11 @@ export const eventColor: Record<EventColorName, Record<ThemeName, EventColor>> =
     dark: { strong: '#A78BFA', soft: '#2E1065' },
   },
   pink: {
-    light: { strong: '#DB2777', soft: '#FDF2F8' },
+    light: { strong: '#C5236B', soft: '#FDF2F8' },
     dark: { strong: '#F472B6', soft: '#500724' },
   },
   teal: {
-    light: { strong: '#0D9488', soft: '#F0FDFA' },
+    light: { strong: '#0B7970', soft: '#F0FDFA' },
     dark: { strong: '#2DD4BF', soft: '#042F2E' },
   },
 };
