@@ -1,15 +1,19 @@
 import type { TimingIssue } from '@agenda/core';
 import type { z } from 'zod';
 
-export type ErrorStatus = 400 | 404 | 409 | 413 | 422 | 500;
+export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 413 | 422 | 429 | 500;
 
 export type ErrorCode =
   | 'invalid_json'
   | 'invalid_query'
   | 'validation_failed'
+  | 'unauthorized'
+  | 'invalid_credentials'
+  | 'csrf_rejected'
   | 'not_found'
   | 'conflict'
   | 'payload_too_large'
+  | 'rate_limited'
   | 'internal';
 
 /** Field path (dot-separated) → messages, e.g. `{ "title": ["Too small: …"] }`. */
@@ -26,6 +30,8 @@ export class ApiError extends Error {
     readonly code: ErrorCode,
     message: string,
     readonly fields?: FieldErrors,
+    /** Extra response headers, e.g. Retry-After on a 429. */
+    readonly headers: Record<string, string> = {},
   ) {
     super(message);
     this.name = 'ApiError';

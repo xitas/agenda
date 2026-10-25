@@ -101,8 +101,10 @@ All routes are under `/api/v1`, and all bodies are JSON validated by the Zod sch
 
 | Method   | Path                                         | Notes                                                                                                  |
 | -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| POST     | `/auth/login`                                | `{ password }` → sets session cookie and returns `{ token }`                                           |
-| POST     | `/auth/logout`                               |                                                                                                        |
+| POST     | `/auth/login`                                | `{ password, client: 'browser'                                                                         | 'token', label? }`→`browser`sets the session cookie;`token`returns`{ token }`. 401 wrong password, 429 rate limited |
+| POST     | `/auth/logout`                               | Revokes the current session (and clears the cookie)                                                    |
+| GET      | `/auth/me` · `/auth/sessions`                | The current session · all active sessions, the current one marked                                      |
+| DELETE   | `/auth/sessions/:id`                         | Revokes another device                                                                                 |
 | GET      | `/events?from&to&tz&q&limit&cursor`          | Range (`tz` required with one) + search; excludes soft-deleted; returns `{ events, nextCursor }`       |
 | POST     | `/events`                                    | Client may send `id` (uuid); 409 if it exists, even soft-deleted                                       |
 | GET      | `/events/:id`                                |                                                                                                        |
@@ -118,13 +120,19 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 
 **Import ids:** UUIDs are kept; non-UUID v0 ids (old nanoid clients) become a UUID v5 in a fixed namespace, so re-importing the same file skips every row as "Already exists".
 
-**Auth (single user):** the password hash lives in an env var (`AGENDA_PASSWORD_HASH`). Web and desktop use an httpOnly, Secure, SameSite=Lax cookie. The extension and mobile app use a bearer token stored in `chrome.storage.local` or `expo-secure-store`. Rate-limit `/auth/login`.
+**Auth (single user):** the password hash lives in an env var (`AGENDA_PASSWORD_HASH`), made with `pnpm --filter @agenda/api hash-password`. It is scrypt (N=2^17, r=8, p=1) in a self-describing format (`scrypt:<logN>:<r>:<p>:<salt>:<key>`), so the cost or the algorithm (argon2id, once Node's built-in is stable) can change later by re-hashing at the next login. The API refuses to start without it.
+
+- **Sessions** live in the `sessions` table: a random 256-bit token is given to the client once; only its SHA-256 is stored. Sessions slide: each use (recorded at most once a minute) moves the expiry 30 days ahead. Logout and `DELETE /auth/sessions/:id` set `revoked_at`.
+- **Only the web app uses the cookie** (`client: 'browser'`): httpOnly, SameSite=Lax, and Secure with the `__Host-` prefix unless `NODE_ENV=development`. **Desktop, extension and mobile use `client: 'token'`** and send `Authorization: Bearer`; the token is stored in the OS keychain (desktop, via a Tauri plugin chosen in Phase 4), `chrome.storage.local` or `expo-secure-store`.
+- **CSRF:** cookie-authenticated writes and browser logins must carry an `Origin` listed in `CORS_ORIGINS` (403 otherwise; a missing Origin too). Bearer requests need no check, because tokens are never attached automatically. **CORS** allows only `CORS_ORIGINS`, with credentials.
+- **Same site required for the cookie:** a SameSite=Lax cookie is only sent when the web app and the API are on the same _site_ (same registrable domain). Phase 3 must therefore serve both from one domain with subdomains, for example `agenda.<domain>` (web) and `api.<domain>` (API), and list the web origin in `CORS_ORIGINS`. Hosting them on unrelated domains (e.g. `*.pages.dev` and `*.fly.dev`) would break cookie login.
+- **Rate limit:** 5 failed logins per IP per 15 minutes, then 429 with `Retry-After`; only failures count. The IP is the socket address; `X-Forwarded-For` is only trusted behind our own proxy (`TRUST_PROXY`, Phase 3). Passwords and tokens are never logged.
 
 ## 6. Per-platform notes
 
 **Web.** This is the SPA plus the PWA. Server state lives in TanStack Query; UI state stays in React (no global store unless it's needed). The API URL comes from `VITE_API_URL`.
 
-**Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
+**Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Its pages run on `tauri://localhost` (macOS, Linux) or `http://tauri.localhost` (Windows), which is cross-site to the API, so the SameSite cookie would not be sent: desktop logs in with `client: 'token'` like the extension and mobile app, keeps the token in the OS keychain, and the web code's API client takes its auth strategy from the `platform` adapter (cookie on the web, bearer token in Tauri). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
 
 **Extension (WXT, MV3).**
 

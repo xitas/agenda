@@ -15,6 +15,7 @@ import type { Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { z } from 'zod';
 import { ApiError, invalidQuery, notFound, validationFailed } from '../errors.js';
+import { readJson } from '../http.js';
 import type { EventRepo, ListCursor } from './repo.js';
 
 export const IMPORT_MAX_BYTES = 5 * 1024 * 1024;
@@ -56,14 +57,6 @@ function decodeCursor(value: string): ListCursor {
     return CursorSchema.parse(JSON.parse(Buffer.from(value, 'base64url').toString('utf8')));
   } catch {
     throw invalidQuery([{ path: ['cursor'], message: 'Invalid cursor' }]);
-  }
-}
-
-async function readJson(c: Context): Promise<unknown> {
-  try {
-    return await c.req.json<unknown>();
-  } catch {
-    throw new ApiError(400, 'invalid_json', 'The request body is not valid JSON');
   }
 }
 

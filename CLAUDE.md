@@ -50,6 +50,7 @@ API database (see `apps/api/README.md`):
 pnpm --filter @agenda/api db:migrate    # apply Drizzle migrations (the server also migrates on start)
 pnpm --filter @agenda/api db:generate   # after editing src/db/schema.ts; commit the SQL in apps/api/drizzle/
 pnpm --filter @agenda/api db:seed [tz]  # sample events around today
+pnpm -s --filter @agenda/api hash-password >> apps/api/.env   # set AGENDA_PASSWORD_HASH (required to start)
 ```
 
 (Update this section as scripts are added.)

@@ -1,17 +1,20 @@
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { plainDateInTz } from '@agenda/core';
+import { sql } from 'drizzle-orm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app.js';
 import { openDb } from '../src/db/client.js';
 import { runMigrations } from '../src/db/migrate.js';
 import { openMigratedDb } from '../src/db/open.js';
 import { buildSeedEvents } from '../src/db/seed-data.js';
-import { loadEnv } from '../src/env.js';
+import { loadDbEnv, loadServerEnv } from '../src/env.js';
 import { ApiError } from '../src/errors.js';
 import { createEventRepo } from '../src/events/repo.js';
-import { makeTestApp, NOW } from './helpers.js';
+import { makeTestApp, NOW, PASSWORD, testAuthConfig } from './helpers.js';
 import type { ErrorResponse } from './helpers.js';
 
 afterEach(() => {
@@ -30,27 +33,48 @@ describe('app', () => {
 
   it('hides unexpected errors behind a 500', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    // No migrations, so the events table does not exist.
-    const { request } = await makeTestApp({ migrate: false });
-    const res: ErrorResponse = await request('GET', '/events');
+    const { request, login, db } = await makeTestApp();
+    const token = await login();
+    // Break the database after logging in, so the events query itself fails.
+    await db.run(sql`DROP TABLE events`);
+    const res: ErrorResponse = await request('GET', '/events', undefined, { auth: token });
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ error: { code: 'internal', message: 'Something went wrong' } });
     expect(consoleError).toHaveBeenCalledOnce();
   });
 
-  it('can log requests, and uses the real clock by default', async () => {
-    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  it('logs requests without passwords or tokens, using the real clock by default', async () => {
+    const logged: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logged.push(args.map(String).join(' '));
+    });
     const db = openDb(':memory:');
     await runMigrations(db);
-    const res = await createApp({ db, logRequests: true }).request('/api/v1/events', {
+    const app = createApp({ db, auth: await testAuthConfig(), logRequests: true });
+    const json = { 'Content-Type': 'application/json' };
+
+    const login = await app.request('/api/v1/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: json,
+      body: JSON.stringify({ password: PASSWORD, client: 'token' }),
+    });
+    const { token } = (await login.json()) as { token: string };
+    const auth = { ...json, Authorization: `Bearer ${token}` };
+    const created = await app.request('/api/v1/events', {
+      method: 'POST',
+      headers: auth,
       body: JSON.stringify({ title: 'Now', start: '2026-10-24', allDay: true, timezone: 'UTC' }),
     });
-    expect(res.status).toBe(201);
-    const body = (await res.json()) as { createdAt: string };
+    expect(created.status).toBe(201);
+    const body = (await created.json()) as { createdAt: string };
     expect(Math.abs(Date.parse(body.createdAt) - Date.now())).toBeLessThan(60_000);
-    expect(consoleLog).toHaveBeenCalled();
+    await app.request('/api/v1/auth/logout', { method: 'POST', headers: auth });
+
+    expect(logged.length).toBeGreaterThanOrEqual(6); // incoming + outgoing line per request
+    const output = logged.join('\n');
+    expect(output).toContain('POST /api/v1/auth/login');
+    expect(output).not.toContain(PASSWORD);
+    expect(output).not.toContain(token);
   });
 
   it('applies migrations only once', async () => {
@@ -117,18 +141,72 @@ describe('repo.insert', () => {
   });
 });
 
-describe('loadEnv', () => {
-  it('uses dev defaults', () => {
-    expect(loadEnv({})).toEqual({ DATABASE_URL: 'file:./data/agenda.db', PORT: 4001 });
+describe('environment', () => {
+  it('needs only DATABASE_URL for the database scripts', () => {
+    expect(loadDbEnv({})).toEqual({ DATABASE_URL: 'file:./data/agenda.db' });
   });
 
-  it('reads and validates values', () => {
-    expect(loadEnv({ DATABASE_URL: 'file:/tmp/x.db', PORT: '8080' })).toEqual({
-      DATABASE_URL: 'file:/tmp/x.db',
-      PORT: 8080,
+  it('reads and validates the server settings, secure by default', async () => {
+    const hash = (await testAuthConfig()).passwordHash;
+    expect(loadServerEnv({ AGENDA_PASSWORD_HASH: hash })).toEqual({
+      DATABASE_URL: 'file:./data/agenda.db',
+      PORT: 4001,
+      NODE_ENV: 'production',
+      AGENDA_PASSWORD_HASH: hash,
+      CORS_ORIGINS: [],
     });
-    expect(() => loadEnv({ PORT: 'eighty' })).toThrow('Invalid environment');
+    expect(
+      loadServerEnv({
+        AGENDA_PASSWORD_HASH: hash,
+        PORT: '8080',
+        NODE_ENV: 'development',
+        CORS_ORIGINS: ' http://localhost:5173 , https://agenda.example ',
+      }),
+    ).toMatchObject({
+      PORT: 8080,
+      NODE_ENV: 'development',
+      CORS_ORIGINS: ['http://localhost:5173', 'https://agenda.example'],
+    });
   });
+
+  it.each([
+    ['a missing hash', () => ({}), 'AGENDA_PASSWORD_HASH is not set'],
+    ['an empty hash', () => ({ AGENDA_PASSWORD_HASH: '' }), 'AGENDA_PASSWORD_HASH is not set'],
+    ['a plain-text password', () => ({ AGENDA_PASSWORD_HASH: 'hunter2' }), 'is not a valid hash'],
+    ['a bad port', (hash: string) => ({ AGENDA_PASSWORD_HASH: hash, PORT: 'eighty' }), 'PORT'],
+    [
+      'an origin with a path',
+      (hash: string) => ({
+        AGENDA_PASSWORD_HASH: hash,
+        CORS_ORIGINS: 'https://agenda.example/app',
+      }),
+      'Expected an origin',
+    ],
+  ])('rejects %s', async (_name, source: (hash: string) => Record<string, string>, message) => {
+    const hash = (await testAuthConfig()).passwordHash;
+    expect(() => loadServerEnv(source(hash))).toThrow(message);
+  });
+});
+
+describe('server startup', () => {
+  const entry = fileURLToPath(new URL('../src/index.ts', import.meta.url));
+
+  it('refuses to start without AGENDA_PASSWORD_HASH and says how to fix it', () => {
+    const env: Record<string, string> = {};
+    for (const key of ['PATH', 'Path', 'SystemRoot', 'TEMP', 'TMP']) {
+      const value = process.env[key];
+      if (value !== undefined) env[key] = value;
+    }
+    const result = spawnSync(process.execPath, ['--import', 'tsx', entry], {
+      env: { ...env, DATABASE_URL: ':memory:' },
+      encoding: 'utf8',
+      timeout: 20_000,
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('AGENDA_PASSWORD_HASH is not set');
+    expect(result.stderr).toContain('hash-password');
+    expect(result.stdout).not.toContain('listening');
+  }, 30_000);
 });
 
 describe('seed data', () => {
