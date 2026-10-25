@@ -10,6 +10,7 @@ coverage
 
 # local databases
 *.db
+*.db-*
 
 # env files
 .env
