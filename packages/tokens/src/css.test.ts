@@ -24,6 +24,7 @@ describe('toCss', () => {
     expect(root).toContain('--ag-size-control-md: 40px;');
     expect(root).toContain('--ag-duration-dialog: 200ms;');
     expect(root).toContain('--ag-easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);');
+    expect(root).toContain('--ag-color-overlay: rgb(0 0 0 / 0.4);');
   });
 
   it('uses rem for font sizes so text follows the user setting', () => {

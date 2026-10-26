@@ -161,7 +161,7 @@ export const elevation: Record<ThemeName, Elevation> = {
   light: {
     floating: '0 8px 24px rgb(0 0 0 / 0.12)',
     floatingBorder: '#E7E5E4',
-    overlay: 'rgb(28 25 23 / 0.4)',
+    overlay: 'rgb(0 0 0 / 0.4)',
   },
   dark: { floating: 'none', floatingBorder: '#4A4A52', overlay: 'rgb(0 0 0 / 0.6)' },
 };

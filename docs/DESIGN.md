@@ -64,7 +64,7 @@ Color is **never the only signal**: events also show their title and time, and c
 
 - **Spacing:** 4-pt scale: 4, 8, 12, 16, 24, 32, 48
 - **Radius:** `sm 6` (inputs, chips) · `md 10` (cards, event blocks) · `lg 16` (dialogs, sheets) · `full` (pills, avatars)
-- **Elevation:** use borders by default. Shadows only on floating layers (dialogs, menus, popovers): `0 8px 24px rgb(0 0 0 / .12)` light, and a stronger border instead of a shadow in dark mode. Tokens: `shadow-floating`, `floating-border` (`#E7E5E4` light, `#4A4A52` dark, clearly stronger than the hairline) and `overlay`, the backdrop behind a modal dialog (`rgb(28 25 23 / 0.4)` light, `rgb(0 0 0 / 0.6)` dark).
+- **Elevation:** use borders by default. Shadows only on floating layers (dialogs, menus, popovers): `0 8px 24px rgb(0 0 0 / .12)` light, and a stronger border instead of a shadow in dark mode. Tokens: `shadow-floating`, `floating-border` (`#E7E5E4` light, `#4A4A52` dark, clearly stronger than the hairline) and `overlay`, the backdrop behind a modal dialog (black at 40% light, `rgb(0 0 0 / 0.4)`; black at 60% dark, `rgb(0 0 0 / 0.6)`; a neutral black dims without tinting the page grey).
 
 ### Motion
 
