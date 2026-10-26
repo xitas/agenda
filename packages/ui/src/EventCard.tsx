@@ -40,7 +40,7 @@ export function EventCard({
       {variant === 'default' && event.location !== null && event.location !== '' && (
         <span className="ag-event-card__location">
           <MapPin aria-hidden="true" className="ag-event-card__icon" />
-          {event.location}
+          <span className="ag-event-card__location-text">{event.location}</span>
         </span>
       )}
       <span className="ag-visually-hidden">Category: {capitalise(event.color)}</span>

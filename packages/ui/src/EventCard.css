@@ -86,6 +86,12 @@
   white-space: nowrap;
 }
 
+.ag-event-card__location-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .ag-event-card__icon {
   width: var(--ag-size-icon-sm);
   height: var(--ag-size-icon-sm);

@@ -38,6 +38,7 @@
 
 .ag-input:disabled {
   background: var(--ag-color-surface-2);
+  color: var(--ag-color-text-muted);
   cursor: not-allowed;
 }
 

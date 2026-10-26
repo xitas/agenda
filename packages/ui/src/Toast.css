@@ -33,6 +33,12 @@
   transform: translateY(var(--radix-toast-swipe-move-y));
 }
 
+/* The action (Undo), not the dismiss icon. */
+.ag-toast .ag-button.ag-button--ghost {
+  color: var(--ag-color-accent);
+  font-weight: var(--ag-weight-semibold);
+}
+
 .ag-toast__message {
   flex: 1;
   font-size: var(--ag-text-body-sm);
