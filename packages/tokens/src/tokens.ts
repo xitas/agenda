@@ -76,38 +76,43 @@ export const color: Record<ThemeName, ThemeColors> = {
   },
 };
 
+/** Dark soft fills are the strong color at this opacity over the dark surface. */
+export const DARK_SOFT_ALPHA = 0.14;
+
+// Dark `soft` values are precomputed (so mobile gets the same hex): strong mixed
+// over color.dark.surface at DARK_SOFT_ALPHA. tokens.test.ts recomputes them.
 export const eventColor: Record<EventColorName, Record<ThemeName, EventColor>> = {
   slate: {
     light: { strong: '#475569', soft: '#F1F5F9' },
-    dark: { strong: '#94A3B8', soft: '#1E293B' },
+    dark: { strong: '#94A3B8', soft: '#282A30' },
   },
   blue: {
     light: { strong: '#2460E3', soft: '#EFF6FF' },
-    dark: { strong: '#60A5FA', soft: '#172554' },
+    dark: { strong: '#60A5FA', soft: '#202A39' },
   },
   green: {
     light: { strong: '#117C38', soft: '#F0FDF4' },
-    dark: { strong: '#4ADE80', soft: '#052E16' },
+    dark: { strong: '#4ADE80', soft: '#1D3228' },
   },
   amber: {
     light: { strong: '#A35904', soft: '#FFFBEB' },
-    dark: { strong: '#FBBF24', soft: '#451A03' },
+    dark: { strong: '#FBBF24', soft: '#362E1B' },
   },
   red: {
     light: { strong: '#CB2323', soft: '#FEF2F2' },
-    dark: { strong: '#F87171', soft: '#450A0A' },
+    dark: { strong: '#F87171', soft: '#362326' },
   },
   violet: {
     light: { strong: '#7C3AED', soft: '#F5F3FF' },
-    dark: { strong: '#A78BFA', soft: '#2E1065' },
+    dark: { strong: '#A78BFA', soft: '#2A2639' },
   },
   pink: {
     light: { strong: '#C5236B', soft: '#FDF2F8' },
-    dark: { strong: '#F472B6', soft: '#500724' },
+    dark: { strong: '#F472B6', soft: '#352330' },
   },
   teal: {
     light: { strong: '#0B7970', soft: '#F0FDFA' },
-    dark: { strong: '#2DD4BF', soft: '#042F2E' },
+    dark: { strong: '#2DD4BF', soft: '#193131' },
   },
 };
 
@@ -126,13 +131,26 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32, 12: 48 } as const
 
 export const radius = { sm: 6, md: 10, lg: 16, full: 9999 } as const;
 
+/** Below this width the layout follows the mobile pattern (DESIGN.md §4). */
+export const breakpoint = { narrow: 768 } as const;
+
+const BOTTOM_NAV = 64;
+
 export const size = {
   control: { sm: 32, md: 40, touch: 44 },
   icon: { md: 20, sm: 16 },
   dialog: { width: 480 },
   toast: { width: 420 },
   sidebar: 240,
+  /** The tab bar on narrow screens (web below breakpoint.narrow, and mobile). */
+  bottomNav: BOTTOM_NAV,
 } as const;
+
+/**
+ * Distance from the bottom of the screen to the toasts. On narrow screens they sit
+ * above the bottom nav; deriving it from the nav height keeps the two from drifting.
+ */
+export const toastOffset = { wide: 24, narrow: BOTTOM_NAV + 16 } as const;
 
 export const border = {
   hairline: 1,
@@ -156,7 +174,7 @@ export const elevation: Record<ThemeName, Elevation> = {
   light: {
     floating: '0 8px 24px rgb(0 0 0 / 0.12)',
     floatingBorder: '#E7E5E4',
-    overlay: 'rgb(28 25 23 / 0.4)',
+    overlay: 'rgb(0 0 0 / 0.4)',
   },
   dark: { floating: 'none', floatingBorder: '#4A4A52', overlay: 'rgb(0 0 0 / 0.6)' },
 };
@@ -167,12 +185,14 @@ export const motion = {
 } as const;
 
 export const tokens = {
+  breakpoint,
   color,
   eventColor,
   font,
   space,
   radius,
   size,
+  toastOffset,
   border,
   elevation,
   motion,

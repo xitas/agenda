@@ -38,14 +38,16 @@ Each category has a soft background (event block fill) and a strong foreground (
 
 | Name   | Strong (light) | Soft (light) | Strong (dark) | Soft (dark) |
 | ------ | -------------- | ------------ | ------------- | ----------- |
-| slate  | `#475569`      | `#F1F5F9`    | `#94A3B8`     | `#1E293B`   |
-| blue   | `#2460E3`      | `#EFF6FF`    | `#60A5FA`     | `#172554`   |
-| green  | `#117C38`      | `#F0FDF4`    | `#4ADE80`     | `#052E16`   |
-| amber  | `#A35904`      | `#FFFBEB`    | `#FBBF24`     | `#451A03`   |
-| red    | `#CB2323`      | `#FEF2F2`    | `#F87171`     | `#450A0A`   |
-| violet | `#7C3AED`      | `#F5F3FF`    | `#A78BFA`     | `#2E1065`   |
-| pink   | `#C5236B`      | `#FDF2F8`    | `#F472B6`     | `#500724`   |
-| teal   | `#0B7970`      | `#F0FDFA`    | `#2DD4BF`     | `#042F2E`   |
+| slate  | `#475569`      | `#F1F5F9`    | `#94A3B8`     | `#282A30`   |
+| blue   | `#2460E3`      | `#EFF6FF`    | `#60A5FA`     | `#202A39`   |
+| green  | `#117C38`      | `#F0FDF4`    | `#4ADE80`     | `#1D3228`   |
+| amber  | `#A35904`      | `#FFFBEB`    | `#FBBF24`     | `#362E1B`   |
+| red    | `#CB2323`      | `#FEF2F2`    | `#F87171`     | `#362326`   |
+| violet | `#7C3AED`      | `#F5F3FF`    | `#A78BFA`     | `#2A2639`   |
+| pink   | `#C5236B`      | `#FDF2F8`    | `#F472B6`     | `#352330`   |
+| teal   | `#0B7970`      | `#F0FDFA`    | `#2DD4BF`     | `#193131`   |
+
+**Dark soft fills** are a tint, not a block: each is its strong color at 14% over the dark `surface` (`#16161A`), precomputed as hex so web and mobile use the same values. A test in `packages/tokens` recomputes them.
 
 Color is **never the only signal**: events also show their title and time, and categories have names.
 
@@ -61,8 +63,9 @@ Color is **never the only signal**: events also show their title and time, and c
 ### Spacing, radius, elevation
 
 - **Spacing:** 4-pt scale: 4, 8, 12, 16, 24, 32, 48
+- **Layout:** the narrow breakpoint is 768 px (`breakpoint.narrow`); below it the bottom nav is 64 px tall (`size.bottomNav`). Toasts sit 24 px above the bottom edge on wide screens and 80 px on narrow ones (`toastOffset`, derived from the nav height + 16 px) so they never cover the nav, plus the safe-area inset on phones.
 - **Radius:** `sm 6` (inputs, chips) · `md 10` (cards, event blocks) · `lg 16` (dialogs, sheets) · `full` (pills, avatars)
-- **Elevation:** use borders by default. Shadows only on floating layers (dialogs, menus, popovers): `0 8px 24px rgb(0 0 0 / .12)` light, and a stronger border instead of a shadow in dark mode. Tokens: `shadow-floating`, `floating-border` (`#E7E5E4` light, `#4A4A52` dark, clearly stronger than the hairline) and `overlay`, the backdrop behind a modal dialog (`rgb(28 25 23 / 0.4)` light, `rgb(0 0 0 / 0.6)` dark).
+- **Elevation:** use borders by default. Shadows only on floating layers (dialogs, menus, popovers): `0 8px 24px rgb(0 0 0 / .12)` light, and a stronger border instead of a shadow in dark mode. Tokens: `shadow-floating`, `floating-border` (`#E7E5E4` light, `#4A4A52` dark, clearly stronger than the hairline) and `overlay`, the backdrop behind a modal dialog (black at 40% light, `rgb(0 0 0 / 0.4)`; black at 60% dark, `rgb(0 0 0 / 0.6)`; a neutral black dims without tinting the page grey).
 
 ### Motion
 
