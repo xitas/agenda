@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Button } from './Button.js';
 import { ToastProvider } from './Toast.js';
 import { useToast } from './useToast.js';
@@ -29,6 +29,11 @@ function setup(options: ToastOptions, duration?: number) {
   );
   return { user, trigger: screen.getByRole('button', { name: 'Delete' }) };
 }
+
+afterEach(() => {
+  // Never let one test's fake timers leak into the next, even if it fails or times out.
+  vi.useRealTimers();
+});
 
 describe('Toast', () => {
   it('shows the message in a live region', async () => {
@@ -61,13 +66,28 @@ describe('Toast', () => {
     });
   });
 
-  it('hides by itself after its duration', async () => {
-    const { user, trigger } = setup({ message: 'Quick one.', duration: 50 });
-    await user.click(trigger);
+  it('hides by itself after its duration, not before', async () => {
+    // Fake timers: the test decides when time passes, so a slow (busy CI) machine can't
+    // make the toast disappear before it is checked. fireEvent is synchronous, unlike
+    // user-event, whose own small delays would wait on the frozen clock.
+    vi.useFakeTimers();
+    render(
+      <ToastProvider>
+        <DeleteButton options={{ message: 'Quick one.', duration: 3000 }} />
+      </ToastProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(screen.getByText('Quick one.')).toBeDefined();
-    await waitFor(() => {
-      expect(screen.queryByText('Quick one.')).toBeNull();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2900);
     });
+    expect(screen.getByText('Quick one.')).toBeDefined();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    expect(screen.queryByText('Quick one.')).toBeNull();
   });
 
   it('uses the provider default duration and stacks several toasts', async () => {
