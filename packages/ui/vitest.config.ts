@@ -6,6 +6,9 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: 'jsdom',
+      // Interaction tests (many simulated key presses) under coverage, on a cold run with
+      // every package testing in parallel, can pass 5 s; that is load, not a hang.
+      testTimeout: 15_000,
       setupFiles: ['./src/test-utils/setup.ts'],
       // UTC+14, as in core: EventCard times must come from the timezone prop, not the host.
       env: { TZ: 'Pacific/Kiritimati' },
