@@ -3,6 +3,7 @@ export { toCss } from './css.js';
 export {
   border,
   color,
+  DARK_SOFT_ALPHA,
   elevation,
   EVENT_COLOR_NAMES,
   eventColor,
