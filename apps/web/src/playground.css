@@ -1,0 +1,116 @@
+/* Layout for the /playground route only. Token variables only, like packages/ui. */
+
+.playground {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-8);
+  max-width: calc(var(--ag-size-dialog) * 2.5);
+  margin: 0 auto;
+  padding: var(--ag-space-6) var(--ag-space-4) var(--ag-space-12);
+}
+
+.playground__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ag-space-4);
+}
+
+.playground__title {
+  margin: 0;
+  font-size: var(--ag-text-display);
+}
+
+.playground__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+  padding-top: var(--ag-space-6);
+  border-top: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.playground__heading {
+  margin: 0;
+  font-size: var(--ag-text-title);
+}
+
+.playground__subheading {
+  margin: var(--ag-space-2) 0 0;
+  font-size: var(--ag-text-title-sm);
+}
+
+.playground__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-3);
+}
+
+.playground__grid,
+.playground__cards {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, calc(var(--ag-size-sidebar) + var(--ag-space-6))), 1fr)
+  );
+  gap: var(--ag-space-4);
+}
+
+.playground__cards {
+  gap: var(--ag-space-3);
+}
+
+.playground__compact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  max-width: var(--ag-size-dialog);
+}
+
+/* ThemeSwitcher: native radios styled as a segmented control. */
+.theme-switcher {
+  display: inline-flex;
+  margin: 0;
+  padding: var(--ag-space-1);
+  border: var(--ag-border-hairline) solid var(--ag-color-border-strong);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+}
+
+.theme-switcher__option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ag-space-1);
+  height: var(--ag-size-control-sm);
+  padding: 0 var(--ag-space-3);
+  border-radius: var(--ag-radius-sm);
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-medium);
+  cursor: pointer;
+}
+
+.theme-switcher__option:has(:checked) {
+  background: var(--ag-color-surface-2);
+  color: var(--ag-color-text);
+}
+
+.theme-switcher__option:has(:focus-visible) {
+  outline: var(--ag-border-focus-ring) solid var(--ag-color-accent);
+  outline-offset: var(--ag-border-focus-offset);
+}
+
+.theme-switcher__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.theme-switcher__icon {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+}
