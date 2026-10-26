@@ -131,13 +131,26 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32, 12: 48 } as const
 
 export const radius = { sm: 6, md: 10, lg: 16, full: 9999 } as const;
 
+/** Below this width the layout follows the mobile pattern (DESIGN.md §4). */
+export const breakpoint = { narrow: 768 } as const;
+
+const BOTTOM_NAV = 64;
+
 export const size = {
   control: { sm: 32, md: 40, touch: 44 },
   icon: { md: 20, sm: 16 },
   dialog: { width: 480 },
   toast: { width: 420 },
   sidebar: 240,
+  /** The tab bar on narrow screens (web below breakpoint.narrow, and mobile). */
+  bottomNav: BOTTOM_NAV,
 } as const;
+
+/**
+ * Distance from the bottom of the screen to the toasts. On narrow screens they sit
+ * above the bottom nav; deriving it from the nav height keeps the two from drifting.
+ */
+export const toastOffset = { wide: 24, narrow: BOTTOM_NAV + 16 } as const;
 
 export const border = {
   hairline: 1,
@@ -172,12 +185,14 @@ export const motion = {
 } as const;
 
 export const tokens = {
+  breakpoint,
   color,
   eventColor,
   font,
   space,
   radius,
   size,
+  toastOffset,
   border,
   elevation,
   motion,

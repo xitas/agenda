@@ -1,6 +1,6 @@
 .ag-toast-viewport {
   position: fixed;
-  bottom: var(--ag-space-6);
+  bottom: calc(var(--ag-toast-offset-wide) + env(safe-area-inset-bottom, 0px));
   left: 50%;
   z-index: 60;
   display: flex;
@@ -12,6 +12,13 @@
   list-style: none;
   transform: translateX(-50%);
   outline: none;
+}
+
+/* Narrow screens have a bottom nav; keep toasts above it. 768px = tokens breakpoint.narrow. */
+@media (width < 768px) {
+  .ag-toast-viewport {
+    bottom: calc(var(--ag-toast-offset-narrow) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .ag-toast {
