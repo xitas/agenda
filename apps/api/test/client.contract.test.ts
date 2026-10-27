@@ -160,6 +160,16 @@ describe('API client against the real API (token mode)', () => {
       code: 'not_found',
     });
 
+    // Undo the delete; a second restore finds nothing deleted. Then delete it again.
+    const restored = await api.events.restore(trip.id);
+    expect(restored).toMatchObject({ id: trip.id, title: 'Trip', deletedAt: null });
+    expect((await api.events.get(trip.id)).id).toBe(trip.id);
+    expect(await rejection(api.events.restore(trip.id))).toMatchObject({
+      status: 404,
+      code: 'not_found',
+    });
+    await api.events.remove(trip.id);
+
     // Import twice (the second changes nothing), then export
     expect(await api.events.importEvents(v0Export, { tz: 'Asia/Karachi' })).toEqual({
       imported: 5,
@@ -258,6 +268,7 @@ describe('contract coverage', () => {
       'events.list',
       'events.listAll',
       'events.remove',
+      'events.restore',
       'events.update',
     ]);
     expect([...exposed].filter((name) => !called.has(name))).toEqual([]);

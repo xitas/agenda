@@ -189,5 +189,12 @@ export function eventRoutes({ repo, now }: EventRoutesOptions) {
     return c.body(null, 204);
   });
 
+  // Undo for a delete: only a soft-deleted event can be restored.
+  routes.post('/:id/restore', async (c) => {
+    const stored = await repo.get(c.req.param('id'), { includeDeleted: true });
+    if (stored?.deletedAt == null) throw notFound('Deleted event');
+    return c.json(await repo.update({ ...stored, deletedAt: null, updatedAt: stamp() }));
+  });
+
   return routes;
 }

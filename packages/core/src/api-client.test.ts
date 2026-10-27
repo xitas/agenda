@@ -42,11 +42,22 @@ interface Call {
   };
 }
 
-function reply(status: number, body: unknown = '', contentType = 'application/json'): ResponseLike {
+function reply(
+  status: number,
+  body: unknown = '',
+  contentType = 'application/json',
+  extraHeaders: Record<string, string> = {},
+): ResponseLike {
   const text = typeof body === 'string' ? body : JSON.stringify(body);
+  const headers = new Map(
+    Object.entries({ 'content-type': contentType, ...extraHeaders }).map(([k, v]) => [
+      k.toLowerCase(),
+      v,
+    ]),
+  );
   return {
     status,
-    headers: { get: (name) => (name.toLowerCase() === 'content-type' ? contentType : null) },
+    headers: { get: (name) => headers.get(name.toLowerCase()) ?? null },
     text: () => Promise.resolve(text),
   };
 }
@@ -92,6 +103,13 @@ describe('requests', () => {
     ['get', (api) => api.events.get(event.id), 'GET', `/events/${event.id}`, event],
     ['remove', (api) => api.events.remove(event.id), 'DELETE', `/events/${event.id}`, null],
     ['exportJson', (api) => api.events.exportJson(), 'GET', '/events/export.json', [event]],
+    [
+      'restore',
+      (api) => api.events.restore(event.id),
+      'POST',
+      `/events/${event.id}/restore`,
+      event,
+    ],
   ])('%s sends %s %s', async (_name, run, method, path, body) => {
     const { api, calls } = client([body === null ? reply(204) : reply(200, body)]);
     await run(api);
@@ -245,6 +263,25 @@ describe('errors', () => {
       message: 'The event is invalid',
       fields: { title: ['Too small'] },
     });
+  });
+
+  it('reads Retry-After on a 429 as retryAfterSeconds', async () => {
+    const body = { error: { code: 'rate_limited', message: 'Too many failed logins' } };
+    const { api } = client([
+      reply(429, body, 'application/json', { 'Retry-After': '840' }),
+      reply(429, body, 'application/json', { 'Retry-After': 'Wed, 21 Oct 2026 07:28:00 GMT' }),
+      reply(429, body),
+    ]);
+    await expect(api.auth.login('x')).rejects.toMatchObject({
+      status: 429,
+      code: 'rate_limited',
+      retryAfterSeconds: 840,
+    });
+    // Only whole seconds count; a date or a missing header leaves it undefined.
+    const dated = await api.auth.login('x').catch((e: unknown) => e);
+    expect((dated as ApiError).retryAfterSeconds).toBeUndefined();
+    const missing = await api.auth.login('x').catch((e: unknown) => e);
+    expect((missing as ApiError).retryAfterSeconds).toBeUndefined();
   });
 
   it('keeps codes it does not know yet', async () => {

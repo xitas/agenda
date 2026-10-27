@@ -111,6 +111,7 @@ All routes are under `/api/v1`, and all bodies are JSON validated by the Zod sch
 | GET      | `/events/:id`                                |                                                                                                        |
 | PATCH    | `/events/:id`                                | Partial update, merged then re-checked with `checkEventTiming`; bumps `updatedAt`                      |
 | DELETE   | `/events/:id`                                | Sets `deletedAt` (soft delete, 204)                                                                    |
+| POST     | `/events/:id/restore`                        | Undo for a delete: clears `deletedAt`, bumps `updatedAt`; 404 if the event is not deleted              |
 | POST     | `/events/import?tz`                          | Accepts v0 and v1 JSON; returns `{ imported, skipped: [{ index, reason }] }`; existing ids are skipped |
 | GET      | `/events/export.json` · `/events/export.ics` | v1 JSON (re-importable) · iCalendar via core `toICalendar`                                             |
 | GET/POST | `/sync`                                      | Phase 7                                                                                                |

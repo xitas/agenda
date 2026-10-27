@@ -187,6 +187,9 @@ curl -X PATCH "$API/events/$ID" -H "$AUTH" -H 'Content-Type: application/json' \
 
 # Soft delete: 204, the row stays as a tombstone with deletedAt set
 curl -i -X DELETE -H "$AUTH" "$API/events/$ID"
+
+# Undo the delete: clears deletedAt (404 if the event is not deleted)
+curl -X POST -H "$AUTH" "$API/events/$ID/restore"
 ```
 
 ### Import: `POST /events/import?tz=`
