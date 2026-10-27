@@ -7,6 +7,8 @@ export type { EmptyStateProps } from './EmptyState.js';
 export { EventCard } from './EventCard.js';
 export type { EventCardProps, EventCardVariant } from './EventCard.js';
 export { Input, Textarea } from './Field.js';
+export { MiniMonth } from './MiniMonth.js';
+export type { MiniMonthProps } from './MiniMonth.js';
 export type { InputProps, TextareaProps } from './Field.js';
 export { IconButton } from './IconButton.js';
 export type { IconButtonProps } from './IconButton.js';
