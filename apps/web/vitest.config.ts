@@ -13,6 +13,20 @@ export default mergeConfig(
       setupFiles: ['./src/test-setup.ts'],
       // Stylesheets are tested separately (tokens only); components don't need them here.
       css: false,
+      coverage: {
+        provider: 'v8',
+        include: ['src/**/*.{ts,tsx}'],
+        // main.tsx only wires the real browser objects together; test helpers aren't app code.
+        exclude: [
+          'src/**/*.test.{ts,tsx}',
+          'src/main.tsx',
+          'src/test-utils/**',
+          'src/test-setup.ts',
+          'src/**/*.d.ts',
+        ],
+        reporter: ['text', 'html'],
+        thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
+      },
     },
   }),
 );
