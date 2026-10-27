@@ -97,7 +97,7 @@ export function QuickAdd() {
         className="ag-input quick-add__input"
         type="text"
         aria-label="Quick add"
-        placeholder="Add an event, e.g. Dentist tomorrow 4pm #red"
+        placeholder="Add an event…"
         autoComplete="off"
         spellCheck={false}
         enterKeyHint="done"
