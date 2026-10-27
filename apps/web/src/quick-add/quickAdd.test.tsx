@@ -53,7 +53,7 @@ describe('QuickAdd preview', () => {
     expect(preview?.textContent).toContain('Dentist');
     expect(preview?.textContent).toContain('Wed 28 Oct · 16:00');
     expect(preview?.textContent).toContain('Red');
-    expect(preview?.querySelector('[data-color="red"]')).not.toBeNull();
+    expect(preview?.querySelector('[data-event-color="red"]')).not.toBeNull();
   });
 
   it('shows the parser warnings', async () => {

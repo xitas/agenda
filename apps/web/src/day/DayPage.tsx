@@ -6,14 +6,11 @@ import { useEffect, useId, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { useEnv } from '../app/env';
+import { EventDetails } from '../events/EventDetails';
+import { useDeleteEvent } from '../events/mutations';
 import { useRangeEvents } from '../events/queries';
 import { useShortcuts } from '../shortcuts';
 import { dayHeading, dayPath, parseDay, relativeDay, timeOfDay } from './dayFormat';
-
-export interface DayPageProps {
-  /** Opens an event (the read-only details dialog). */
-  onOpenEvent?: (event: AgendaEvent) => void;
-}
 
 /** The clock, refreshed every minute so the "now" marker (and "today") move on. */
 function useMinuteClock(now: () => Date): Date {
@@ -30,7 +27,7 @@ function useMinuteClock(now: () => Date): Date {
 }
 
 /** "/" and "/day/YYYY-MM-DD": one day's events, all-day first, with a "now" marker today. */
-export function DayPage({ onOpenEvent }: DayPageProps) {
+export function DayPage() {
   const env = useEnv();
   const navigate = useNavigate();
   const params = useParams();
@@ -43,6 +40,8 @@ export function DayPage({ onOpenEvent }: DayPageProps) {
 
   const range = useMemo(() => dayRangeInTz(day, env.timezone), [day, env.timezone]);
   const events = useRangeEvents(range, env.timezone);
+  const remove = useDeleteEvent();
+  const [opened, setOpened] = useState<AgendaEvent | null>(null);
 
   const go = (target: string) => {
     void navigate(dayPath(target, today));
@@ -68,13 +67,9 @@ export function DayPage({ onOpenEvent }: DayPageProps) {
         event={event}
         timezone={env.timezone}
         locale={env.locale}
-        {...(onOpenEvent === undefined
-          ? {}
-          : {
-              onSelect: () => {
-                onOpenEvent(event);
-              },
-            })}
+        onSelect={() => {
+          setOpened(event);
+        }}
       />
     </li>
   );
@@ -165,6 +160,15 @@ export function DayPage({ onOpenEvent }: DayPageProps) {
         </div>
       </header>
       {body}
+      <EventDetails
+        event={opened}
+        onClose={() => {
+          setOpened(null);
+        }}
+        onDelete={(event) => {
+          remove.mutate(event);
+        }}
+      />
     </section>
   );
 }

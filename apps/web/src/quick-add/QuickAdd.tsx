@@ -110,7 +110,7 @@ export function QuickAdd() {
       />
       {parsed !== null && (
         <div id={previewId} className="quick-add__preview">
-          <p className="quick-add__chip" data-color={parsed.draft.color}>
+          <p className="quick-add__chip" data-event-color={parsed.draft.color}>
             <span className="quick-add__dot" aria-hidden="true" />
             <span className="quick-add__title">{parsed.draft.title}</span>
             <span className="quick-add__when">{previewWhen(parsed.draft, env)}</span>
