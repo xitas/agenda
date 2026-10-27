@@ -1,6 +1,14 @@
 import { enGB, enUS } from 'date-fns/locale';
 import { describe, expect, it } from 'vitest';
-import { formatEventTime, plainDateInTz, rangeForView, startOfDayInTz } from './dates.js';
+import {
+  addDaysToPlainDate,
+  addMonthsToPlainDate,
+  formatEventTime,
+  monthGrid,
+  plainDateInTz,
+  rangeForView,
+  startOfDayInTz,
+} from './dates.js';
 
 const iso = (date: Date) => date.toISOString();
 
@@ -127,5 +135,76 @@ describe('formatEventTime', () => {
     const trip = { allDay: true, start: '2026-10-16', end: '2026-10-19' };
     expect(formatEventTime(trip, 'Pacific/Kiritimati', enGB)).toBe('Fri, 16 Oct – Sun, 18 Oct');
     expect(formatEventTime(trip, 'Pacific/Pago_Pago', enGB)).toBe('Fri, 16 Oct – Sun, 18 Oct');
+  });
+});
+
+describe('monthGrid', () => {
+  const weekday = (day: string) => new Date(`${day}T00:00:00.000Z`).getUTCDay();
+
+  it('starts on the Monday on or before the 1st and has 6 full weeks', () => {
+    const grid = monthGrid('2026-10-23'); // October 2026 starts on a Thursday
+    expect(grid).toHaveLength(42);
+    expect(grid[0]).toBe('2026-09-28');
+    expect(grid[3]).toBe('2026-10-01');
+    expect(grid[41]).toBe('2026-11-08');
+    grid.forEach((day, i) => {
+      expect(weekday(day)).toBe((i + 1) % 7); // Monday = 1 … Sunday = 0
+    });
+  });
+
+  it('starts on the 1st when the month starts on a Monday', () => {
+    expect(monthGrid('2026-06-17')[0]).toBe('2026-06-01');
+  });
+
+  it('crosses the year boundary', () => {
+    const grid = monthGrid('2027-01-15'); // 1 January 2027 is a Friday
+    expect(grid[0]).toBe('2026-12-28');
+    expect(grid[4]).toBe('2027-01-01');
+    expect(grid[41]).toBe('2027-02-07');
+    expect(monthGrid('2026-12-31')[0]).toBe('2026-11-30');
+  });
+
+  it('handles February in common and leap years', () => {
+    expect(monthGrid('2026-02-10')).toContain('2026-02-28');
+    expect(monthGrid('2026-02-10')).not.toContain('2026-02-29');
+    expect(monthGrid('2028-02-10')).toContain('2028-02-29');
+  });
+
+  it('is the same whatever the host zone (tests run in UTC+14)', () => {
+    expect(monthGrid('2026-03-29')[0]).toBe('2026-02-23');
+  });
+});
+
+describe('addDaysToPlainDate', () => {
+  it('adds and subtracts days across months and years', () => {
+    expect(addDaysToPlainDate('2026-10-31', 1)).toBe('2026-11-01');
+    expect(addDaysToPlainDate('2027-01-01', -1)).toBe('2026-12-31');
+    expect(addDaysToPlainDate('2028-02-28', 1)).toBe('2028-02-29');
+  });
+
+  it('rejects anything that is not a real plain date', () => {
+    expect(() => addDaysToPlainDate('2026-13-01', 1)).toThrow('Expected a date like 2026-10-24');
+    expect(() => addDaysToPlainDate('tomorrow', 1)).toThrow(RangeError);
+    expect(() => addDaysToPlainDate('2026-02-30', 1)).toThrow(RangeError);
+    expect(() => monthGrid('2026-10')).toThrow(RangeError);
+  });
+});
+
+describe('addMonthsToPlainDate', () => {
+  it('keeps the day number, clamped to the target month', () => {
+    expect(addMonthsToPlainDate('2026-10-23', 1)).toBe('2026-11-23');
+    expect(addMonthsToPlainDate('2026-01-31', 1)).toBe('2026-02-28');
+    expect(addMonthsToPlainDate('2028-01-31', 1)).toBe('2028-02-29');
+    expect(addMonthsToPlainDate('2026-03-31', -1)).toBe('2026-02-28');
+  });
+
+  it('crosses year boundaries both ways', () => {
+    expect(addMonthsToPlainDate('2026-12-15', 1)).toBe('2027-01-15');
+    expect(addMonthsToPlainDate('2027-01-15', -1)).toBe('2026-12-15');
+    expect(addMonthsToPlainDate('2026-10-23', -14)).toBe('2025-08-23');
+  });
+
+  it('rejects an invalid date', () => {
+    expect(() => addMonthsToPlainDate('2026-02-30', 1)).toThrow(RangeError);
   });
 });
