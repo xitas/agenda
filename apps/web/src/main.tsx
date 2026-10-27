@@ -5,6 +5,7 @@ import './playground.css';
 import './auth/login.css';
 import './shell/shell.css';
 import './day/day.css';
+import './quick-add/quickAdd.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter } from 'react-router';

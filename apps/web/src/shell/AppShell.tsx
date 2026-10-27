@@ -6,6 +6,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { useApi } from '../app/api';
+import { QuickAdd } from '../quick-add/QuickAdd';
 import { CalendarPanel } from './CalendarPanel';
 
 interface NavItem {
@@ -21,17 +22,12 @@ const NAV: NavItem[] = [
   { to: '/search', label: 'Search', icon: <Search /> },
 ];
 
-export interface AppShellProps {
-  /** The QuickAdd field, at the top of every screen. */
-  quickAdd?: ReactNode;
-}
-
 /**
  * The frame around every signed-in screen (DESIGN.md §4). There is one nav; CSS places it
  * in the sidebar from 1024 px, in the top bar from 768 px, and at the bottom below that.
  * The calendar sits in the sidebar, or behind a top-bar button when there is no sidebar.
  */
-export function AppShell({ quickAdd }: AppShellProps) {
+export function AppShell() {
   const api = useApi();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -86,7 +82,9 @@ export function AppShell({ quickAdd }: AppShellProps) {
       </aside>
 
       <header className="shell__top">
-        <div className="shell__quick-add">{quickAdd}</div>
+        <div className="shell__quick-add">
+          <QuickAdd />
+        </div>
         <div className="shell__actions">
           <span className="shell__calendar-button">
             <Dialog
