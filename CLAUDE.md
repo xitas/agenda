@@ -37,7 +37,8 @@ If a request conflicts with these docs, point it out and ask before deviating. I
 pnpm i                              # install (pnpm via Corepack; version pinned in package.json)
 pnpm dev                            # run all apps in watch mode
 pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; desktop, extension, mobile later)
-                                    # web: http://localhost:5173/playground shows every ui component
+                                    # web: http://localhost:5173 (log in with the API password);
+                                    # /playground shows every ui component
 pnpm build                          # build every package and app
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # what CI runs; must pass before a PR
 pnpm format                         # fix formatting with Prettier

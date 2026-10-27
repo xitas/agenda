@@ -32,8 +32,8 @@ agenda/
 │  ├─ extension/    WXT (MV3): popup, sidepanel, background service worker
 │  └─ mobile/       Expo + Expo Router
 ├─ packages/
-│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, import.ts, ics.ts, quick-add.ts,
-│  │                api-schemas.ts, api-client.ts, http.ts
+│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, agenda.ts, import.ts, ics.ts,
+│  │                quick-add.ts, api-schemas.ts, api-client.ts, http.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -54,7 +54,7 @@ agenda/
 | Monorepo      | pnpm workspaces + Turborepo                                                 | Fast, simple caching; Nx is the heavier alternative                                       |
 | Toolchain     | Node 24 (`.nvmrc`), pnpm 12 via Corepack (`packageManager`), TypeScript 6.0 | TS stays below 6.1 until typescript-eslint supports newer versions                        |
 | Web build     | Vite                                                                        | CRA is deprecated                                                                         |
-| Routing (web) | React Router (or TanStack Router)                                           | Either is fine; pick one and keep it                                                      |
+| Routing (web) | React Router (data router: `createBrowserRouter`)                           | Chosen in Phase 2; one route table in `router.tsx`, a memory router in tests              |
 | Server state  | TanStack Query                                                              | Caching, optimistic updates, retries. Same library in mobile                              |
 | Validation    | Zod                                                                         | Same schema validates on client and server                                                |
 | Dates         | date-fns (+ `@date-fns/tz`)                                                 | moment is in maintenance mode                                                             |
@@ -139,7 +139,14 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 
 ## 6. Per-platform notes
 
-**Web.** This is the SPA plus the PWA. Server state lives in TanStack Query; UI state stays in React (no global store unless it's needed). The API URL comes from `VITE_API_URL`.
+**Web.** This is the SPA plus the PWA. Server state lives in TanStack Query; UI state stays in React (no global store unless it's needed).
+
+- **Same origin in dev.** Vite proxies `/api` to `http://localhost:4001`, so the browser only ever talks to the Vite origin and the session cookie is first-party with no CORS involved. Builds call `VITE_API_URL` instead.
+- **Injected, not imported.** The core client (cookie mode), the query client, and an `AppEnv` (`timezone` from Intl, `locale`: en-US for en-US browsers, en-GB otherwise, and `now()`) come from React context (`src/app/`). Tests render the real routes with a fake client and a fixed clock and zone (`src/test-utils/renderApp.tsx`).
+- **401 anywhere** clears the query cache and goes to `/login?next=…`; `next` must be a same-site path, so the login link can't become an open redirect.
+- **Query keys.** Event lists are cached per range: `['events', 'range', startISO, endISO, tz]` (a day, or a month grid for the calendar dots). Every key starts with `'events'`, so one invalidation refreshes them all.
+- **Optimistic writes.** Create, delete and restore snapshot every cached list, change them at once (a new event goes into each range it overlaps, using the API's overlap rule from `core`), roll back from the snapshot with a toast on error, and refetch on settle. New events get their id on the client (`newId()`), so the optimistic copy and the saved one are the same row.
+- **Layout.** `src/shell/` is the frame (one nav, placed by CSS grid areas per breakpoint), `src/day/` the day view, `src/quick-add/`, `src/events/` (queries, mutations, details dialog), `src/auth/`.
 
 **Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Its pages run on `tauri://localhost` (macOS, Linux) or `http://tauri.localhost` (Windows), which is cross-site to the API, so the SameSite cookie would not be sent: desktop logs in with `client: 'token'` like the extension and mobile app, keeps the token in the OS keychain, and the web code's API client takes its auth strategy from the `platform` adapter (cookie on the web, bearer token in Tauri). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
 
