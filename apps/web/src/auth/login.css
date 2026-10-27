@@ -1,0 +1,47 @@
+/* /login and the loading/error splash. Token variables only. */
+
+.login,
+.splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ag-space-4);
+  min-height: 100dvh;
+  padding: var(--ag-space-6) var(--ag-space-4);
+  text-align: center;
+}
+
+.splash {
+  color: var(--ag-color-text-muted);
+}
+
+.splash p {
+  margin: 0;
+}
+
+.login__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+  width: min(100%, calc(var(--ag-size-dialog) * 0.75));
+  padding: var(--ag-space-8) var(--ag-space-6);
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-lg);
+  background: var(--ag-color-surface);
+  text-align: left;
+}
+
+.login__title {
+  margin: 0;
+  font-size: var(--ag-text-display);
+}
+
+.login__intro {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+}
+
+.login__card .ag-button {
+  width: 100%;
+}

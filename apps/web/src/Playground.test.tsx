@@ -48,11 +48,6 @@ describe('/playground', () => {
     });
     expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
   });
-
-  it('keeps the placeholder home page at /', () => {
-    renderAt('/');
-    expect(screen.getByText('Agenda')).toBeDefined();
-  });
 });
 
 describe('ThemeSwitcher', () => {

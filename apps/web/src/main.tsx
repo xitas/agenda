@@ -2,6 +2,7 @@ import '@fontsource-variable/inter';
 import '@agenda/tokens/tokens.css';
 import '@agenda/ui/styles.css';
 import './playground.css';
+import './auth/login.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter } from 'react-router';
