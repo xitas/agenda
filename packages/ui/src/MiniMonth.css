@@ -34,14 +34,29 @@
 
 .ag-minimonth__day {
   position: relative;
+  isolation: isolate;
   height: var(--ag-size-control-sm);
   padding: 0;
-  border-radius: var(--ag-radius-full);
+  border-radius: var(--ag-radius-sm);
   text-align: center;
   cursor: pointer;
 }
 
-.ag-minimonth__day:hover {
+/* The fill and the today ring sit on a fixed-size circle behind the number, so they stay
+   round however wide the cell is (the grid stretches in a dialog on phones). */
+.ag-minimonth__day::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: var(--ag-size-control-sm);
+  height: var(--ag-size-control-sm);
+  border-radius: var(--ag-radius-full);
+  transform: translate(-50%, -50%);
+}
+
+.ag-minimonth__day:hover::before {
   background: var(--ag-color-surface-2);
 }
 
@@ -50,14 +65,20 @@
 }
 
 .ag-minimonth__day--today {
-  box-shadow: inset 0 0 0 var(--ag-border-focus-ring) var(--ag-color-accent);
   font-weight: var(--ag-weight-semibold);
 }
 
-.ag-minimonth__day--selected,
-.ag-minimonth__day--selected:hover {
-  background: var(--ag-color-accent);
+.ag-minimonth__day--today::before {
+  box-shadow: inset 0 0 0 var(--ag-border-focus-ring) var(--ag-color-accent);
+}
+
+.ag-minimonth__day--selected {
   color: var(--ag-color-accent-fg);
+}
+
+.ag-minimonth__day--selected::before,
+.ag-minimonth__day--selected:hover::before {
+  background: var(--ag-color-accent);
 }
 
 .ag-minimonth__dot {
