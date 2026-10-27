@@ -1,16 +1,11 @@
 import { ApiError, NetworkError } from '@agenda/core';
 import { screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import axe from 'axe-core';
 import { describe, expect, it } from 'vitest';
+import { expectNoAxeViolations } from '../test-utils/axe';
 import { renderApp } from '../test-utils/renderApp';
 import { SESSION, unauthorized } from '../test-utils/fakeApi';
 import { loginErrorMessage, waitText } from './messages';
-
-async function noAxeViolations() {
-  const results = await axe.run(document.body, { rules: { 'color-contrast': { enabled: false } } });
-  expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
-}
 
 async function logIn(password = 'correct horse battery staple') {
   const user = userEvent.setup();
@@ -47,7 +42,7 @@ describe('/login', () => {
     expect(await screen.findByText("That password didn't work. Try again.")).toBeDefined();
     expect(screen.getByLabelText(/Password/).getAttribute('aria-invalid')).toBe('true');
     expect(app.router.state.location.pathname).toBe('/login');
-    await noAxeViolations();
+    await expectNoAxeViolations();
   });
 
   it('says when to try again after too many attempts', async () => {
@@ -67,7 +62,7 @@ describe('/login', () => {
     expect(field.getAttribute('type')).toBe('password');
     expect(field.getAttribute('autocomplete')).toBe('current-password');
     expect(document.activeElement).toBe(field);
-    await noAxeViolations();
+    await expectNoAxeViolations();
   });
 });
 

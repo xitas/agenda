@@ -1,0 +1,78 @@
+/* The day view. Token variables only. */
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-6);
+  max-width: calc(var(--ag-size-dialog) * 1.5);
+}
+
+.day__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ag-space-3);
+}
+
+.day__titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+}
+
+.day__eyebrow {
+  margin: 0;
+  color: var(--ag-color-accent);
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-semibold);
+}
+
+.day__heading {
+  margin: 0;
+  font-size: var(--ag-text-display);
+}
+
+.day__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+}
+
+.day__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The "now" line: a label on the accent rule between past and upcoming events. */
+.day__now {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+  color: var(--ag-color-accent);
+  font-size: var(--ag-text-caption);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--ag-weight-semibold);
+}
+
+.day__now::after {
+  content: '';
+  flex: 1;
+  border-top: var(--ag-border-focus-ring) solid var(--ag-color-accent);
+}
+
+.day__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ag-space-3);
+  color: var(--ag-color-text-muted);
+}
+
+.day__status p {
+  margin: 0;
+}

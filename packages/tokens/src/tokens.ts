@@ -132,7 +132,12 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32, 12: 48 } as const
 export const radius = { sm: 6, md: 10, lg: 16, full: 9999 } as const;
 
 /** Below this width the layout follows the mobile pattern (DESIGN.md §4). */
-export const breakpoint = { narrow: 768 } as const;
+export const breakpoint = {
+  /** Below this: phone layout with a bottom nav. */
+  narrow: 768,
+  /** From this up: the sidebar (DESIGN.md §4); between the two, nav in the top bar. */
+  wide: 1024,
+} as const;
 
 const BOTTOM_NAV = 64;
 

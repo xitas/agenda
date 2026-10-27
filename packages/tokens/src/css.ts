@@ -42,6 +42,7 @@ function staticDeclarations(t: Tokens): Declarations {
     [`${PREFIX}-toast-offset-narrow`, px(t.toastOffset.narrow)],
     // For reference only: CSS variables cannot be used inside @media conditions.
     [`${PREFIX}-breakpoint-narrow`, px(t.breakpoint.narrow)],
+    [`${PREFIX}-breakpoint-wide`, px(t.breakpoint.wide)],
   );
   for (const [name, value] of Object.entries(t.border))
     out.push([`${PREFIX}-border-${kebab(name)}`, px(value)]);
