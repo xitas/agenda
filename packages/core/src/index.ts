@@ -1,3 +1,5 @@
+export { dayAgenda, eventDays, eventOverlapsRange } from './agenda.js';
+export type { DayAgenda } from './agenda.js';
 export {
   API_PREFIX,
   ApiError,
@@ -41,6 +43,7 @@ export { APP_NAME } from './constants.js';
 export {
   addDaysToPlainDate,
   addMonthsToPlainDate,
+  dayRangeInTz,
   formatEventTime,
   monthGrid,
   plainDateInTz,

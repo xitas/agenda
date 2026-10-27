@@ -1,4 +1,4 @@
-import { tz } from '@date-fns/tz';
+import { TZDate, tz } from '@date-fns/tz';
 import {
   addDays,
   addMonths,
@@ -81,6 +81,20 @@ export function addDaysToPlainDate(day: string, days: number): string {
   const next = fromPlainDate(day);
   next.setUTCDate(next.getUTCDate() + days);
   return next.toISOString().slice(0, 10);
+}
+
+/**
+ * The half-open range of instants a plain day covers in `timeZone`. Needed because "noon
+ * UTC" of a date is not always inside that local day (at UTC+14 it is the next day).
+ */
+export function dayRangeInTz(day: string, timeZone: string): DateRange {
+  const [year, month, date] = addDaysToPlainDate(day, 0).split('-').map(Number) as [
+    number,
+    number,
+    number,
+  ];
+  const start = new TZDate(year, month - 1, date, timeZone);
+  return { start: toDate(start), end: toDate(addDays(start, 1, { in: tz(timeZone) })) };
 }
 
 /**
