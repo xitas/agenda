@@ -152,6 +152,38 @@ describe('MonthGrid', () => {
   });
 });
 
+describe('MonthGrid cell times', () => {
+  it('shows only the start time, on the start day; nothing for all-day events', () => {
+    setup({
+      events: [
+        event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z'),
+        event('Flight', '2026-10-29T22:00:00.000Z', '2026-10-30T01:30:00.000Z'),
+        event('Offsite', '2026-10-29', '2026-10-31', true),
+      ],
+    });
+    const times = (fullDate: string) =>
+      [...cell(fullDate).querySelectorAll('li')].map(
+        (li) => li.querySelector('time')?.textContent ?? null,
+      );
+    expect(times('Wednesday, 28 October 2026')).toEqual(['16:00']);
+    expect(times('Thursday, 29 October 2026')).toEqual([null, '22:00']);
+    // The flight continues into Friday: title only.
+    expect(times('Friday, 30 October 2026')).toEqual([null, null]);
+  });
+});
+
+describe('EventCard time override', () => {
+  it('shows a given time, or none', () => {
+    const dentist = event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z');
+    const { rerender } = render(
+      <EventCard event={dentist} timezone="UTC" locale={enGB} time="16:00" />,
+    );
+    expect(screen.getByText('16:00').tagName).toBe('TIME');
+    rerender(<EventCard event={dentist} timezone="UTC" locale={enGB} time={null} />);
+    expect(document.querySelector('time')).toBeNull();
+  });
+});
+
 describe('EventCard past', () => {
   it('mutes an ended event without changing its content', () => {
     const { container } = render(

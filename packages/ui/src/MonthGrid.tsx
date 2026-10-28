@@ -1,4 +1,4 @@
-import { eventsByDay, hasEnded, monthGrid } from '@agenda/core';
+import { eventsByDay, formatEventTime, hasEnded, monthGrid, plainDateInTz } from '@agenda/core';
 import type { AgendaEvent, Locale } from '@agenda/core';
 import { useMemo } from 'react';
 import { cx } from './cx.js';
@@ -54,6 +54,12 @@ export function MonthGrid<E extends MonthEvent>({
   );
   const shownMonth = month.slice(0, 7);
   const isPast = (event: E) => hasEnded(event, now, today);
+  // A cell has room for the start time only, on the day the event starts; all-day
+  // events and the later days of long ones show just the title.
+  const cellTime = (event: E, day: string) =>
+    !event.allDay && plainDateInTz(new Date(event.start), timezone) === day
+      ? formatEventTime({ start: event.start, end: null, allDay: false }, timezone, locale)
+      : null;
 
   return (
     <div className="ag-monthgrid">
@@ -103,6 +109,7 @@ export function MonthGrid<E extends MonthEvent>({
                         locale={locale}
                         variant="compact"
                         past={isPast(event)}
+                        time={cellTime(event, day)}
                         onSelect={() => {
                           onSelectEvent(event);
                         }}

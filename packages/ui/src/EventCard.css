@@ -61,6 +61,7 @@
 
 /* Compact: one line, time first, for month cells and the extension popup. */
 .ag-event-card--compact {
+  overflow: hidden;
   flex-direction: row-reverse;
   justify-content: flex-end;
   align-items: baseline;

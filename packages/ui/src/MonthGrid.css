@@ -38,7 +38,7 @@
   flex-direction: column;
   gap: var(--ag-space-1);
   min-width: 0;
-  min-height: calc(var(--ag-size-hour-row) * 2.5);
+  min-height: calc(var(--ag-size-hour-row) * 2);
   padding: var(--ag-space-1);
   border-right: var(--ag-border-hairline) solid var(--ag-color-border);
   border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
@@ -127,7 +127,7 @@
 /* Phones: no room for times; titles only, and a shorter cell. */
 @media (width < 768px) {
   .ag-monthgrid__cell {
-    min-height: calc(var(--ag-size-hour-row) * 2);
+    min-height: calc(var(--ag-size-hour-row) * 1.75);
     padding: var(--ag-space-1) 0;
   }
 
