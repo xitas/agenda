@@ -89,6 +89,12 @@ Lucide (web: `lucide-react`; mobile: `lucide-react-native`), 20 px in UI and 16 
 | **EmptyState**           | Icon + one friendly line + quick-add hint. Example: "Nothing today. Enjoy the space."                                                           |
 | **Toast**                | Bottom-center; supports **Undo** for deletes (preferred over confirm dialogs).                                                                  |
 
+**Time grid rules (Week):** positions follow the local wall clock, so on DST days the skipped hour is empty and the repeated one overlaps itself. Overlapping events sit side by side within their cluster (a lone event keeps the full width). Timed events that cross midnight are clipped into each day; events of 24 hours or more go to the all-day strip, spanning their days; events with no end are drawn as 30 minutes. Clicking empty time opens the editor at that half hour. Below 768 px the Week view shows 3 days, and a horizontal swipe moves like the arrows.
+
+**Past:** events that have ended keep their fill but get a muted title (muted text passes contrast on every category fill); past days in Week and Month get muted numbers and the `bg` color.
+
+**EventEditor details:** dates can be typed ("27 Oct", "tomorrow") or picked from a MiniMonth that opens inline below the field. Times use the native `<input type="time">`. **Known limitation:** the browser shows that field in 12- or 24-hour time from its own language setting, not from Agenda's locale choice (en-US or en-GB), so the two can differ. On phones the editor is a full-height sheet.
+
 ## 4. Layout per platform
 
 **Web / Desktop (≥ 1024 px):** left sidebar (240 px) with mini-month and categories; main area with the view switcher (Today · Week · Month) and QuickAdd at the top. Below 768 px the sidebar collapses and the layout follows the mobile pattern.

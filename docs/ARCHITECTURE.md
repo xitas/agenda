@@ -30,10 +30,12 @@ agenda/
 │  ├─ web/          Vite + React + TS, PWA
 │  ├─ desktop/      Tauri 2 (src-tauri/ in Rust), points at apps/web build
 │  ├─ extension/    WXT (MV3): popup, sidepanel, background service worker
-│  └─ mobile/       Expo + Expo Router
+│  ├─ mobile/       Expo + Expo Router
+│  └─ e2e/          Playwright smoke test against the built api + web
 ├─ packages/
-│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, agenda.ts, import.ts, ics.ts,
-│  │                quick-add.ts, api-schemas.ts, api-client.ts, http.ts
+│  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, agenda.ts, time-grid.ts, month.ts,
+│  │                event-form.ts, import.ts, ics.ts, quick-add.ts, api-schemas.ts,
+│  │                api-client.ts, http.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -141,12 +143,14 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 
 **Web.** This is the SPA plus the PWA. Server state lives in TanStack Query; UI state stays in React (no global store unless it's needed).
 
-- **Same origin in dev.** Vite proxies `/api` to `http://localhost:4001`, so the browser only ever talks to the Vite origin and the session cookie is first-party with no CORS involved. Builds call `VITE_API_URL` instead.
+- **Same origin in dev.** Vite proxies `/api` to `http://localhost:4001` (`AGENDA_API_URL` changes the target; `vite preview` uses the same proxy), so the browser only ever talks to the Vite origin and the session cookie is first-party with no CORS involved. Builds call `VITE_API_URL` instead.
 - **Injected, not imported.** The core client (cookie mode), the query client, and an `AppEnv` (`timezone` from Intl, `locale`: en-US for en-US browsers, en-GB otherwise, and `now()`) come from React context (`src/app/`). Tests render the real routes with a fake client and a fixed clock and zone (`src/test-utils/renderApp.tsx`).
 - **401 anywhere** clears the query cache and goes to `/login?next=…`; `next` must be a same-site path, so the login link can't become an open redirect.
-- **Query keys.** Event lists are cached per range: `['events', 'range', startISO, endISO, tz]` (a day, or a month grid for the calendar dots). Every key starts with `'events'`, so one invalidation refreshes them all.
-- **Optimistic writes.** Create, delete and restore snapshot every cached list, change them at once (a new event goes into each range it overlaps, using the API's overlap rule from `core`), roll back from the snapshot with a toast on error, and refetch on settle. New events get their id on the client (`newId()`), so the optimistic copy and the saved one are the same row.
-- **Layout.** `src/shell/` is the frame (one nav, placed by CSS grid areas per breakpoint), `src/day/` the day view, `src/quick-add/`, `src/events/` (queries, mutations, details dialog), `src/auth/`.
+- **Routes.** `/` and `/day/YYYY-MM-DD`, `/week` and `/week/YYYY-MM-DD` (the week containing the date; 3 days from it below 768 px), `/month` and `/month/YYYY-MM`, `/search?q=`. The short paths mean "the period with today".
+- **Query keys.** Event lists are cached per range: `['events', 'range', startISO, endISO, tz]` (a day, a week, or a 6-week month grid, which the Month view and the sidebar calendar share). Search results are `['events', 'search', q]` (no range: every event). Every key starts with `'events'` and holds a plain `AgendaEvent[]`, so one invalidation refreshes them all and optimistic writes can patch any of them.
+- **Optimistic writes.** Create, update, delete and restore snapshot every cached list, change them at once (a new or edited event goes into each range it overlaps, using the API's overlap rule from `core`, and leaves ranges it no longer touches), roll back from the snapshot with a toast on error, and refetch on settle. New events get their id on the client (`newId()`), so the optimistic copy and the saved one are the same row.
+- **One place for event dialogs.** `EventActionsProvider` (in the shell) owns the details dialog, the editor and the mutations; views and shortcuts call `useEventActions()` (`open`, `edit`, `create`, `remove`). The mutations live there, not in the dialogs, so their callbacks still run after a dialog closes.
+- **Layout.** `src/shell/` is the frame (one nav, placed by CSS grid areas per breakpoint; the global shortcuts and their help dialog), `src/views/` (shared header, paths), `src/day/`, `src/week/`, `src/month/`, `src/search/`, `src/quick-add/`, `src/events/` (queries, mutations, details dialog, editor), `src/auth/`.
 
 **Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Its pages run on `tauri://localhost` (macOS, Linux) or `http://tauri.localhost` (Windows), which is cross-site to the API, so the SameSite cookie would not be sent: desktop logs in with `client: 'token'` like the extension and mobile app, keeps the token in the OS keychain, and the web code's API client takes its auth strategy from the `platform` adapter (cookie on the web, bearer token in Tauri). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
 
@@ -176,6 +180,7 @@ Each app provides its own implementation (`webPlatform`, `tauriPlatform`, `chrom
 ## 8. Quality gates
 
 - CI (`.github/workflows/ci.yml`) runs `pnpm format:check`, `lint`, `typecheck`, `test` and `build` on every PR and push to `master`; all must pass.
+- A second CI job runs the Playwright smoke test (`apps/e2e`, Chromium only) against the built apps: the API with a temp-file database per run (not libSQL's `:memory:`, which gives each transaction an empty database), `NODE_ENV=development` and `CORS_ORIGINS` set to the preview server, and `vite preview` proxying `/api` to it. Locally: `pnpm build && pnpm e2e` (ports 4101 and 5101, so a dev API on 4001 is untouched). Unit tests cover the details; the smoke test covers what only a real browser, server and database show (cookies through the proxy, the CSRF check, migrations, CSS that blocks a click).
 - CI installs with `pnpm install --frozen-lockfile`, so lockfile changes must be committed with the `package.json` change that caused them.
 - Line endings are LF everywhere (`.gitattributes`), so Prettier gives the same result on Windows, macOS and Linux.
 - `core` targets about 90% test coverage, since it holds the logic everything depends on. Apps get smoke tests.
