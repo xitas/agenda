@@ -14,6 +14,8 @@ export { IconButton } from './IconButton.js';
 export type { IconButtonProps } from './IconButton.js';
 export { Placeholder } from './Placeholder.js';
 export type { PlaceholderProps } from './Placeholder.js';
+export { TimeGrid } from './TimeGrid.js';
+export type { TimeGridProps } from './TimeGrid.js';
 export { ToastProvider } from './Toast.js';
 export type { ToastProviderProps } from './Toast.js';
 export { useToast } from './useToast.js';
