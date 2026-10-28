@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { expectNoAxeViolations } from '../test-utils/axe';
 import type { FakeApi } from '../test-utils/fakeApi';
 import { NOW, TEST_ENV, renderApp } from '../test-utils/renderApp';
+import { findToastAction } from '../test-utils/toast';
 import { colorName, previewWhen } from './preview';
 
 /** A tiny in-memory server: listAll returns what create saved. */
@@ -102,7 +103,7 @@ describe('QuickAdd create', () => {
     await user.type(field(), 'Lunch with Sara tomorrow 1pm{Enter}');
     expect(await screen.findByText('Event added for Wed 28 Oct.')).toBeDefined();
 
-    await user.click(screen.getByRole('button', { name: 'Show' }));
+    await user.click(await findToastAction('Show'));
     expect(path(app)).toBe('/day/2026-10-28');
     const list = await screen.findByRole('list', { name: /^Events,/ });
     expect(within(list).getByText('Lunch with Sara')).toBeDefined();

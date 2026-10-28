@@ -11,6 +11,9 @@ export default mergeConfig(
       // every package testing in parallel, can pass 5 s; that is load, not a hang.
       testTimeout: 15_000,
       setupFiles: ['./src/test-setup.ts'],
+      // UTC+14, like core and ui: the app takes its zone from AppEnv, so anything that
+      // leaks the machine's zone shows up as a wrong day here, on every machine.
+      env: { TZ: 'Pacific/Kiritimati' },
       // Stylesheets are tested separately (tokens only); components don't need them here.
       css: false,
       coverage: {

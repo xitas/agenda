@@ -7,6 +7,7 @@ import { expectNoAxeViolations } from '../test-utils/axe';
 import { makeEvent } from '../test-utils/events';
 import type { FakeApi } from '../test-utils/fakeApi';
 import { renderApp } from '../test-utils/renderApp';
+import { findToastAction } from '../test-utils/toast';
 import { failure } from './mutations';
 
 const review = makeEvent({
@@ -91,7 +92,7 @@ describe('delete with Undo', () => {
     expect(await screen.findByText('Event deleted.')).toBeDefined();
     expect(app.events.remove).toHaveBeenCalledWith(review.id);
 
-    await user.click(screen.getByRole('button', { name: 'Undo' }));
+    await user.click(await findToastAction('Undo'));
     await waitFor(async () => {
       expect(await titles()).toContainEqual(expect.stringContaining('Review'));
     });
@@ -113,7 +114,7 @@ describe('delete with Undo', () => {
     app.events.restore.mockRejectedValue(new NetworkError('network', 'offline'));
     const { user, dialog } = await openReview();
     await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
-    await user.click(await screen.findByRole('button', { name: 'Undo' }));
+    await user.click(await findToastAction('Undo'));
 
     expect(
       await screen.findByText(
