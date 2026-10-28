@@ -1,4 +1,4 @@
-import { addDaysToPlainDate, dayAgenda, dayRangeInTz, plainDateInTz } from '@agenda/core';
+import { addDaysToPlainDate, dayAgenda, dayRangeInTz, hasEnded, plainDateInTz } from '@agenda/core';
 import type { AgendaEvent } from '@agenda/core';
 import { Button, EmptyState, EventCard } from '@agenda/ui';
 import { useId, useMemo } from 'react';
@@ -52,6 +52,8 @@ export function DayPage() {
         event={event}
         timezone={env.timezone}
         locale={env.locale}
+        // Ended events are muted (still readable) so what's next stands out.
+        past={hasEnded(event, now, today)}
         onSelect={() => {
           actions.open(event);
         }}

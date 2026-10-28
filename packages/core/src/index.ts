@@ -1,4 +1,4 @@
-export { dayAgenda, eventDays, eventOverlapsRange } from './agenda.js';
+export { dayAgenda, eventDays, eventOverlapsRange, hasEnded } from './agenda.js';
 export {
   DEFAULT_DURATION_MINUTES,
   MIN_BLOCK_MINUTES,

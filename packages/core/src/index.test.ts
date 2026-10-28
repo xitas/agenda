@@ -53,6 +53,7 @@ describe('public API', () => {
       'formatDateInput',
       'formatEventTime',
       'fromV0',
+      'hasEnded',
       'inAllDayStrip',
       'layoutAllDay',
       'layoutDay',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayAgenda, eventDays, eventOverlapsRange } from './agenda.js';
+import { dayAgenda, eventDays, eventOverlapsRange, hasEnded } from './agenda.js';
 import { dayRangeInTz } from './dates.js';
 
 const timed = (title: string, start: string, end: string | null = null) => ({
@@ -152,5 +152,21 @@ describe('eventDays', () => {
 
   it('stops after a year for a runaway range', () => {
     expect(eventDays([allDay('Forever', '2026-01-01', '2036-01-01')], 'UTC').size).toBe(366);
+  });
+});
+
+describe('hasEnded', () => {
+  const now = new Date('2026-10-27T09:00:00.000Z');
+  it.each([
+    [timed('Over', '2026-10-27T07:00:00.000Z', '2026-10-27T09:00:00.000Z'), true],
+    [timed('Going', '2026-10-27T08:00:00.000Z', '2026-10-27T10:00:00.000Z'), false],
+    [timed('No end, 30 min ago', '2026-10-27T08:30:00.000Z'), true],
+    [timed('No end, just started', '2026-10-27T08:45:00.000Z'), false],
+    [allDay('Yesterday', '2026-10-26'), true],
+    [allDay('Today', '2026-10-27'), false],
+    [allDay('Ends today', '2026-10-25', '2026-10-28'), false],
+    [allDay('Ended yesterday', '2026-10-25', '2026-10-27'), true],
+  ])('%o → %s', (event, ended) => {
+    expect(hasEnded(event, now, '2026-10-27')).toBe(ended);
   });
 });

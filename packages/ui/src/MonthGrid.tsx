@@ -1,4 +1,4 @@
-import { addDaysToPlainDate, eventsByDay, monthGrid } from '@agenda/core';
+import { eventsByDay, hasEnded, monthGrid } from '@agenda/core';
 import type { AgendaEvent, Locale } from '@agenda/core';
 import { useMemo } from 'react';
 import { cx } from './cx.js';
@@ -26,7 +26,6 @@ export interface MonthGridProps<E extends MonthEvent> {
 }
 
 const atNoonUtc = (day: string) => new Date(`${day}T12:00:00.000Z`);
-const MINUTE = 60_000;
 
 /**
  * The Month view (DESIGN.md §3 MonthGrid): 6 weeks of days, each listing up to
@@ -54,11 +53,7 @@ export function MonthGrid<E extends MonthEvent>({
     [locale.code],
   );
   const shownMonth = month.slice(0, 7);
-  const isPast = (event: E) =>
-    event.allDay
-      ? (event.end === null ? event.start : addDaysToPlainDate(event.end, -1)) < today
-      : (event.end === null ? Date.parse(event.start) + 30 * MINUTE : Date.parse(event.end)) <=
-        now.getTime();
+  const isPast = (event: E) => hasEnded(event, now, today);
 
   return (
     <div className="ag-monthgrid">

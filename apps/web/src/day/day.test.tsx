@@ -50,6 +50,21 @@ describe('Today', () => {
     expect(screen.getByRole('button', { name: 'Today' })).toHaveProperty('disabled', true);
   });
 
+  it('mutes events that have ended, keeping them readable', async () => {
+    renderApp('/', {
+      setup: (fake) => {
+        fake.events.listAll.mockResolvedValue(TODAY_EVENTS);
+      },
+    });
+    await dayList();
+    const card = (title: string) => screen.getByRole('button', { name: new RegExp(`^${title}`) });
+    // 14:00 now: Standup (10:00, 30 min) and Lunch (13:00–14:00) are over.
+    expect(card('Standup').className).toContain('ag-event-card--past');
+    expect(card('Lunch').className).toContain('ag-event-card--past');
+    expect(card('Review').className).not.toContain('--past');
+    expect(card('Holiday').className).not.toContain('--past');
+  });
+
   it('asks for the day in the viewer zone', async () => {
     const app = renderApp('/');
     await screen.findByText('Nothing today. Enjoy the space.');

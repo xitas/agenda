@@ -1,8 +1,7 @@
 import {
-  addDaysToPlainDate,
-  DEFAULT_DURATION_MINUTES,
   MINUTES_PER_DAY,
   formatEventTime,
+  hasEnded,
   layoutAllDay,
   layoutDay,
   wallClockMinutes,
@@ -40,13 +39,6 @@ const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const SLOT_MINUTES = 30;
 const atNoonUtc = (day: string) => new Date(`${day}T12:00:00.000Z`);
 const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
-/** The last plain date an all-day event covers (its end is exclusive). */
-const lastDay = (event: GridEvent) =>
-  event.end === null ? event.start : addDaysToPlainDate(event.end, -1);
-const timedEnd = (event: GridEvent) =>
-  event.end === null
-    ? Date.parse(event.start) + DEFAULT_DURATION_MINUTES * 60_000
-    : Date.parse(event.end);
 
 /** CSS custom properties (numbers only); the stylesheet turns them into lengths. */
 const vars = (values: Record<string, number>) =>
@@ -106,8 +98,7 @@ export function TimeGrid<E extends GridEvent>({
   }, [scrollToMinutes]);
 
   const nowMinutes = wallClockMinutes(now, timezone);
-  const isPast = (event: GridEvent) =>
-    event.allDay ? lastDay(event) < today : timedEnd(event) <= now.getTime();
+  const isPast = (event: GridEvent) => hasEnded(event, now, today);
 
   const pickSlot = (day: string) => (click: MouseEvent<HTMLDivElement>) => {
     if (onSelectSlot === undefined || click.target !== click.currentTarget) return;
