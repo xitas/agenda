@@ -1,6 +1,8 @@
 export { Button } from './Button.js';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './Button.js';
-export { Dialog, DialogClose } from './Dialog.js';
+export { DateField } from './DateField.js';
+export type { DateFieldProps } from './DateField.js';
+export { Dialog, DialogClose, KEEP_DIALOG_OPEN_ON_ESCAPE } from './Dialog.js';
 export type { DialogProps } from './Dialog.js';
 export { EmptyState } from './EmptyState.js';
 export type { EmptyStateProps } from './EmptyState.js';

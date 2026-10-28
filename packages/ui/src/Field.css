@@ -76,3 +76,22 @@
   height: var(--ag-size-icon-sm);
   flex-shrink: 0;
 }
+
+/* DateField: the text field with its calendar button, and the inline calendar below. */
+.ag-datefield__row {
+  display: flex;
+  gap: var(--ag-space-2);
+}
+
+.ag-datefield__row .ag-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.ag-datefield__calendar {
+  max-width: calc(var(--ag-size-sidebar) + var(--ag-space-8));
+  padding: var(--ag-space-3);
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+}

@@ -81,3 +81,37 @@
     opacity: 0;
   }
 }
+
+/* Sheet: on phones the dialog fills the screen, so long forms scroll inside it. */
+@media (width < 768px) {
+  .ag-dialog--sheet {
+    inset: 0;
+    width: 100%;
+    max-height: none;
+    height: 100dvh;
+    padding: var(--ag-space-4) var(--ag-space-4)
+      calc(var(--ag-space-4) + env(safe-area-inset-bottom, 0px));
+    border: 0;
+    border-radius: 0;
+    transform: none;
+  }
+
+  .ag-dialog--sheet[data-state='open'] {
+    animation: ag-sheet-in var(--ag-duration-sheet) var(--ag-easing-standard);
+  }
+
+  .ag-dialog--sheet .ag-dialog__footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding-top: var(--ag-space-3);
+    background: var(--ag-color-surface);
+  }
+}
+
+@keyframes ag-sheet-in {
+  from {
+    transform: translateY(var(--ag-space-8));
+    opacity: 0;
+  }
+}
