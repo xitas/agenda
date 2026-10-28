@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router';
 import { LoginPage } from './auth/LoginPage';
 import { RequireAuth } from './auth/RequireAuth';
 import { DayPage } from './day/DayPage';
+import { MonthPage } from './month/MonthPage';
 import { Playground } from './Playground';
 import { AppShell } from './shell/AppShell';
 import { ComingSoon } from './shell/ComingSoon';
@@ -22,7 +23,8 @@ export const routes: RouteObject[] = [
           { path: 'day/:date', element: <DayPage /> },
           { path: 'week', element: <WeekPage /> },
           { path: 'week/:date', element: <WeekPage /> },
-          { path: 'month', element: <ComingSoon title="Month" /> },
+          { path: 'month', element: <MonthPage /> },
+          { path: 'month/:month', element: <MonthPage /> },
           { path: 'search', element: <ComingSoon title="Search" /> },
           { path: '*', element: <Navigate to="/" replace /> },
         ],

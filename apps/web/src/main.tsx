@@ -7,6 +7,7 @@ import './shell/shell.css';
 import './views/views.css';
 import './day/day.css';
 import './week/week.css';
+import './month/month.css';
 import './events/events.css';
 import './quick-add/quickAdd.css';
 import { StrictMode } from 'react';
