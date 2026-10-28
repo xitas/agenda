@@ -8,7 +8,8 @@
 
 .editor__when {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) calc(var(--ag-space-12) * 2.5);
+  /* Wide enough for "04:00 PM" and the browser's clock icon. */
+  grid-template-columns: minmax(0, 1fr) calc(var(--ag-space-12) * 3);
   gap: var(--ag-space-3);
   align-items: start;
 }
