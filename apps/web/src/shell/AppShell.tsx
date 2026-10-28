@@ -9,6 +9,7 @@ import { useApi } from '../app/api';
 import { EventActionsProvider } from '../events/EventActionsProvider';
 import { QuickAdd } from '../quick-add/QuickAdd';
 import { CalendarPanel } from './CalendarPanel';
+import { GlobalShortcuts } from './GlobalShortcuts';
 
 interface NavItem {
   to: string;
@@ -103,6 +104,7 @@ export function AppShell() {
                 />
               </Dialog>
             </span>
+            <GlobalShortcuts />
             <IconButton
               label="Log out"
               icon={<LogOut />}

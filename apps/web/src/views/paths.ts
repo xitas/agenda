@@ -1,5 +1,5 @@
 import { addDaysToPlainDate } from '@agenda/core';
-import { dayPath } from '../day/dayFormat';
+import { dayPath, parseDay } from '../day/dayFormat';
 
 export type CalendarViewName = 'day' | 'week' | 'month';
 
@@ -26,4 +26,20 @@ export function parseMonth(value: string | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * The date the screen is about, from its path: the day, week or month in the URL, or
+ * today on "/", "/week", "/month" and pages without a date.
+ */
+export function dateOnScreen(pathname: string, today: string): string {
+  const dated = /^\/(day|week)\/(\d{4}-\d{2}-\d{2})$/.exec(pathname);
+  if (dated?.[2] !== undefined) return parseDay(dated[2]) ?? today;
+  const month = /^\/month\/(\d{4}-\d{2})$/.exec(pathname);
+  if (month?.[1] !== undefined) {
+    const first = parseMonth(month[1]);
+    // Switching from this month keeps today; from another month, its first day.
+    return first === null || first.slice(0, 7) === today.slice(0, 7) ? today : first;
+  }
+  return today;
 }

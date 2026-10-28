@@ -1,5 +1,6 @@
 import type { AgendaEvent, DateRange } from '@agenda/core';
 import { useQuery } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 import { useApi } from '../app/api';
 
 /** Every cached list of events starts with this, so one invalidation refreshes them all. */
@@ -48,4 +49,13 @@ export function useSearchEvents(q: string) {
       (await api.events.list({ q, limit: SEARCH_LIMIT }, { signal })).events,
     enabled: q !== '',
   });
+}
+
+/** An event by id from any cached list (for shortcuts on the focused event). */
+export function findCachedEvent(queryClient: QueryClient, id: string): AgendaEvent | undefined {
+  for (const [, data] of queryClient.getQueriesData<AgendaEvent[]>({ queryKey: EVENTS_KEY })) {
+    const event = data?.find((candidate) => candidate.id === id);
+    if (event !== undefined) return event;
+  }
+  return undefined;
 }

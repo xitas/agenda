@@ -235,3 +235,48 @@
     padding-bottom: calc(var(--ag-size-bottom-nav) + var(--ag-space-6));
   }
 }
+
+/* No keyboard on phones, so no shortcuts button (the keys still work with one). */
+@media (width < 768px) {
+  .shell__help {
+    display: none;
+  }
+}
+
+/* The shortcuts help dialog. */
+.shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+  margin: 0;
+}
+
+.shortcuts__row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--ag-space-3);
+  align-items: baseline;
+}
+
+.shortcuts dd {
+  margin: 0;
+  font-size: var(--ag-text-body-sm);
+}
+
+.shortcuts kbd {
+  display: inline-block;
+  min-width: var(--ag-space-6);
+  padding: 0 var(--ag-space-1);
+  border: var(--ag-border-hairline) solid var(--ag-color-border-strong);
+  border-radius: var(--ag-radius-sm);
+  background: var(--ag-color-surface-2);
+  font: inherit;
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-medium);
+  text-align: center;
+}
+
+.shortcuts__or {
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+}
