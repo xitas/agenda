@@ -1,0 +1,146 @@
+/* The Month view grid. Token variables only. */
+
+.ag-monthgrid {
+  display: flex;
+  flex-direction: column;
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+  overflow: hidden;
+}
+
+.ag-monthgrid__weekdays,
+.ag-monthgrid__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.ag-monthgrid__weekdays {
+  border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.ag-monthgrid__weekdays span {
+  padding: var(--ag-space-2) 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-medium);
+  text-align: center;
+}
+
+.ag-monthgrid__days {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-monthgrid__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  min-width: 0;
+  min-height: calc(var(--ag-size-hour-row) * 2.5);
+  padding: var(--ag-space-1);
+  border-right: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.ag-monthgrid__cell:nth-child(7n) {
+  border-right: 0;
+}
+
+.ag-monthgrid__cell:nth-last-child(-n + 7) {
+  border-bottom: 0;
+}
+
+.ag-monthgrid__cell--past,
+.ag-monthgrid__cell--outside {
+  background: var(--ag-color-bg);
+}
+
+.ag-monthgrid__date {
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  width: var(--ag-size-control-sm);
+  height: var(--ag-size-control-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ag-radius-full);
+  background: none;
+  color: var(--ag-color-text);
+  font: inherit;
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-medium);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.ag-monthgrid__date:hover {
+  background: var(--ag-color-surface-2);
+}
+
+.ag-monthgrid__cell--past .ag-monthgrid__date,
+.ag-monthgrid__cell--outside .ag-monthgrid__date {
+  color: var(--ag-color-text-muted);
+  font-weight: var(--ag-weight-regular);
+}
+
+/* Today: an accent ring, like the MiniMonth. */
+.ag-monthgrid__cell--today .ag-monthgrid__date {
+  box-shadow: inset 0 0 0 var(--ag-border-focus-ring) var(--ag-color-accent);
+  color: var(--ag-color-accent);
+  font-weight: var(--ag-weight-semibold);
+}
+
+.ag-monthgrid__events {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-monthgrid__events .ag-event-card__title {
+  min-width: 0;
+}
+
+.ag-monthgrid__more {
+  align-self: flex-start;
+  padding: 0 var(--ag-space-1);
+  border: 0;
+  border-radius: var(--ag-radius-sm);
+  background: none;
+  color: var(--ag-color-text-muted);
+  font: inherit;
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-medium);
+  cursor: pointer;
+}
+
+.ag-monthgrid__more:hover {
+  background: var(--ag-color-surface-2);
+  color: var(--ag-color-text);
+}
+
+/* Phones: no room for times; titles only, and a shorter cell. */
+@media (width < 768px) {
+  .ag-monthgrid__cell {
+    min-height: calc(var(--ag-size-hour-row) * 2);
+    padding: var(--ag-space-1) 0;
+  }
+
+  .ag-monthgrid__date {
+    align-self: center;
+  }
+
+  .ag-monthgrid__events .ag-event-card__time {
+    display: none;
+  }
+
+  .ag-monthgrid__events .ag-event-card--compact {
+    padding: 0 var(--ag-space-1);
+    border-left-width: var(--ag-border-focus-ring);
+  }
+}

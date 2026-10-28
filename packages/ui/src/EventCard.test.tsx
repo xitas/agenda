@@ -31,7 +31,7 @@ describe('EventCard', () => {
     expect(screen.getByText('Clinic, Main St')).toBeDefined();
     expect(screen.getByText('Category: Teal').className).toBe('ag-visually-hidden');
     const root = container.firstElementChild;
-    expect(root?.getAttribute('data-color')).toBe('teal');
+    expect(root?.getAttribute('data-event-color')).toBe('teal');
     expect(root?.className).toBe('ag-event-card ag-event-card--default');
   });
 
@@ -57,10 +57,10 @@ describe('EventCard', () => {
   });
 
   it.each(['slate', 'blue', 'green', 'amber', 'red', 'violet', 'pink', 'teal'] as EventColor[])(
-    'sets data-color for %s',
+    'sets data-event-color for %s',
     (color) => {
       const { container } = card({ event: { ...dentist, color } });
-      expect(container.firstElementChild?.getAttribute('data-color')).toBe(color);
+      expect(container.firstElementChild?.getAttribute('data-event-color')).toBe(color);
     },
   );
 

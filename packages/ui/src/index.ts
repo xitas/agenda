@@ -12,6 +12,8 @@ export type { MiniMonthProps } from './MiniMonth.js';
 export type { InputProps, TextareaProps } from './Field.js';
 export { IconButton } from './IconButton.js';
 export type { IconButtonProps } from './IconButton.js';
+export { MonthGrid } from './MonthGrid.js';
+export type { MonthGridProps } from './MonthGrid.js';
 export { Placeholder } from './Placeholder.js';
 export type { PlaceholderProps } from './Placeholder.js';
 export { TimeGrid } from './TimeGrid.js';

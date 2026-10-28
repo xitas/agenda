@@ -1,43 +1,4 @@
-/* The category picks the pair of event color tokens; everything else is shared. */
-.ag-event-card[data-color='slate'] {
-  --ag-event-strong: var(--ag-event-slate-strong);
-  --ag-event-soft: var(--ag-event-slate-soft);
-}
-
-.ag-event-card[data-color='blue'] {
-  --ag-event-strong: var(--ag-event-blue-strong);
-  --ag-event-soft: var(--ag-event-blue-soft);
-}
-
-.ag-event-card[data-color='green'] {
-  --ag-event-strong: var(--ag-event-green-strong);
-  --ag-event-soft: var(--ag-event-green-soft);
-}
-
-.ag-event-card[data-color='amber'] {
-  --ag-event-strong: var(--ag-event-amber-strong);
-  --ag-event-soft: var(--ag-event-amber-soft);
-}
-
-.ag-event-card[data-color='red'] {
-  --ag-event-strong: var(--ag-event-red-strong);
-  --ag-event-soft: var(--ag-event-red-soft);
-}
-
-.ag-event-card[data-color='violet'] {
-  --ag-event-strong: var(--ag-event-violet-strong);
-  --ag-event-soft: var(--ag-event-violet-soft);
-}
-
-.ag-event-card[data-color='pink'] {
-  --ag-event-strong: var(--ag-event-pink-strong);
-  --ag-event-soft: var(--ag-event-pink-soft);
-}
-
-.ag-event-card[data-color='teal'] {
-  --ag-event-strong: var(--ag-event-teal-strong);
-  --ag-event-soft: var(--ag-event-teal-soft);
-}
+/* Colors come from data-event-color (EventColors.css); everything else is here. */
 
 .ag-event-card {
   display: flex;
@@ -112,4 +73,10 @@
 .ag-event-card--compact .ag-event-card__time {
   flex-shrink: 0;
   font-size: var(--ag-text-caption);
+}
+
+/* Ended events stay readable: muted text on the same fill (contrast is tested). */
+.ag-event-card--past .ag-event-card__title {
+  color: var(--ag-color-text-muted);
+  font-weight: var(--ag-weight-regular);
 }
