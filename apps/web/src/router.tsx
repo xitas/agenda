@@ -5,8 +5,8 @@ import { RequireAuth } from './auth/RequireAuth';
 import { DayPage } from './day/DayPage';
 import { MonthPage } from './month/MonthPage';
 import { Playground } from './Playground';
+import { SearchPage } from './search/SearchPage';
 import { AppShell } from './shell/AppShell';
-import { ComingSoon } from './shell/ComingSoon';
 import { WeekPage } from './week/WeekPage';
 
 /** The route table; main.tsx makes a browser router from it, tests a memory router. */
@@ -25,7 +25,7 @@ export const routes: RouteObject[] = [
           { path: 'week/:date', element: <WeekPage /> },
           { path: 'month', element: <MonthPage /> },
           { path: 'month/:month', element: <MonthPage /> },
-          { path: 'search', element: <ComingSoon title="Search" /> },
+          { path: 'search', element: <SearchPage /> },
           { path: '*', element: <Navigate to="/" replace /> },
         ],
       },

@@ -235,9 +235,3 @@
     padding-bottom: calc(var(--ag-size-bottom-nav) + var(--ag-space-6));
   }
 }
-
-.coming-soon {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ag-space-6);
-}

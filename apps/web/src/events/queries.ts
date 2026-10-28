@@ -32,3 +32,20 @@ export function useRangeEvents(range: DateRange, timezone: string) {
       api.events.listAll({ from: range.start, to: range.end, tz: timezone }, { signal }),
   });
 }
+
+/** The most results Search asks for (the API's page limit). */
+export const SEARCH_LIMIT = 200;
+
+/**
+ * Events whose title, location or notes contain `q`, across all dates. Cached under
+ * EVENTS_KEY as a plain list like the ranges, so edits and deletes update it too.
+ */
+export function useSearchEvents(q: string) {
+  const api = useApi();
+  return useQuery<AgendaEvent[]>({
+    queryKey: ['events', 'search', q],
+    queryFn: async ({ signal }) =>
+      (await api.events.list({ q, limit: SEARCH_LIMIT }, { signal })).events,
+    enabled: q !== '',
+  });
+}
