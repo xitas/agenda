@@ -26,6 +26,7 @@ describe('toCss', () => {
     expect(root).toContain('--ag-easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);');
     expect(root).toContain('--ag-color-overlay: rgb(0 0 0 / 0.4);');
     expect(root).toContain('--ag-size-bottom-nav: 64px;');
+    expect(root).toContain('--ag-size-hour-row: 48px;');
     expect(root).toContain('--ag-toast-offset-wide: 24px;');
     expect(root).toContain('--ag-toast-offset-narrow: 80px;');
     expect(root).toContain('--ag-breakpoint-narrow: 768px;');

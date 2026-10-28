@@ -38,6 +38,7 @@ function staticDeclarations(t: Tokens): Declarations {
     [`${PREFIX}-size-toast`, px(t.size.toast.width)],
     [`${PREFIX}-size-sidebar`, px(t.size.sidebar)],
     [`${PREFIX}-size-bottom-nav`, px(t.size.bottomNav)],
+    [`${PREFIX}-size-hour-row`, px(t.size.hourRow)],
     [`${PREFIX}-toast-offset-wide`, px(t.toastOffset.wide)],
     [`${PREFIX}-toast-offset-narrow`, px(t.toastOffset.narrow)],
     // For reference only: CSS variables cannot be used inside @media conditions.
