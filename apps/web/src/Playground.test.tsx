@@ -5,6 +5,7 @@ import axe from 'axe-core';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { routes } from './router';
+import { findToastAction } from './test-utils/toast';
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -37,7 +38,7 @@ describe('/playground', () => {
     await user.keyboard('{Escape}');
 
     await user.click(screen.getByRole('button', { name: 'Delete with Undo' }));
-    await user.click(screen.getByRole('button', { name: 'Undo' }));
+    await user.click(await findToastAction('Undo'));
     expect(await screen.findByText('Event restored.')).toBeDefined();
   });
 
@@ -47,11 +48,6 @@ describe('/playground', () => {
       rules: { 'color-contrast': { enabled: false } },
     });
     expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
-  });
-
-  it('keeps the placeholder home page at /', () => {
-    renderAt('/');
-    expect(screen.getByText('Agenda')).toBeDefined();
   });
 });
 

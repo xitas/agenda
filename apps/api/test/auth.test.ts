@@ -238,6 +238,7 @@ describe('requireAuth', () => {
     ['GET', `/events/${ID}`],
     ['PATCH', `/events/${ID}`],
     ['DELETE', `/events/${ID}`],
+    ['POST', `/events/${ID}/restore`],
     ['POST', '/events/import?tz=UTC'],
     ['GET', '/events/export.json'],
     ['GET', '/events/export.ics'],

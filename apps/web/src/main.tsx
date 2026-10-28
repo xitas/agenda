@@ -2,23 +2,41 @@ import '@fontsource-variable/inter';
 import '@agenda/tokens/tokens.css';
 import '@agenda/ui/styles.css';
 import './playground.css';
-import { ToastProvider } from '@agenda/ui';
+import './auth/login.css';
+import './shell/shell.css';
+import './day/day.css';
+import './events/events.css';
+import './quick-add/quickAdd.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import { router } from './router';
+import { createWebApi } from './app/api';
+import { AppProviders } from './app/AppProviders';
+import { browserEnv } from './app/env';
+import { createQueryClient } from './app/queryClient';
+import { handleUnauthorized } from './app/session';
+import { routes } from './router';
 import { applyTheme, readTheme } from './theme';
 
 // Before the first render, so the saved theme is used from the first frame.
 applyTheme(readTheme());
+
+const queryClient = createQueryClient();
+// The client needs the router for its 401 handler, and the router is created after it.
+const app: { router?: ReturnType<typeof createBrowserRouter> } = {};
+const api = createWebApi(() => {
+  if (app.router) handleUnauthorized(queryClient, app.router);
+});
+app.router = createBrowserRouter(routes);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root element in index.html');
 
 createRoot(root).render(
   <StrictMode>
-    <ToastProvider>
-      <RouterProvider router={router} />
-    </ToastProvider>
+    <AppProviders api={api} queryClient={queryClient} env={browserEnv()}>
+      <RouterProvider router={app.router} />
+    </AppProviders>
   </StrictMode>,
 );

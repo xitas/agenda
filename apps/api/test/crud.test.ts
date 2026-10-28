@@ -180,6 +180,30 @@ describe('PATCH /events/:id', () => {
   });
 });
 
+describe('POST /events/:id/restore', () => {
+  it('undoes a delete: clears deletedAt, bumps updatedAt, shows up again', async () => {
+    const { request, create, setNow } = await makeTestApp();
+    const event = await create(timed('Dentist', '2026-10-24T11:00:00.000Z'));
+    await request('DELETE', `/events/${event.id}`);
+
+    const later = new Date('2026-10-23T09:05:00.000Z');
+    setNow(later);
+    const res = await request<AgendaEvent>('POST', `/events/${event.id}/restore`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ...event, deletedAt: null, updatedAt: later.toISOString() });
+    expect((await request<AgendaEvent>('GET', `/events/${event.id}`)).body).toEqual(res.body);
+  });
+
+  it('returns 404 for an event that is not deleted, or does not exist', async () => {
+    const { request, create } = await makeTestApp();
+    const event = await create(timed('Dentist', '2026-10-24T11:00:00.000Z'));
+    const active: ErrorResponse = await request('POST', `/events/${event.id}/restore`);
+    expect(active.status).toBe(404);
+    expect(active.body.error).toEqual({ code: 'not_found', message: 'Deleted event not found' });
+    expect((await request('POST', `/events/${MISSING_ID}/restore`)).status).toBe(404);
+  });
+});
+
 describe('DELETE /events/:id', () => {
   it('soft-deletes: 204, then the row is a tombstone with deletedAt set', async () => {
     const { request, create, db } = await makeTestApp();

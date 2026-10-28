@@ -1,3 +1,5 @@
+export { dayAgenda, eventDays, eventOverlapsRange } from './agenda.js';
+export type { DayAgenda } from './agenda.js';
 export {
   API_PREFIX,
   ApiError,
@@ -38,7 +40,16 @@ export type {
   SessionWithCurrent,
 } from './api-schemas.js';
 export { APP_NAME } from './constants.js';
-export { formatEventTime, plainDateInTz, rangeForView, startOfDayInTz } from './dates.js';
+export {
+  addDaysToPlainDate,
+  addMonthsToPlainDate,
+  dayRangeInTz,
+  formatEventTime,
+  monthGrid,
+  plainDateInTz,
+  rangeForView,
+  startOfDayInTz,
+} from './dates.js';
 export type { CalendarView, DateRange } from './dates.js';
 /** The locale type formatEventTime takes, so apps and ui need no direct date-fns import. */
 export type { Locale } from 'date-fns';

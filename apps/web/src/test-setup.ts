@@ -1,5 +1,10 @@
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
+
+// findBy*/waitFor give up after 1 s by default. Rendering the whole app (routes, shell,
+// calendar) for the first time in a file took 1.5 s on a busy CI runner, so wait longer.
+// A real failure still fails, just a few seconds later.
+configure({ asyncUtilTimeout: 5_000 });
 
 afterEach(() => {
   cleanup();

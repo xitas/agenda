@@ -36,12 +36,21 @@ Apps depend on packages through `workspace:*` links, so a change in `packages/co
 
 ## Getting started
 
+The first time, give the API a password (it refuses to start without one):
+
 ```sh
 pnpm i
+cp apps/api/.env.example apps/api/.env
+pnpm -s --filter @agenda/api hash-password >> apps/api/.env   # asks for the password twice
+```
+
+Then:
+
+```sh
 pnpm dev
 ```
 
-`pnpm dev` builds the shared packages, then starts every app in watch mode. To run a single app:
+`pnpm dev` builds the shared packages, then starts the API (http://localhost:4001) and the web app (http://localhost:5173) in watch mode. Open the web app and log in. In dev, Vite forwards `/api` to the API, so both are on one origin and the session cookie works without CORS. To run a single app:
 
 ```sh
 pnpm dev --filter @agenda/web   # Vite dev server on http://localhost:5173

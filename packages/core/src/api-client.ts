@@ -32,10 +32,14 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly fields?: Record<string, string[]>,
-    options?: { cause?: unknown },
+    options?: { cause?: unknown; retryAfterSeconds?: number },
   ) {
     super(message, options);
+    this.retryAfterSeconds = options?.retryAfterSeconds;
   }
+
+  /** From the Retry-After header (e.g. a 429 on login): seconds until trying again helps. */
+  readonly retryAfterSeconds: number | undefined;
 }
 
 export type NetworkErrorKind = 'timeout' | 'aborted' | 'network';
@@ -188,11 +192,12 @@ export function createApiClient<A extends AuthStrategy>(options: ApiClientOption
       abort.done();
     }
 
-    if (response.status < 200 || response.status > 299) throw toApiError(response.status, text);
+    if (response.status < 200 || response.status > 299) throw toApiError(response, text);
     return { response, text };
   }
 
-  function toApiError(status: number, text: string): ApiError {
+  function toApiError(response: ResponseLike, text: string): ApiError {
+    const { status } = response;
     let parsed: unknown;
     try {
       parsed = JSON.parse(text);
@@ -204,7 +209,11 @@ export function createApiClient<A extends AuthStrategy>(options: ApiClientOption
       return invalid(status, `Unexpected ${String(status)} response body`, body.error);
     }
     const { code, message, fields } = body.data.error;
-    const error = new ApiError(status, code, message, fields);
+    // Our API sends Retry-After in whole seconds; anything else is ignored.
+    const retryAfter = Number(response.headers.get('Retry-After') ?? '');
+    const error = new ApiError(status, code, message, fields, {
+      ...(Number.isInteger(retryAfter) && retryAfter > 0 ? { retryAfterSeconds: retryAfter } : {}),
+    });
     if (status === 401 && code === 'unauthorized') auth.onUnauthorized?.(error);
     return error;
   }
@@ -288,6 +297,10 @@ export function createApiClient<A extends AuthStrategy>(options: ApiClientOption
     /** Soft delete. */
     remove: (eventId: string, call?: CallOptions): Promise<void> =>
       empty('DELETE', `/events/${id(eventId)}`, { call }),
+
+    /** Undoes a remove (soft delete). */
+    restore: (eventId: string, call?: CallOptions): Promise<AgendaEvent> =>
+      json(AgendaEventSchema, 'POST', `/events/${id(eventId)}/restore`, { call }),
 
     /** Imports a v0 and/or v1 export; `tz` is the zone the v0 app ran in. */
     importEvents: (

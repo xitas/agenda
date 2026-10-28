@@ -29,6 +29,7 @@ describe('toCss', () => {
     expect(root).toContain('--ag-toast-offset-wide: 24px;');
     expect(root).toContain('--ag-toast-offset-narrow: 80px;');
     expect(root).toContain('--ag-breakpoint-narrow: 768px;');
+    expect(root).toContain('--ag-breakpoint-wide: 1024px;');
   });
 
   it('uses rem for font sizes so text follows the user setting', () => {

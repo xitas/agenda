@@ -1,0 +1,243 @@
+/*
+ * The signed-in frame (DESIGN.md §4). Token variables only.
+ * One nav (with the app name), placed by grid areas: sidebar (>= 1024), top bar
+ * (768-1023), fixed bottom bar (< 768).
+ */
+
+.shell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'nav top'
+    'main main';
+  min-height: 100dvh;
+  background: var(--ag-color-bg);
+}
+
+.shell__skip {
+  position: absolute;
+  top: var(--ag-space-2);
+  left: var(--ag-space-2);
+  z-index: 1;
+  padding: var(--ag-space-2) var(--ag-space-3);
+  border-radius: var(--ag-radius-sm);
+  background: var(--ag-color-accent);
+  color: var(--ag-color-accent-fg);
+  transform: translateY(-200%);
+}
+
+.shell__skip:focus {
+  transform: none;
+}
+
+.shell__brand {
+  margin: 0;
+  padding: var(--ag-space-3) var(--ag-space-4);
+  font-size: var(--ag-text-title-sm);
+  font-weight: var(--ag-weight-semibold);
+}
+
+.shell__nav {
+  display: flex;
+  grid-area: nav;
+  align-items: center;
+  padding-right: var(--ag-space-2);
+}
+
+.shell__nav ul {
+  display: flex;
+  gap: var(--ag-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shell__link {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+  min-height: var(--ag-size-control-md);
+  padding: 0 var(--ag-space-3);
+  border-radius: var(--ag-radius-sm);
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-medium);
+  text-decoration: none;
+  transition: background-color var(--ag-duration-fast) var(--ag-easing-standard);
+}
+
+.shell__link:hover {
+  background: var(--ag-color-surface-2);
+  color: var(--ag-color-text);
+}
+
+.shell__link:focus-visible {
+  outline: var(--ag-border-focus-ring) solid var(--ag-color-accent);
+  outline-offset: var(--ag-border-focus-offset);
+}
+
+.shell__link--active {
+  background: var(--ag-color-surface-2);
+  color: var(--ag-color-text);
+}
+
+.shell__link-icon {
+  display: inline-flex;
+}
+
+.shell__link-icon svg {
+  width: var(--ag-size-icon-md);
+  height: var(--ag-size-icon-md);
+}
+
+.shell__calendar {
+  display: none;
+  grid-area: calendar;
+}
+
+.shell__top {
+  display: flex;
+  grid-area: top;
+  align-items: center;
+  gap: var(--ag-space-3);
+  min-width: 0;
+  padding: var(--ag-space-3) var(--ag-space-4);
+}
+
+.shell__quick-add {
+  flex: 1;
+  min-width: 0;
+}
+
+.shell__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-1);
+}
+
+.shell__calendar-button {
+  display: contents;
+}
+
+.shell__main {
+  grid-area: main;
+  min-width: 0;
+  padding: var(--ag-space-6) var(--ag-space-4) var(--ag-space-12);
+}
+
+.shell__main:focus {
+  outline: none;
+}
+
+.shell__top,
+.shell__nav {
+  border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+/* Wide: the sidebar holds the nav and, below it, the calendar. */
+@media (width >= 1024px) {
+  .shell {
+    grid-template-columns: var(--ag-size-sidebar) 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'nav top'
+      'nav main'
+      'calendar main';
+  }
+
+  .shell__nav,
+  .shell__calendar {
+    border-right: var(--ag-border-hairline) solid var(--ag-color-border);
+    border-bottom: 0;
+    background: var(--ag-color-surface);
+  }
+
+  .shell__brand {
+    padding: var(--ag-space-4) var(--ag-space-3) var(--ag-space-3);
+  }
+
+  .shell__nav {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 var(--ag-space-3) var(--ag-space-4);
+  }
+
+  .shell__nav ul {
+    flex-direction: column;
+  }
+
+  .shell__calendar {
+    display: block;
+    padding: var(--ag-space-4) var(--ag-space-3);
+    border-top: var(--ag-border-hairline) solid var(--ag-color-border);
+  }
+
+  .shell__calendar-button {
+    display: none;
+  }
+
+  .shell__main {
+    padding: var(--ag-space-8) var(--ag-space-8) var(--ag-space-12);
+  }
+}
+
+/* Narrow: the nav becomes a tab bar fixed to the bottom edge. */
+@media (width < 768px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'top'
+      'main';
+  }
+
+  .shell__brand {
+    display: none;
+  }
+
+  .shell__nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-top: var(--ag-border-hairline) solid var(--ag-color-border);
+    padding-right: 0;
+    border-bottom: 0;
+    background: var(--ag-color-surface);
+  }
+
+  .shell__nav ul {
+    flex: 1;
+    height: var(--ag-size-bottom-nav);
+  }
+
+  .shell__nav li {
+    flex: 1;
+  }
+
+  .shell__link {
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--ag-space-1);
+    height: 100%;
+    border-radius: 0;
+    font-size: var(--ag-text-caption);
+  }
+
+  .shell__link--active {
+    background: none;
+    color: var(--ag-color-accent);
+  }
+
+  .shell__main {
+    padding-bottom: calc(var(--ag-size-bottom-nav) + var(--ag-space-6));
+  }
+}
+
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-6);
+}

@@ -1,0 +1,86 @@
+/* Event colors and the details dialog. Token variables only. */
+
+/* Any element with data-event-color gets --ag-event-strong and --ag-event-soft. */
+[data-event-color='slate'] {
+  --ag-event-strong: var(--ag-event-slate-strong);
+  --ag-event-soft: var(--ag-event-slate-soft);
+}
+
+[data-event-color='blue'] {
+  --ag-event-strong: var(--ag-event-blue-strong);
+  --ag-event-soft: var(--ag-event-blue-soft);
+}
+
+[data-event-color='green'] {
+  --ag-event-strong: var(--ag-event-green-strong);
+  --ag-event-soft: var(--ag-event-green-soft);
+}
+
+[data-event-color='amber'] {
+  --ag-event-strong: var(--ag-event-amber-strong);
+  --ag-event-soft: var(--ag-event-amber-soft);
+}
+
+[data-event-color='red'] {
+  --ag-event-strong: var(--ag-event-red-strong);
+  --ag-event-soft: var(--ag-event-red-soft);
+}
+
+[data-event-color='violet'] {
+  --ag-event-strong: var(--ag-event-violet-strong);
+  --ag-event-soft: var(--ag-event-violet-soft);
+}
+
+[data-event-color='pink'] {
+  --ag-event-strong: var(--ag-event-pink-strong);
+  --ag-event-soft: var(--ag-event-pink-soft);
+}
+
+[data-event-color='teal'] {
+  --ag-event-strong: var(--ag-event-teal-strong);
+  --ag-event-soft: var(--ag-event-teal-soft);
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+  margin: 0;
+}
+
+.event-details__row {
+  display: grid;
+  grid-template-columns: calc(var(--ag-space-12) * 2) 1fr;
+  gap: var(--ag-space-3);
+}
+
+.event-details dt {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-1);
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+}
+
+.event-details dd {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+  margin: 0;
+}
+
+.event-details__notes {
+  white-space: pre-wrap;
+}
+
+.event-details__icon {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+}
+
+.event-details__dot {
+  width: var(--ag-space-3);
+  height: var(--ag-space-3);
+  border-radius: var(--ag-radius-full);
+  background: var(--ag-event-strong);
+}
