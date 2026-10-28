@@ -133,6 +133,19 @@ describe('TimeGrid', () => {
     expect(screen.getByText('All day')).toBeDefined();
   });
 
+  it('puts title and time on one line in blocks under 45 minutes', () => {
+    setup({
+      events: [
+        event('Call', '2026-10-28T09:00:00.000Z', '2026-10-28T09:30:00.000Z'),
+        event('Ping', '2026-10-28T12:00:00.000Z', null),
+        event('Meeting', '2026-10-28T14:00:00.000Z', '2026-10-28T14:45:00.000Z'),
+      ],
+    });
+    expect(block('Call').className).toContain('ag-timegrid__event--short');
+    expect(block('Ping').className).toContain('ag-timegrid__event--short');
+    expect(block('Meeting').className).not.toContain('--short');
+  });
+
   it('has no all-day strip without all-day events', () => {
     setup({ events: [event('Standup', '2026-10-27T09:00:00.000Z', null)] });
     expect(screen.queryByText('All day')).toBeNull();

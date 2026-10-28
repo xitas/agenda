@@ -37,6 +37,8 @@ export interface TimeGridProps<E extends GridEvent> {
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const SLOT_MINUTES = 30;
+/** Blocks shorter than this (36 px at 48 px an hour) put the time on the title's line. */
+const SHORT_BLOCK_MINUTES = 45;
 const atNoonUtc = (day: string) => new Date(`${day}T12:00:00.000Z`);
 const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -108,11 +110,21 @@ export function TimeGrid<E extends GridEvent>({
     onSelectSlot(day, Math.min(Math.max(minutes, 0), MINUTES_PER_DAY - SLOT_MINUTES));
   };
 
-  const eventButton = (event: E, className: string, style: CSSProperties, extra = '') => (
+  const eventButton = (
+    event: E,
+    className: string,
+    style: CSSProperties,
+    extra = '',
+    short = false,
+  ) => (
     <button
       key={`${event.id}${extra}`}
       type="button"
-      className={cx(className, isPast(event) && `${className}--past`)}
+      className={cx(
+        className,
+        isPast(event) && `${className}--past`,
+        short && `${className}--short`,
+      )}
       style={style}
       data-event-color={event.color}
       data-event-id={event.id}
@@ -204,6 +216,8 @@ export function TimeGrid<E extends GridEvent>({
                   cols: block.columns,
                 }),
                 `@${day}`,
+                // Too short for two lines: title and time share one.
+                block.height < SHORT_BLOCK_MINUTES,
               ),
             )}
             {day === today && (

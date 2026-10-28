@@ -234,3 +234,21 @@ button.ag-timegrid__day--today:hover .ag-timegrid__date {
   border-radius: var(--ag-radius-full);
   background: var(--ag-color-accent);
 }
+
+/* Short blocks: one line, title first, so neither is cut in half. */
+.ag-timegrid__event--short {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--ag-space-1);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.ag-timegrid__event--short .ag-timegrid__event-title {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.ag-timegrid__event--short .ag-timegrid__event-time {
+  flex-shrink: 0;
+}
