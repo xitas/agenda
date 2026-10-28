@@ -11,6 +11,19 @@ export {
   wallClockMinutes,
 } from './time-grid.js';
 export type { AllDayLayout, StripBlock, TimedBlock } from './time-grid.js';
+export { eventsByDay } from './month.js';
+export {
+  EVENT_FORM_MESSAGES,
+  REMINDER_CHOICES,
+  eventFromForm,
+  formatDateInput,
+  formFromEvent,
+  localDateTimeToUtc,
+  newEventForm,
+  parseDateInput,
+  utcToLocalDateTime,
+} from './event-form.js';
+export type { EventForm, EventFormErrors, EventFormField, EventFormResult } from './event-form.js';
 export type { DayAgenda } from './agenda.js';
 export {
   API_PREFIX,
