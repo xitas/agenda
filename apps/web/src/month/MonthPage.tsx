@@ -8,6 +8,7 @@ import { useEventActions } from '../events/actions';
 import { useRangeEvents } from '../events/queries';
 import { useShortcuts } from '../shortcuts';
 import { parseMonth, viewPath } from '../views/paths';
+import { NewEventButton } from '../views/NewEventButton';
 import { ViewHeader } from '../views/ViewHeader';
 
 /** "/month" and "/month/YYYY-MM": the month grid, 6 weeks from the Monday before the 1st. */
@@ -72,6 +73,7 @@ export function MonthPage() {
         onToday={() => {
           go(today);
         }}
+        actions={<NewEventButton day={showsToday ? today : month} today={today} />}
       />
       {events.isError && (
         <div className="month__status" role="alert">

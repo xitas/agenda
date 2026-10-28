@@ -5,6 +5,10 @@ import { createContext, useContext } from 'react';
 export interface EventActions {
   /** The read-only details dialog. */
   open: (event: AgendaEvent) => void;
+  /** The editor for an existing event. */
+  edit: (event: AgendaEvent) => void;
+  /** The editor for a new event, starting at `start` (default: the next whole hour). */
+  create: (start?: Date) => void;
   /** Optimistic delete with an Undo toast. */
   remove: (event: AgendaEvent) => void;
 }

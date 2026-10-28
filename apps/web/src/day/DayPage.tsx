@@ -9,6 +9,7 @@ import { useEnv } from '../app/env';
 import { useEventActions } from '../events/actions';
 import { useRangeEvents } from '../events/queries';
 import { useShortcuts } from '../shortcuts';
+import { NewEventButton } from '../views/NewEventButton';
 import { ViewHeader } from '../views/ViewHeader';
 import { dayHeading, dayPath, parseDay, relativeDay, timeOfDay } from './dayFormat';
 
@@ -123,6 +124,7 @@ export function DayPage() {
         onToday={() => {
           go(today);
         }}
+        actions={<NewEventButton day={day} today={today} />}
       />
       {body}
     </section>

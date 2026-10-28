@@ -1,6 +1,7 @@
 import {
   addDaysToPlainDate,
   dayRangeInTz,
+  localDateTimeToUtc,
   daysFrom,
   plainDateInTz,
   startOfWeekPlain,
@@ -18,6 +19,7 @@ import { useEventActions } from '../events/actions';
 import { useRangeEvents } from '../events/queries';
 import { useShortcuts } from '../shortcuts';
 import { viewPath } from '../views/paths';
+import { NewEventButton } from '../views/NewEventButton';
 import { ViewHeader } from '../views/ViewHeader';
 
 /** A horizontal touch swipe longer than this (px) moves to the previous or next period. */
@@ -117,6 +119,7 @@ export function WeekPage() {
         onToday={() => {
           go(today);
         }}
+        actions={<NewEventButton day={showsToday ? today : first} today={today} />}
       />
       {events.isError && (
         <div className="week__status" role="alert">
@@ -147,6 +150,10 @@ export function WeekPage() {
           now={now}
           scrollToMinutes={scrollTo}
           onSelectEvent={actions.open}
+          onSelectSlot={(day, minutes) => {
+            const time = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+            actions.create(new Date(localDateTimeToUtc(day, time, env.timezone)));
+          }}
           onSelectDay={(day) => {
             void navigate(viewPath('day', day, today));
           }}
