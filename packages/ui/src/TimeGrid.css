@@ -244,11 +244,13 @@ button.ag-timegrid__day--today:hover .ag-timegrid__date {
   padding-bottom: 0;
 }
 
+/* In a narrow block the title wins; the time gives way first. */
 .ag-timegrid__event--short .ag-timegrid__event-title {
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
+  max-width: 100%;
 }
 
 .ag-timegrid__event--short .ag-timegrid__event-time {
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
