@@ -197,16 +197,18 @@ describe('server startup', () => {
       const value = process.env[key];
       if (value !== undefined) env[key] = value;
     }
+    // Starting Node and compiling the API with tsx takes about 3 s alone, but 24 s was
+    // measured while every package's tests ran at once; the limit only catches a hang.
     const result = spawnSync(process.execPath, ['--import', 'tsx', entry], {
       env: { ...env, DATABASE_URL: ':memory:' },
       encoding: 'utf8',
-      timeout: 20_000,
+      timeout: 60_000,
     });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('AGENDA_PASSWORD_HASH is not set');
     expect(result.stderr).toContain('hash-password');
     expect(result.stdout).not.toContain('listening');
-  }, 30_000);
+  }, 90_000);
 });
 
 describe('seed data', () => {
