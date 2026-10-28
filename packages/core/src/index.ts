@@ -1,4 +1,16 @@
 export { dayAgenda, eventDays, eventOverlapsRange } from './agenda.js';
+export {
+  DEFAULT_DURATION_MINUTES,
+  MIN_BLOCK_MINUTES,
+  MINUTES_PER_DAY,
+  daysFrom,
+  inAllDayStrip,
+  layoutAllDay,
+  layoutDay,
+  startOfWeekPlain,
+  wallClockMinutes,
+} from './time-grid.js';
+export type { AllDayLayout, StripBlock, TimedBlock } from './time-grid.js';
 export type { DayAgenda } from './agenda.js';
 export {
   API_PREFIX,
