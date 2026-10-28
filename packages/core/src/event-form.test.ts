@@ -180,6 +180,16 @@ describe('eventFromForm', () => {
     expect(eventFromForm(form(fields), KARACHI)).toEqual({ ok: false, errors });
   });
 
+  it('reports a missing title together with an end before the start', () => {
+    expect(eventFromForm(form({ title: '', endTime: '15:00' }), KARACHI)).toEqual({
+      ok: false,
+      errors: {
+        title: EVENT_FORM_MESSAGES.titleMissing,
+        endTime: EVENT_FORM_MESSAGES.endBeforeStart,
+      },
+    });
+  });
+
   it('reports several field errors at once', () => {
     expect(eventFromForm(form({ title: '', startTime: 'soon' }), KARACHI)).toEqual({
       ok: false,

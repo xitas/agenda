@@ -159,24 +159,26 @@ export function eventFromForm(
     if (!TIME.test(form.startTime)) errors.startTime = EVENT_FORM_MESSAGES.timeInvalid;
     if (!TIME.test(form.endTime)) errors.endTime = EVENT_FORM_MESSAGES.timeInvalid;
   }
-  if (Object.keys(errors).length > 0) return { ok: false, errors };
+  // Start and end can only be compared once they are readable; the title is separate, so
+  // a missing title and an end before the start are reported together.
+  const readable = Object.keys(errors).every((field) => field === 'title');
+  if (!readable) return { ok: false, errors };
 
   let start: string;
   let end: string | null;
   if (form.allDay) {
-    if (form.endDate < form.startDate) {
-      return { ok: false, errors: { endDate: EVENT_FORM_MESSAGES.endDayBeforeStart } };
-    }
+    if (form.endDate < form.startDate) errors.endDate = EVENT_FORM_MESSAGES.endDayBeforeStart;
     start = form.startDate;
     end = form.endDate === form.startDate ? null : addDaysToPlainDate(form.endDate, 1);
   } else {
     start = localDateTimeToUtc(form.startDate, form.startTime, viewerZone);
     end = localDateTimeToUtc(form.endDate, form.endTime, viewerZone);
     if (Date.parse(end) <= Date.parse(start)) {
-      const field = form.endDate < form.startDate ? 'endDate' : 'endTime';
-      return { ok: false, errors: { [field]: EVENT_FORM_MESSAGES.endBeforeStart } };
+      errors[form.endDate < form.startDate ? 'endDate' : 'endTime'] =
+        EVENT_FORM_MESSAGES.endBeforeStart;
     }
   }
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const location = form.location.trim();
   const parsed = EventCreateSchema.safeParse({
