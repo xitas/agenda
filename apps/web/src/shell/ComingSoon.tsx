@@ -10,7 +10,7 @@ export interface ComingSoonProps {
 export function ComingSoon({ title }: ComingSoonProps) {
   return (
     <section className="coming-soon" aria-labelledby="coming-soon-title">
-      <h1 id="coming-soon-title" className="day__heading">
+      <h1 id="coming-soon-title" className="view-header__heading">
         {title}
       </h1>
       <EmptyState

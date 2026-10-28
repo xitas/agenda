@@ -24,11 +24,11 @@ describe('app shell', () => {
 
   it('shows placeholders for the views that come later', async () => {
     const app = renderApp('/');
-    await userEvent.setup().click(await screen.findByRole('link', { name: 'Week' }));
-    expect(path(app)).toBe('/week');
-    expect(screen.getByRole('heading', { level: 1, name: 'Week' })).toBeDefined();
-    expect(screen.getByText('The week view is coming soon.')).toBeDefined();
-    expect(screen.getByRole('link', { name: 'Week' }).getAttribute('aria-current')).toBe('page');
+    await userEvent.setup().click(await screen.findByRole('link', { name: 'Search' }));
+    expect(path(app)).toBe('/search');
+    expect(screen.getByRole('heading', { level: 1, name: 'Search' })).toBeDefined();
+    expect(screen.getByText('The search view is coming soon.')).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Search' }).getAttribute('aria-current')).toBe('page');
     expect(screen.getByRole('link', { name: 'Today' }).getAttribute('aria-current')).toBeNull();
   });
 

@@ -1,0 +1,32 @@
+/* The week view. Token variables only. */
+
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+}
+
+/* The grid fills the rest of the screen and scrolls inside: top bar, main padding and
+   the header take about four 48 px rows. */
+.week__grid {
+  height: calc(100dvh - var(--ag-space-12) * 4);
+  min-height: calc(var(--ag-size-hour-row) * 6);
+}
+
+.week__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-3);
+  color: var(--ag-color-text-muted);
+}
+
+.week__status p {
+  margin: 0;
+}
+
+@media (width < 768px) {
+  .week__grid {
+    height: calc(100dvh - var(--ag-space-12) * 4 - var(--ag-size-bottom-nav));
+  }
+}
