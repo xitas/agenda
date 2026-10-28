@@ -1,0 +1,33 @@
+/* Shared by the Day, Week and Month views. Token variables only. */
+
+.view-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ag-space-3);
+}
+
+.view-header__titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+}
+
+.view-header__eyebrow {
+  margin: 0;
+  color: var(--ag-color-accent);
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-semibold);
+}
+
+.view-header__heading {
+  margin: 0;
+  font-size: var(--ag-text-display);
+}
+
+.view-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+}

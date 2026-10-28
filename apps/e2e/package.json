@@ -1,0 +1,18 @@
+{
+  "name": "@agenda/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@agenda/config": "workspace:*",
+    "@playwright/test": "~1.64.1",
+    "@types/node": "^24.19.2",
+    "eslint": "^10.13.0",
+    "typescript": "~6.0.3"
+  }
+}

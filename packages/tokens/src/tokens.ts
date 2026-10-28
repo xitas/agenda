@@ -149,6 +149,8 @@ export const size = {
   sidebar: 240,
   /** The tab bar on narrow screens (web below breakpoint.narrow, and mobile). */
   bottomNav: BOTTOM_NAV,
+  /** One hour in the Week time grid (DESIGN.md §3: DayColumn / TimeGrid). */
+  hourRow: 48,
 } as const;
 
 /**

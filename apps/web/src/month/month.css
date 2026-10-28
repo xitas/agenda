@@ -1,0 +1,19 @@
+/* The month view. Token variables only. */
+
+.month {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+}
+
+.month__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-3);
+  color: var(--ag-color-text-muted);
+}
+
+.month__status p {
+  margin: 0;
+}

@@ -5,5 +5,8 @@
 @import './Dialog.css';
 @import './Toast.css';
 @import './EmptyState.css';
+@import './EventColors.css';
 @import './EventCard.css';
 @import './MiniMonth.css';
+@import './TimeGrid.css';
+@import './MonthGrid.css';

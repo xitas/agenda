@@ -81,3 +81,46 @@
     opacity: 0;
   }
 }
+
+/* Sheet (the event editor): only the body scrolls, so the title and the footer with
+   Save stay in view however long the form is. The body's padding (cancelled by a
+   negative margin) keeps focus rings at its edges from being clipped. */
+.ag-dialog--sheet {
+  overflow: hidden;
+}
+
+.ag-dialog--sheet .ag-dialog__body {
+  --ag-dialog-ring: calc(var(--ag-border-focus-ring) + var(--ag-border-focus-offset));
+
+  flex: 1;
+  min-height: 0;
+  margin: calc(var(--ag-dialog-ring) * -1);
+  padding: var(--ag-dialog-ring);
+  overflow-y: auto;
+}
+
+/* On phones the sheet fills the screen. */
+@media (width < 768px) {
+  .ag-dialog--sheet {
+    inset: 0;
+    width: 100%;
+    max-height: none;
+    height: 100dvh;
+    padding: var(--ag-space-4) var(--ag-space-4)
+      calc(var(--ag-space-4) + env(safe-area-inset-bottom, 0px));
+    border: 0;
+    border-radius: 0;
+    transform: none;
+  }
+
+  .ag-dialog--sheet[data-state='open'] {
+    animation: ag-sheet-in var(--ag-duration-sheet) var(--ag-easing-standard);
+  }
+}
+
+@keyframes ag-sheet-in {
+  from {
+    transform: translateY(var(--ag-space-8));
+    opacity: 0;
+  }
+}

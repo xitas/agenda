@@ -1,4 +1,29 @@
-export { dayAgenda, eventDays, eventOverlapsRange } from './agenda.js';
+export { dayAgenda, eventDays, eventOverlapsRange, hasEnded } from './agenda.js';
+export {
+  DEFAULT_DURATION_MINUTES,
+  MIN_BLOCK_MINUTES,
+  MINUTES_PER_DAY,
+  daysFrom,
+  inAllDayStrip,
+  layoutAllDay,
+  layoutDay,
+  startOfWeekPlain,
+  wallClockMinutes,
+} from './time-grid.js';
+export type { AllDayLayout, StripBlock, TimedBlock } from './time-grid.js';
+export { eventsByDay } from './month.js';
+export {
+  EVENT_FORM_MESSAGES,
+  REMINDER_CHOICES,
+  eventFromForm,
+  formatDateInput,
+  formFromEvent,
+  localDateTimeToUtc,
+  newEventForm,
+  parseDateInput,
+  utcToLocalDateTime,
+} from './event-form.js';
+export type { EventForm, EventFormErrors, EventFormField, EventFormResult } from './event-form.js';
 export type { DayAgenda } from './agenda.js';
 export {
   API_PREFIX,

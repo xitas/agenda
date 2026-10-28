@@ -94,3 +94,17 @@ export function eventDays(events: readonly Timing[], timeZone: string): Set<stri
   }
   return days;
 }
+
+/**
+ * Whether an event is over: a timed event once its end has passed (an event with no end
+ * counts as 30 minutes, as in the Week grid), an all-day event once its last day is
+ * before `today` (a plain date in the viewer's zone).
+ */
+export function hasEnded(event: Timing, now: Date, today: string): boolean {
+  if (event.allDay) {
+    const last = event.end === null ? event.start : addDaysToPlainDate(event.end, -1);
+    return last < today;
+  }
+  const end = event.end === null ? instant(event.start) + 30 * 60_000 : instant(event.end);
+  return end <= now.getTime();
+}

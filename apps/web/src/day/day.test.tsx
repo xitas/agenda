@@ -46,8 +46,23 @@ describe('Today', () => {
       expect.stringContaining('Review'),
     ]);
     expect(screen.getByRole('heading', { level: 1, name: 'Tuesday 27 October' })).toBeDefined();
-    expect(screen.getByText('Today', { selector: '.day__eyebrow' })).toBeDefined();
+    expect(screen.getByText('Today', { selector: '.view-header__eyebrow' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Today' })).toHaveProperty('disabled', true);
+  });
+
+  it('mutes events that have ended, keeping them readable', async () => {
+    renderApp('/', {
+      setup: (fake) => {
+        fake.events.listAll.mockResolvedValue(TODAY_EVENTS);
+      },
+    });
+    await dayList();
+    const card = (title: string) => screen.getByRole('button', { name: new RegExp(`^${title}`) });
+    // 14:00 now: Standup (10:00, 30 min) and Lunch (13:00–14:00) are over.
+    expect(card('Standup').className).toContain('ag-event-card--past');
+    expect(card('Lunch').className).toContain('ag-event-card--past');
+    expect(card('Review').className).not.toContain('--past');
+    expect(card('Holiday').className).not.toContain('--past');
   });
 
   it('asks for the day in the viewer zone', async () => {
@@ -89,7 +104,7 @@ describe('Today', () => {
     });
     await dayList();
     expect(screen.queryByText(/^Now ·/)).toBeNull();
-    expect(screen.getByText('Tomorrow', { selector: '.day__eyebrow' })).toBeDefined();
+    expect(screen.getByText('Tomorrow', { selector: '.view-header__eyebrow' })).toBeDefined();
   });
 
   it('moves the now marker as the clock goes on', async () => {
@@ -150,7 +165,7 @@ describe('day navigation', () => {
     await user.click(screen.getByRole('button', { name: 'Previous day' }));
     await user.click(screen.getByRole('button', { name: 'Previous day' }));
     expect(path(app)).toBe('/day/2026-10-26');
-    expect(screen.getByText('Yesterday', { selector: '.day__eyebrow' })).toBeDefined();
+    expect(screen.getByText('Yesterday', { selector: '.view-header__eyebrow' })).toBeDefined();
 
     await user.click(screen.getByRole('button', { name: 'Today' }));
     expect(path(app)).toBe('/');

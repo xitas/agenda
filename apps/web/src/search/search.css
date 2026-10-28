@@ -1,0 +1,126 @@
+/* The search view. Token variables only. */
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+  max-width: calc(var(--ag-size-dialog) * 1.5);
+}
+
+.search__field {
+  position: relative;
+}
+
+.search__icon {
+  position: absolute;
+  top: 50%;
+  left: var(--ag-space-3);
+  width: var(--ag-size-icon-md);
+  height: var(--ag-size-icon-md);
+  color: var(--ag-color-text-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search__input {
+  padding-left: calc(var(--ag-space-3) * 2 + var(--ag-size-icon-md));
+}
+
+.search__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-3);
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+}
+
+.search__status p {
+  margin: 0;
+}
+
+.search__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+}
+
+.search__heading {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.search__groups,
+.search__events {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search__groups {
+  gap: var(--ag-space-4);
+}
+
+.search__events {
+  gap: var(--ag-space-2);
+}
+
+.search__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+}
+
+.search__day {
+  margin: 0;
+  font-size: var(--ag-text-body-sm);
+  font-weight: var(--ag-weight-semibold);
+}
+
+.search__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  width: 100%;
+  padding: var(--ag-space-2) var(--ag-space-3);
+  border: 0;
+  border-left: var(--ag-border-bar) solid var(--ag-event-strong);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-event-soft);
+  color: var(--ag-color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.search__result:hover {
+  filter: brightness(0.97);
+}
+
+.search__title {
+  font-weight: var(--ag-weight-medium);
+}
+
+.search__time,
+.search__extra {
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The match: the accent as a soft underline-like fill, text color unchanged so contrast
+   stays the text's own. */
+.search__result mark {
+  border-radius: var(--ag-radius-sm);
+  background: none;
+  box-shadow: inset 0 calc(var(--ag-border-focus-ring) * -1) 0 var(--ag-color-accent);
+  color: inherit;
+  font-weight: var(--ag-weight-semibold);
+}

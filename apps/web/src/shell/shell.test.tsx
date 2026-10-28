@@ -22,16 +22,6 @@ describe('app shell', () => {
     );
   });
 
-  it('shows placeholders for the views that come later', async () => {
-    const app = renderApp('/');
-    await userEvent.setup().click(await screen.findByRole('link', { name: 'Week' }));
-    expect(path(app)).toBe('/week');
-    expect(screen.getByRole('heading', { level: 1, name: 'Week' })).toBeDefined();
-    expect(screen.getByText('The week view is coming soon.')).toBeDefined();
-    expect(screen.getByRole('link', { name: 'Week' }).getAttribute('aria-current')).toBe('page');
-    expect(screen.getByRole('link', { name: 'Today' }).getAttribute('aria-current')).toBeNull();
-  });
-
   it('sends unknown paths to Today', async () => {
     const app = renderApp('/nowhere');
     await screen.findByRole('heading', { level: 1, name: 'Tuesday 27 October' });

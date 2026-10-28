@@ -14,6 +14,10 @@ export interface EventCardProps {
   variant?: EventCardVariant;
   /** Makes the card a button, e.g. to open the editor. */
   onSelect?: () => void;
+  /** The event has ended: its title is muted (still readable). */
+  past?: boolean;
+  /** Replaces the time shown (e.g. just the start in a month cell); null shows none. */
+  time?: string | null;
 }
 
 const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
@@ -29,14 +33,18 @@ export function EventCard({
   locale,
   variant = 'default',
   onSelect,
+  past = false,
+  time: timeOverride,
 }: EventCardProps) {
-  const time = formatEventTime(event, timezone, locale);
+  const time = timeOverride === undefined ? formatEventTime(event, timezone, locale) : timeOverride;
   const content = (
     <>
       <span className="ag-event-card__title">{event.title}</span>
-      <time className="ag-event-card__time" dateTime={event.start}>
-        {time}
-      </time>
+      {time !== null && (
+        <time className="ag-event-card__time" dateTime={event.start}>
+          {time}
+        </time>
+      )}
       {variant === 'default' && event.location !== null && event.location !== '' && (
         <span className="ag-event-card__location">
           <MapPin aria-hidden="true" className="ag-event-card__icon" />
@@ -50,14 +58,15 @@ export function EventCard({
     'ag-event-card',
     `ag-event-card--${variant}`,
     onSelect && 'ag-event-card--interactive',
+    past && 'ag-event-card--past',
   );
 
   return onSelect === undefined ? (
-    <div className={className} data-color={event.color}>
+    <div className={className} data-event-color={event.color}>
       {content}
     </div>
   ) : (
-    <button type="button" className={className} data-color={event.color} onClick={onSelect}>
+    <button type="button" className={className} data-event-color={event.color} onClick={onSelect}>
       {content}
     </button>
   );

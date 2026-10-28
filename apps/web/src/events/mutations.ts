@@ -1,5 +1,5 @@
 import { NetworkError, eventOverlapsRange } from '@agenda/core';
-import type { AgendaEvent, EventCreate } from '@agenda/core';
+import type { AgendaEvent, EventCreate, EventPatch } from '@agenda/core';
 import { useToast } from '@agenda/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
@@ -27,6 +27,30 @@ function insertEverywhere(queryClient: QueryClient, snapshot: EventsSnapshot, ev
       queryClient.setQueryData<AgendaEvent[]>(
         key,
         data.filter((other) => other.id !== event.id).concat(event),
+      );
+    }
+  }
+}
+
+/**
+ * Puts an edited event in place of the old one: range lists drop it, then take it back
+ * only if it still overlaps their range (it may have moved); other lists (search) swap it
+ * where it was.
+ */
+function replaceEverywhere(queryClient: QueryClient, snapshot: EventsSnapshot, event: AgendaEvent) {
+  for (const [key, data] of snapshot) {
+    if (!data) continue;
+    const cached = rangeFromKey(key);
+    if (cached === null) {
+      queryClient.setQueryData<AgendaEvent[]>(
+        key,
+        data.map((other) => (other.id === event.id ? event : other)),
+      );
+    } else {
+      const without = data.filter((other) => other.id !== event.id);
+      queryClient.setQueryData<AgendaEvent[]>(
+        key,
+        eventOverlapsRange(event, cached.range, cached.timezone) ? [...without, event] : without,
       );
     }
   }
@@ -128,6 +152,39 @@ export function useRestoreEvent() {
     onError: (error, event, context) => {
       restoreSnapshot(queryClient, context?.snapshot);
       toast({ message: failure(error, `restore "${event.title}"`) });
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: EVENTS_KEY }),
+  });
+}
+
+/** What an edit needs: the event as it was (for the optimistic copy) and the changes. */
+export interface EventEdit {
+  event: AgendaEvent;
+  patch: EventPatch;
+}
+
+/**
+ * Saves an edit optimistically: the changed event shows at once, in the right lists if it
+ * moved, and everything rolls back if the API rejects it. The caller adds its own error
+ * message (the editor offers to reopen the form).
+ */
+export function useUpdateEvent() {
+  const api = useApi();
+  const env = useEnv();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ event, patch }: EventEdit) => api.events.update(event.id, patch),
+    onMutate: async ({ event, patch }) => {
+      const snapshot = await takeSnapshot(queryClient);
+      replaceEverywhere(queryClient, snapshot, {
+        ...event,
+        ...patch,
+        updatedAt: env.now().toISOString(),
+      });
+      return { snapshot };
+    },
+    onError: (_error, _edit, context) => {
+      restoreSnapshot(queryClient, context?.snapshot);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: EVENTS_KEY }),
   });

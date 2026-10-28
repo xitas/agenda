@@ -1,0 +1,106 @@
+/* The event editor. Token variables only. */
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+}
+
+.editor__when {
+  display: grid;
+  /* Wide enough for "04:00 PM" and the browser's clock icon. */
+  grid-template-columns: minmax(0, 1fr) calc(var(--ag-space-12) * 3);
+  gap: var(--ag-space-3);
+  align-items: start;
+}
+
+.editor__check,
+.editor__color,
+.editor__chip {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+  font-size: var(--ag-text-body-sm);
+  cursor: pointer;
+}
+
+.editor__check input,
+.editor__color input,
+.editor__chip input {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+  margin: 0;
+  accent-color: var(--ag-color-accent);
+}
+
+.editor__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.editor__group legend {
+  padding: 0;
+  margin-bottom: var(--ag-space-2);
+}
+
+.editor__colors {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ag-space-2);
+}
+
+.editor__color,
+.editor__chip {
+  padding: var(--ag-space-2);
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-sm);
+}
+
+.editor__color:has(input:checked),
+.editor__chip:has(input:checked) {
+  border-color: var(--ag-color-accent);
+  background: var(--ag-color-surface-2);
+}
+
+.editor__swatch {
+  flex-shrink: 0;
+  width: var(--ag-space-3);
+  height: var(--ag-space-3);
+  border-radius: var(--ag-radius-full);
+  background: var(--ag-event-strong);
+}
+
+.editor__reminders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ag-space-2);
+}
+
+.editor__chip {
+  padding: var(--ag-space-1) var(--ag-space-3);
+  border-radius: var(--ag-radius-full);
+}
+
+.editor__tip {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+}
+
+/* No physical keyboard to press Ctrl+Enter with. */
+@media (pointer: coarse) {
+  .editor__tip {
+    display: none;
+  }
+}
+
+@media (width < 768px) {
+  .editor__colors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

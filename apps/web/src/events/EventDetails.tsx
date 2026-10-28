@@ -1,6 +1,6 @@
 import type { AgendaEvent } from '@agenda/core';
 import { Button, Dialog } from '@agenda/ui';
-import { MapPin, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, Trash2 } from 'lucide-react';
 import { useEnv } from '../app/env';
 import { colorName, previewWhen } from '../quick-add/preview';
 
@@ -8,11 +8,13 @@ export interface EventDetailsProps {
   /** The event shown; null closes the dialog. */
   event: AgendaEvent | null;
   onClose: () => void;
+  /** Opens the editor (the details dialog closes). */
+  onEdit: (event: AgendaEvent) => void;
   onDelete: (event: AgendaEvent) => void;
 }
 
-/** A read-only view of one event, with Delete. Editing comes with the EventEditor. */
-export function EventDetails({ event, onClose, onDelete }: EventDetailsProps) {
+/** A read-only view of one event, with Edit and Delete. */
+export function EventDetails({ event, onClose, onEdit, onDelete }: EventDetailsProps) {
   const env = useEnv();
   if (event === null) return null;
 
@@ -25,16 +27,26 @@ export function EventDetails({ event, onClose, onDelete }: EventDetailsProps) {
       title={event.title}
       description={previewWhen(event, env)}
       footer={
-        <Button
-          variant="danger"
-          icon={<Trash2 />}
-          onClick={() => {
-            onDelete(event);
-            onClose();
-          }}
-        >
-          Delete
-        </Button>
+        <>
+          <Button
+            variant="danger"
+            icon={<Trash2 />}
+            onClick={() => {
+              onDelete(event);
+              onClose();
+            }}
+          >
+            Delete
+          </Button>
+          <Button
+            icon={<Pencil />}
+            onClick={() => {
+              onEdit(event);
+            }}
+          >
+            Edit
+          </Button>
+        </>
       }
     >
       <dl className="event-details" data-event-color={event.color}>

@@ -1,0 +1,256 @@
+/*
+ * The Week time grid. Token variables only. Positions arrive as unitless custom
+ * properties set by the component (--top and --height in minutes, --col/--cols for
+ * overlaps, --col/--span/--lane in the all-day strip) and become lengths here.
+ */
+
+.ag-timegrid {
+  --ag-timegrid-gutter: calc(var(--ag-space-12) + var(--ag-space-2));
+  --ag-timegrid-columns: var(--ag-timegrid-gutter) repeat(var(--days), minmax(0, 1fr));
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+  overflow: hidden;
+}
+
+.ag-timegrid__head,
+.ag-timegrid__strip,
+.ag-timegrid__body {
+  display: grid;
+  grid-template-columns: var(--ag-timegrid-columns);
+}
+
+.ag-timegrid__head {
+  border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.ag-timegrid__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ag-space-1);
+  padding: var(--ag-space-2) 0;
+  border: 0;
+  border-left: var(--ag-border-hairline) solid var(--ag-color-border);
+  background: none;
+  color: var(--ag-color-text);
+  font: inherit;
+}
+
+button.ag-timegrid__day {
+  cursor: pointer;
+}
+
+button.ag-timegrid__day:hover .ag-timegrid__date {
+  background: var(--ag-color-surface-2);
+}
+
+.ag-timegrid__weekday {
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-medium);
+}
+
+.ag-timegrid__date {
+  display: grid;
+  place-items: center;
+  width: var(--ag-size-control-sm);
+  height: var(--ag-size-control-sm);
+  border-radius: var(--ag-radius-full);
+  font-size: var(--ag-text-title-sm);
+  font-weight: var(--ag-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.ag-timegrid__day--past .ag-timegrid__date {
+  color: var(--ag-color-text-muted);
+  font-weight: var(--ag-weight-regular);
+}
+
+.ag-timegrid__day--today .ag-timegrid__weekday {
+  color: var(--ag-color-accent);
+}
+
+.ag-timegrid__day--today .ag-timegrid__date,
+button.ag-timegrid__day--today:hover .ag-timegrid__date {
+  background: var(--ag-color-accent);
+  color: var(--ag-color-accent-fg);
+}
+
+/* All-day strip: one row per lane, events spanning their days. */
+.ag-timegrid__strip {
+  grid-template-rows: repeat(var(--lanes), auto);
+  gap: var(--ag-space-1) 0;
+  padding: var(--ag-space-1) 0;
+  border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.ag-timegrid__strip-label {
+  grid-row: 1 / -1;
+  grid-column: 1;
+  align-self: center;
+  padding-right: var(--ag-space-2);
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+  text-align: right;
+}
+
+.ag-timegrid__allday {
+  grid-row: var(--lane);
+  grid-column: var(--col) / span var(--span);
+  margin: 0 var(--ag-space-1);
+}
+
+/* Scrolling hours. */
+.ag-timegrid__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ag-timegrid__hours,
+.ag-timegrid__column {
+  position: relative;
+  height: calc(var(--ag-size-hour-row) * 24);
+}
+
+.ag-timegrid__hour {
+  position: absolute;
+  top: calc(var(--ag-size-hour-row) * var(--hour));
+  right: var(--ag-space-2);
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.ag-timegrid__column {
+  border-left: var(--ag-border-hairline) solid var(--ag-color-border);
+  background-image: linear-gradient(
+    to bottom,
+    var(--ag-color-border) var(--ag-border-hairline),
+    transparent var(--ag-border-hairline)
+  );
+  background-size: 100% var(--ag-size-hour-row);
+  cursor: cell;
+}
+
+.ag-timegrid__column--past {
+  background-color: var(--ag-color-bg);
+}
+
+/* Event blocks (timed and all-day). */
+.ag-timegrid__event,
+.ag-timegrid__allday {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--ag-space-1) var(--ag-space-2);
+  border: 0;
+  border-left: var(--ag-border-bar) solid var(--ag-event-strong);
+  border-radius: var(--ag-radius-sm);
+  background: var(--ag-event-soft);
+  color: var(--ag-color-text);
+  font: inherit;
+  font-size: var(--ag-text-caption);
+  line-height: var(--ag-leading-heading);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ag-timegrid__event {
+  position: absolute;
+  top: calc(var(--ag-size-hour-row) * var(--top) / 60);
+  left: calc(100% * var(--col) / var(--cols));
+  width: calc(100% / var(--cols) - var(--ag-space-1));
+  height: calc(var(--ag-size-hour-row) * var(--height) / 60 - var(--ag-border-hairline));
+  box-shadow: 0 0 0 var(--ag-border-hairline) var(--ag-color-surface);
+}
+
+.ag-timegrid__allday {
+  flex-direction: row;
+  gap: var(--ag-space-2);
+  align-items: baseline;
+}
+
+.ag-timegrid__event:hover,
+.ag-timegrid__allday:hover {
+  filter: brightness(0.97);
+}
+
+.ag-timegrid__event:focus-visible,
+.ag-timegrid__allday:focus-visible {
+  z-index: 1;
+}
+
+.ag-timegrid__event-title {
+  overflow: hidden;
+  font-weight: var(--ag-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ag-timegrid__event-time {
+  overflow: hidden;
+  color: var(--ag-color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ended events stay readable: muted text on the same fill (contrast is tested). */
+.ag-timegrid__event--past .ag-timegrid__event-title,
+.ag-timegrid__allday--past .ag-timegrid__event-title {
+  color: var(--ag-color-text-muted);
+  font-weight: var(--ag-weight-regular);
+}
+
+/* The now line on today's column. */
+.ag-timegrid__now {
+  position: absolute;
+  top: calc(var(--ag-size-hour-row) * var(--top) / 60);
+  right: 0;
+  left: 0;
+  z-index: 2;
+  border-top: var(--ag-border-focus-ring) solid var(--ag-color-accent);
+  pointer-events: none;
+}
+
+.ag-timegrid__now::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--ag-space-1) * -1 - var(--ag-border-hairline));
+  left: calc(var(--ag-space-1) * -1);
+  width: var(--ag-space-2);
+  height: var(--ag-space-2);
+  border-radius: var(--ag-radius-full);
+  background: var(--ag-color-accent);
+}
+
+/* Short blocks: one line, title first, so neither is cut in half. */
+.ag-timegrid__event--short {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--ag-space-1);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* In a narrow block the title wins; the time gives way first. */
+.ag-timegrid__event--short .ag-timegrid__event-title {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.ag-timegrid__event--short .ag-timegrid__event-time {
+  flex-shrink: 1;
+  min-width: 0;
+}

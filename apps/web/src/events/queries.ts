@@ -1,5 +1,6 @@
 import type { AgendaEvent, DateRange } from '@agenda/core';
 import { useQuery } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 import { useApi } from '../app/api';
 
 /** Every cached list of events starts with this, so one invalidation refreshes them all. */
@@ -31,4 +32,30 @@ export function useRangeEvents(range: DateRange, timezone: string) {
     queryFn: ({ signal }) =>
       api.events.listAll({ from: range.start, to: range.end, tz: timezone }, { signal }),
   });
+}
+
+/** The most results Search asks for (the API's page limit). */
+export const SEARCH_LIMIT = 200;
+
+/**
+ * Events whose title, location or notes contain `q`, across all dates. Cached under
+ * EVENTS_KEY as a plain list like the ranges, so edits and deletes update it too.
+ */
+export function useSearchEvents(q: string) {
+  const api = useApi();
+  return useQuery<AgendaEvent[]>({
+    queryKey: ['events', 'search', q],
+    queryFn: async ({ signal }) =>
+      (await api.events.list({ q, limit: SEARCH_LIMIT }, { signal })).events,
+    enabled: q !== '',
+  });
+}
+
+/** An event by id from any cached list (for shortcuts on the focused event). */
+export function findCachedEvent(queryClient: QueryClient, id: string): AgendaEvent | undefined {
+  for (const [, data] of queryClient.getQueriesData<AgendaEvent[]>({ queryKey: EVENTS_KEY })) {
+    const event = data?.find((candidate) => candidate.id === id);
+    if (event !== undefined) return event;
+  }
+  return undefined;
 }

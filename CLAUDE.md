@@ -40,8 +40,10 @@ pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; des
                                     # web: http://localhost:5173 (log in with the API password);
                                     # /playground shows every ui component
 pnpm build                          # build every package and app
-pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # what CI runs; must pass before a PR
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # what CI runs (plus pnpm e2e); must pass before a PR
 pnpm format                         # fix formatting with Prettier
+pnpm build && pnpm e2e              # Playwright smoke test (Chromium) on the built api + web; own temp DB, ports 4101/5101
+                                    # first time: pnpm --filter @agenda/e2e exec playwright install chromium
 ```
 
 Filters need the full scoped package name (`@agenda/web`, not `web`).
