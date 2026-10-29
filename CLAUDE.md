@@ -1,6 +1,6 @@
 # CLAUDE.md: working on Agenda
 
-Agenda is a personal agenda/calendar app being rebuilt from a teaching project (tag `legacy-agenda`; the old code is kept in `legacy/` for reference) into a monorepo that ships on web, desktop (Tauri), Chrome extension (MV3/WXT), and mobile (Expo). The owner is using it to **learn** each platform, so explain non-obvious decisions briefly in PR descriptions.
+Agenda is a personal agenda/calendar app being rebuilt from a teaching project (the old code is at the tag `legacy-agenda`) into a monorepo that ships on web, desktop (Tauri), Chrome extension (MV3/WXT), and mobile (Expo). The owner is using it to **learn** each platform, so explain non-obvious decisions briefly in PR descriptions.
 
 ## Read first
 

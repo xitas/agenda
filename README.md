@@ -23,7 +23,6 @@ packages/
   tokens/     Design tokens (color, spacing, type) for every platform
   ui/         Shared React components for web-based apps
   config/     Shared tsconfig, ESLint, Prettier and Vitest settings
-legacy/       The original CRA + Express app, kept for reference only
 ```
 
 Apps depend on packages through `workspace:*` links, so a change in `packages/core` is picked up by `apps/web` without publishing anything. Library packages compile to `dist/` with type declarations.
@@ -76,12 +75,6 @@ Add `--filter @agenda/<name>` (for example `--filter @agenda/core`) to any of th
 
 Every pull request and push to `master` runs `.github/workflows/ci.yml`: a frozen-lockfile install, then `format:check`, `lint`, `typecheck`, `test` and `build`. Run the same checks locally before opening a PR.
 
-## Legacy app
+## The original app
 
-The original v0 app lives in `legacy/` and is not part of the workspace. The last commit before the rebuild is tagged `legacy-agenda`. To run it:
-
-```sh
-cd legacy
-npm install
-npm run dev
-```
+The v0 app (Create React App and Express) is no longer in the tree. The last commit before the rebuild is tagged `legacy-agenda`; check it out to see or run the old code. Its exports still import: Settings > Data takes an old `AgendaData.json`.

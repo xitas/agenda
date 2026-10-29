@@ -1,4 +1,4 @@
-// The three cases from legacy/server/db.test.js, ported to the v1 API.
+// The three cases from the v0 app's server/db.test.js (tag legacy-agenda), ported to the v1 API.
 import type { AgendaEvent } from '@agenda/core';
 import { describe, expect, it } from 'vitest';
 import { makeTestApp } from './helpers.js';
@@ -8,7 +8,7 @@ interface Page {
   events: AgendaEvent[];
 }
 
-describe('ported from legacy/server/db.test.js', () => {
+describe('ported from the v0 server/db.test.js', () => {
   it('rejects a missing title and a bad date', async () => {
     const { request } = await makeTestApp();
     const noTitle: ErrorResponse = await request('POST', '/events', {

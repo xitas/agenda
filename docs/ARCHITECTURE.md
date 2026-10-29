@@ -39,7 +39,6 @@ agenda/
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
-├─ legacy/          v0 CRA + Express app, reference only (deleted after Phase 2)
 ├─ docs/            PLAN, ARCHITECTURE, DESIGN, PROMPTS
 ├─ .github/         CI workflow, PR template
 ├─ CLAUDE.md
