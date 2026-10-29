@@ -19,6 +19,7 @@ import { RouterProvider } from 'react-router/dom';
 import { createWebApi } from './app/api';
 import { AppProviders } from './app/AppProviders';
 import { browserEnv } from './app/env';
+import { webPlatform } from './app/platform';
 import { createQueryClient } from './app/queryClient';
 import { handleUnauthorized } from './app/session';
 import { routes } from './router';
@@ -40,7 +41,7 @@ if (!root) throw new Error('Missing #root element in index.html');
 
 createRoot(root).render(
   <StrictMode>
-    <AppProviders api={api} queryClient={queryClient} env={browserEnv()}>
+    <AppProviders api={api} queryClient={queryClient} env={browserEnv()} platform={webPlatform}>
       <RouterProvider router={app.router} />
     </AppProviders>
   </StrictMode>,
