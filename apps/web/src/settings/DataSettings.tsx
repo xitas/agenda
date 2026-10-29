@@ -152,7 +152,7 @@ export function DataSettings() {
                   return (
                     <li key={index}>
                       Row {index + 1}
-                      {title === undefined ? '' : ` "${title}"`}: {reason}
+                      {title === undefined || title === '' ? '' : ` "${title}"`}: {reason}
                     </li>
                   );
                 })}

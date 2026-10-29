@@ -142,7 +142,7 @@ describe('Data', () => {
       within(data)
         .getAllByRole('listitem')
         .map((li) => li.textContent),
-    ).toEqual(['Row 2 "Dentist": Already exists', 'Row 3 "": Invalid date']);
+    ).toEqual(['Row 2 "Dentist": Already exists', 'Row 3: Invalid date']);
     expect(app.events.importEvents).toHaveBeenCalledWith(v0, { tz: 'Asia/Karachi' });
   });
 
