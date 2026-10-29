@@ -114,33 +114,52 @@ export function TimeGrid<E extends GridEvent>({
     onSelectSlot(day, Math.min(Math.max(minutes, 0), MINUTES_PER_DAY - SLOT_MINUTES));
   };
 
+  /** "Dentist, Wednesday, 28 October 2026, 16:00 – 17:00, Red": everything a block shows. */
+  const describe = (event: E, day: string | null) => {
+    const time = formatEventTime(event, timezone, locale, { hour12 });
+    const when =
+      day !== null
+        ? `${formats.full.format(atNoonUtc(day))}, ${time}`
+        : time === 'All day'
+          ? `${formats.full.format(atNoonUtc(event.start))}, all day`
+          : time;
+    return { time, label: `${event.title}, ${when}, ${capitalise(event.color)}` };
+  };
+
   const eventButton = (
     event: E,
     className: string,
     style: CSSProperties,
     extra = '',
     short = false,
-  ) => (
-    <button
-      key={`${event.id}${extra}`}
-      type="button"
-      className={cx(
-        className,
-        isPast(event) && `${className}--past`,
-        short && `${className}--short`,
-      )}
-      style={style}
-      data-event-color={event.color}
-      data-event-id={event.id}
-      onClick={() => onSelectEvent?.(event)}
-    >
-      <span className="ag-timegrid__event-title">{event.title}</span>
-      <time className="ag-timegrid__event-time" dateTime={event.start}>
-        {formatEventTime(event, timezone, locale, { hour12 })}
-      </time>
-      <span className="ag-visually-hidden">Category: {capitalise(event.color)}</span>
-    </button>
-  );
+    day: string | null = null,
+  ) => {
+    const { time, label } = describe(event, day);
+    return (
+      <button
+        key={`${event.id}${extra}`}
+        type="button"
+        className={cx(
+          className,
+          isPast(event) && `${className}--past`,
+          short && `${className}--short`,
+        )}
+        style={style}
+        data-event-color={event.color}
+        data-event-id={event.id}
+        // The full name, since a narrow block hides its time; the tooltip shows the same.
+        aria-label={label}
+        title={`${event.title}
+${time}`}
+        onClick={() => onSelectEvent?.(event)}
+      >
+        <span className="ag-timegrid__event-title">{event.title}</span>
+        <time className="ag-timegrid__event-time" dateTime={event.start}>
+          {time}
+        </time>
+      </button>
+    );
+  };
 
   return (
     <div className="ag-timegrid" style={vars({ days: days.length })}>
@@ -222,6 +241,7 @@ export function TimeGrid<E extends GridEvent>({
                 `@${day}`,
                 // Too short for two lines: title and time share one.
                 block.height < SHORT_BLOCK_MINUTES,
+                day,
               ),
             )}
             {day === today && (

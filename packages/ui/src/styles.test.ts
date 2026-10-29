@@ -1,7 +1,7 @@
 // @vitest-environment node
 /// <reference types="node" />
 import { readdirSync, readFileSync } from 'node:fs';
-import { breakpoint } from '@agenda/tokens';
+import { breakpoint, size } from '@agenda/tokens';
 import { describe, expect, it } from 'vitest';
 
 const dir = new URL('./', import.meta.url);
@@ -9,6 +9,8 @@ const sheets = readdirSync(dir).filter((name) => name.endsWith('.css'));
 const read = (name: string) => readFileSync(new URL(name, dir), 'utf8');
 
 const BREAKPOINTS = new Set<number>(Object.values(breakpoint));
+/** Container queries can't use variables either; their widths must equal a size token. */
+const CONTAINER_WIDTHS = new Set<number>([size.eventTimeMin]);
 
 /** Literal values that must come from tokens instead (CLAUDE.md: tokens only). */
 const FORBIDDEN: [string, RegExp][] = [
@@ -30,6 +32,9 @@ function declarations(css: string): string {
       // Variables can't be used in @media conditions, so a width there must equal a token.
       .replace(/@media \(width [<>]=? (\d+)px\)/g, (match, px: string) =>
         BREAKPOINTS.has(Number(px)) ? '@media (breakpoint)' : match,
+      )
+      .replace(/@container \(width [<>]=? (\d+)px\)/g, (match, px: string) =>
+        CONTAINER_WIDTHS.has(Number(px)) ? '@container (token)' : match,
       )
   );
 }
@@ -54,7 +59,18 @@ describe('ui stylesheets', () => {
   it('allows breakpoint widths and zero, and nothing else', () => {
     expect(violations('@media (width < 768px) { a { b: env(x, 0px); } }')).toEqual([]);
     expect(violations('@media (width < 700px) { a { b: c; } }')).toEqual(['px length: "700px"']);
+    expect(violations('@container (width < 96px) { a { b: c; } }')).toEqual([]);
+    expect(violations('@container (width < 90px) { a { b: c; } }')).toEqual(['px length: "90px"']);
     expect(violations('a { margin: 10px; }')).toEqual(['px length: "10px"']);
+  });
+
+  it('hides the time in time-grid blocks narrower than size.eventTimeMin', () => {
+    const css = read('TimeGrid.css');
+    // Blocks are size containers; below the token width the time is not shown.
+    expect(css).toMatch(/\.ag-timegrid__event \{\s*container-type: inline-size;\s*\}/);
+    expect(css).toContain(
+      `@container (width < ${String(size.eventTimeMin)}px) {\n  .ag-timegrid__event-time {\n    display: none;`,
+    );
   });
 
   it('imports every stylesheet from styles.css', () => {
