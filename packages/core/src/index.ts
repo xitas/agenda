@@ -7,7 +7,6 @@ export {
   inAllDayStrip,
   layoutAllDay,
   layoutDay,
-  startOfWeekPlain,
   wallClockMinutes,
 } from './time-grid.js';
 export type { AllDayLayout, StripBlock, TimedBlock } from './time-grid.js';
@@ -74,8 +73,21 @@ export {
   plainDateInTz,
   rangeForView,
   startOfDayInTz,
+  startOfWeekPlain,
 } from './dates.js';
-export type { CalendarView, DateRange } from './dates.js';
+export type { CalendarView, DateRange, TimeFormatOptions, WeekStart } from './dates.js';
+export {
+  DEFAULT_SETTINGS,
+  SettingsSchema,
+  THEMES,
+  TIME_FORMATS,
+  WEEK_STARTS,
+  usesTwelveHour,
+} from './settings.js';
+export type { Settings, Theme, TimeFormat } from './settings.js';
+export { formatTimeInput, parseTimeInput, stepTime } from './time-input.js';
+export { deviceLabel } from './device.js';
+export type { Platform, SaveFileRequest } from './platform.js';
 /** The locale type formatEventTime takes, so apps and ui need no direct date-fns import. */
 export type { Locale } from 'date-fns';
 export {
