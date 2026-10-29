@@ -189,3 +189,23 @@ describe('MiniMonth accessibility', () => {
     await expectNoAxeViolations(document.body);
   });
 });
+
+describe('MiniMonth week start', () => {
+  it('starts on Sunday when asked, headers included, and Home/End follow it', async () => {
+    const { user, grid, day, focused } = setup({ weekStart: 'sunday' });
+    const headers = within(grid())
+      .getAllByRole('columnheader')
+      .map((th) => th.getAttribute('abbr'));
+    expect(headers[0]).toBe('Sunday');
+    expect(headers[6]).toBe('Saturday');
+    // October 2026 starts on a Thursday; its Sunday-first grid starts on 27 September.
+    expect(within(grid()).getAllByRole('gridcell')[0]?.getAttribute('aria-label')).toMatch(
+      /^Sunday, 27 September 2026/,
+    );
+    await user.click(day('Tuesday, 27 October 2026'));
+    await user.keyboard('{Home}');
+    expect(focused()).toMatch(/^Sunday, 25 October 2026/);
+    await user.keyboard('{End}');
+    expect(focused()).toMatch(/^Saturday, 31 October 2026/);
+  });
+});

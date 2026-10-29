@@ -18,6 +18,8 @@ export interface EventCardProps {
   past?: boolean;
   /** Replaces the time shown (e.g. just the start in a month cell); null shows none. */
   time?: string | null;
+  /** Force a 12- (true) or 24-hour (false) clock; by default the locale decides. */
+  hour12?: boolean | undefined;
 }
 
 const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
@@ -35,8 +37,12 @@ export function EventCard({
   onSelect,
   past = false,
   time: timeOverride,
+  hour12,
 }: EventCardProps) {
-  const time = timeOverride === undefined ? formatEventTime(event, timezone, locale) : timeOverride;
+  const time =
+    timeOverride === undefined
+      ? formatEventTime(event, timezone, locale, { hour12 })
+      : timeOverride;
   const content = (
     <>
       <span className="ag-event-card__title">{event.title}</span>

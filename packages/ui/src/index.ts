@@ -18,6 +18,8 @@ export { MonthGrid } from './MonthGrid.js';
 export type { MonthGridProps } from './MonthGrid.js';
 export { Placeholder } from './Placeholder.js';
 export type { PlaceholderProps } from './Placeholder.js';
+export { TimeField } from './TimeField.js';
+export type { TimeFieldProps } from './TimeField.js';
 export { TimeGrid } from './TimeGrid.js';
 export type { TimeGridProps } from './TimeGrid.js';
 export { ToastProvider } from './Toast.js';

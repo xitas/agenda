@@ -294,3 +294,21 @@ describe('TimeGrid', () => {
     await expectNoAxeViolations(container);
   });
 });
+
+describe('TimeGrid clock', () => {
+  it('can force a 12-hour clock on hours and events', () => {
+    render(
+      <TimeGrid
+        days={WEEK}
+        events={[event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z')]}
+        timezone="UTC"
+        locale={enGB}
+        today="2026-10-27"
+        now={NOW}
+        hour12
+      />,
+    );
+    expect(screen.getByText('8:00 AM')).toBeDefined();
+    expect(screen.getByText('4:00 PM – 5:00 PM')).toBeDefined();
+  });
+});

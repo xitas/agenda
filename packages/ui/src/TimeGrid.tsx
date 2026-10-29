@@ -33,6 +33,8 @@ export interface TimeGridProps<E extends GridEvent> {
   onSelectDay?: (day: string) => void;
   /** Minutes from midnight to scroll to when the grid first shows. */
   scrollToMinutes?: number;
+  /** Force a 12- (true) or 24-hour (false) clock; by default the locale decides. */
+  hour12?: boolean | undefined;
 }
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
@@ -63,6 +65,7 @@ export function TimeGrid<E extends GridEvent>({
   onSelectSlot,
   onSelectDay,
   scrollToMinutes,
+  hour12,
 }: TimeGridProps<E>) {
   const body = useRef<HTMLDivElement>(null);
   const formats = useMemo(
@@ -80,9 +83,10 @@ export function TimeGrid<E extends GridEvent>({
           { start: new Date(Date.UTC(2026, 0, 1, hour)).toISOString(), end: null, allDay: false },
           'UTC',
           locale,
+          { hour12 },
         ),
       ),
-    [locale],
+    [locale, hour12],
   );
   const strip = useMemo(() => layoutAllDay(events, days, timezone), [events, days, timezone]);
   const columns = useMemo(
@@ -132,7 +136,7 @@ export function TimeGrid<E extends GridEvent>({
     >
       <span className="ag-timegrid__event-title">{event.title}</span>
       <time className="ag-timegrid__event-time" dateTime={event.start}>
-        {formatEventTime(event, timezone, locale)}
+        {formatEventTime(event, timezone, locale, { hour12 })}
       </time>
       <span className="ag-visually-hidden">Category: {capitalise(event.color)}</span>
     </button>

@@ -198,3 +198,28 @@ describe('EventCard past', () => {
     expect(screen.getByText('Done')).toBeDefined();
   });
 });
+
+describe('MonthGrid options', () => {
+  it('starts weeks on Sunday and can force a 12-hour clock', () => {
+    setup({
+      weekStart: 'sunday',
+      hour12: true,
+      events: [event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z')],
+    });
+    const dates = screen.getAllByRole('button', { name: /, (no events|\d+ events?)$/ });
+    expect(dates[0]?.getAttribute('aria-label')).toBe('Sunday, 27 September 2026, no events');
+    expect(within(cell('Wednesday, 28 October 2026')).getByText('4:00 PM')).toBeDefined();
+  });
+
+  it('passes the clock to cards', () => {
+    render(
+      <EventCard
+        event={event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z')}
+        timezone="UTC"
+        locale={enGB}
+        hour12
+      />,
+    );
+    expect(screen.getByText('4:00 PM – 5:00 PM')).toBeDefined();
+  });
+});
