@@ -89,6 +89,8 @@ Each phase ends with something usable and merged to `master`. Work in small PRs,
 
 **Done when:** I use the web app as my agenda for one full week.
 
+**Status (step 2.4):** everything above is built: every screen including Settings, QuickAdd, the PWA (installable, app shell cached, update prompt), component tests with coverage gates, and the Playwright smoke test in CI. What remains is the week of real use, which only the owner can tick: [ ] used as my agenda for one full week.
+
 ### Phase 3: Deploy (about 3–5 days)
 
 **Learn:** hosting, env/secrets, DB backups, domains.

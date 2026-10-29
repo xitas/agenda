@@ -44,6 +44,7 @@ pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # 
 pnpm format                         # fix formatting with Prettier
 pnpm build && pnpm e2e              # Playwright smoke test (Chromium) on the built api + web; own temp DB, ports 4101/5101
                                     # first time: pnpm --filter @agenda/e2e exec playwright install chromium
+pnpm --filter @agenda/web icons     # regenerate the PWA icons from apps/web/public/icon.svg (commit the PNGs)
 ```
 
 Filters need the full scoped package name (`@agenda/web`, not `web`).

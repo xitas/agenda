@@ -93,7 +93,11 @@ Lucide (web: `lucide-react`; mobile: `lucide-react-native`), 20 px in UI and 16 
 
 **Past:** events that have ended keep their fill but get a muted title (muted text passes contrast on every category fill); past days in Week and Month get muted numbers and the `bg` color.
 
-**EventEditor details:** dates can be typed ("27 Oct", "tomorrow") or picked from a MiniMonth that opens inline below the field. Times use the native `<input type="time">`. **Known limitation:** the browser shows that field in 12- or 24-hour time from its own language setting, not from Agenda's locale choice (en-US or en-GB), so the two can differ. On phones the editor is a full-height sheet.
+**EventEditor details:** dates can be typed ("27 Oct", "tomorrow") or picked from a MiniMonth that opens inline below the field. Times are typed too ("16:30", "4:30pm"; ↑/↓ change them by 15 minutes) and shown on the user's clock from Settings, so they match the rest of the app. On phones the editor is a full-height sheet.
+
+**Narrow events in Week:** an overlapping event narrower than `size.eventTimeMin` (96 px) shows only its title; every block has a full accessible name ("Dentist, Wednesday, 28 October 2026, 16:00 – 17:00, Red") and a tooltip with its title and time.
+
+**Settings:** Appearance (theme, week start, 12/24-hour time: shared by every device), Data (import with a report of skipped rows, export JSON or .ics), Devices (log out others), Account. Reached from the nav and from the top-bar account menu (Settings, Keyboard shortcuts, Log out).
 
 ## 4. Layout per platform
 

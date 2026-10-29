@@ -101,21 +101,23 @@ The type is called `AgendaEvent`, not `Event`, so it doesn't shadow the DOM's gl
 
 All routes are under `/api/v1`, and all bodies are JSON validated by the Zod schemas in `core`.
 
-| Method   | Path                                         | Notes                                                                                                  |
-| -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| POST     | `/auth/login`                                | `{ password, client: 'browser'                                                                         | 'token', label? }`→`browser`sets the session cookie;`token`returns`{ token }`. 401 wrong password, 429 rate limited |
-| POST     | `/auth/logout`                               | Revokes the current session (and clears the cookie)                                                    |
-| GET      | `/auth/me` · `/auth/sessions`                | The current session · all active sessions, the current one marked                                      |
-| DELETE   | `/auth/sessions/:id`                         | Revokes another device                                                                                 |
-| GET      | `/events?from&to&tz&q&limit&cursor`          | Range (`tz` required with one) + search; excludes soft-deleted; returns `{ events, nextCursor }`       |
-| POST     | `/events`                                    | Client may send `id` (uuid); 409 if it exists, even soft-deleted                                       |
-| GET      | `/events/:id`                                |                                                                                                        |
-| PATCH    | `/events/:id`                                | Partial update, merged then re-checked with `checkEventTiming`; bumps `updatedAt`                      |
-| DELETE   | `/events/:id`                                | Sets `deletedAt` (soft delete, 204)                                                                    |
-| POST     | `/events/:id/restore`                        | Undo for a delete: clears `deletedAt`, bumps `updatedAt`; 404 if the event is not deleted              |
-| POST     | `/events/import?tz`                          | Accepts v0 and v1 JSON; returns `{ imported, skipped: [{ index, reason }] }`; existing ids are skipped |
-| GET      | `/events/export.json` · `/events/export.ics` | v1 JSON (re-importable) · iCalendar via core `toICalendar`                                             |
-| GET/POST | `/sync`                                      | Phase 7                                                                                                |
+| Method   | Path                                         | Notes                                                                                                                                    |
+| -------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| POST     | `/auth/login`                                | `{ password, client: 'browser'                                                                                                           | 'token', label? }`→`browser`sets the session cookie;`token`returns`{ token }`. 401 wrong password, 429 rate limited |
+| POST     | `/auth/logout`                               | Revokes the current session (and clears the cookie)                                                                                      |
+| GET      | `/auth/me` · `/auth/sessions`                | The current session · all active sessions, the current one marked                                                                        |
+| DELETE   | `/auth/sessions/:id`                         | Revokes another device                                                                                                                   |
+| POST     | `/auth/sessions/revoke-others`               | "Log out everywhere else": revokes every session but this one in one request; returns `{ revoked }`                                      |
+| GET/PUT  | `/settings`                                  | The user's preferences (`SettingsSchema` in core: theme, week start, time format), shared by every device; PUT replaces the whole object |
+| GET      | `/events?from&to&tz&q&limit&cursor`          | Range (`tz` required with one) + search; excludes soft-deleted; returns `{ events, nextCursor }`                                         |
+| POST     | `/events`                                    | Client may send `id` (uuid); 409 if it exists, even soft-deleted                                                                         |
+| GET      | `/events/:id`                                |                                                                                                                                          |
+| PATCH    | `/events/:id`                                | Partial update, merged then re-checked with `checkEventTiming`; bumps `updatedAt`                                                        |
+| DELETE   | `/events/:id`                                | Sets `deletedAt` (soft delete, 204)                                                                                                      |
+| POST     | `/events/:id/restore`                        | Undo for a delete: clears `deletedAt`, bumps `updatedAt`; 404 if the event is not deleted                                                |
+| POST     | `/events/import?tz`                          | Accepts v0 and v1 JSON; returns `{ imported, skipped: [{ index, reason }] }`; existing ids are skipped                                   |
+| GET      | `/events/export.json` · `/events/export.ics` | v1 JSON (re-importable) · iCalendar via core `toICalendar`                                                                               |
+| GET/POST | `/sync`                                      | Phase 7                                                                                                                                  |
 
 Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invalid_json` / `invalid_query`, 404 `not_found`, 409 `conflict`, 413 `payload_too_large`, 422 `validation_failed` (with `fields`), 500 `internal`.
 
@@ -142,6 +144,9 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 
 **Web.** This is the SPA plus the PWA. Server state lives in TanStack Query; UI state stays in React (no global store unless it's needed).
 
+- **Settings** live on the server (a one-row `settings` table holding JSON, merged over the defaults on read, so a new preference needs no migration), so every device shares them. The web app keeps a copy in `localStorage` to paint the first frame (theme before React renders), then follows the server. `PreferencesProvider` puts the week start and the clock (`hour12`) into `AppEnv`, so every view and form reads them through `useEnv()`.
+- **PWA.** `vite-plugin-pwa` (injectManifest) builds the manifest and gives our own service worker (`src/sw/sw.ts`, typed by its own WebWorker tsconfig) the build's file list. The worker precaches the build on install, answers page loads with the cached shell and build files from the cache, and never touches `/api` (the routing is a pure, tested function in `src/sw/routes.ts`). A new version waits until the user picks Reload in the "Update available." toast. No service worker in dev. Icons are generated from `public/icon.svg` (`pnpm --filter @agenda/web icons`) and committed.
+
 - **Same origin in dev.** Vite proxies `/api` to `http://localhost:4001` (`AGENDA_API_URL` changes the target; `vite preview` uses the same proxy), so the browser only ever talks to the Vite origin and the session cookie is first-party with no CORS involved. Builds call `VITE_API_URL` instead.
 - **Injected, not imported.** The core client (cookie mode), the query client, and an `AppEnv` (`timezone` from Intl, `locale`: en-US for en-US browsers, en-GB otherwise, and `now()`) come from React context (`src/app/`). Tests render the real routes with a fake client and a fixed clock and zone (`src/test-utils/renderApp.tsx`).
 - **401 anywhere** clears the query cache and goes to `/login?next=…`; `next` must be a same-site path, so the login link can't become an open redirect.
@@ -149,7 +154,7 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 - **Query keys.** Event lists are cached per range: `['events', 'range', startISO, endISO, tz]` (a day, a week, or a 6-week month grid, which the Month view and the sidebar calendar share). Search results are `['events', 'search', q]` (no range: every event). Every key starts with `'events'` and holds a plain `AgendaEvent[]`, so one invalidation refreshes them all and optimistic writes can patch any of them.
 - **Optimistic writes.** Create, update, delete and restore snapshot every cached list, change them at once (a new or edited event goes into each range it overlaps, using the API's overlap rule from `core`, and leaves ranges it no longer touches), roll back from the snapshot with a toast on error, and refetch on settle. New events get their id on the client (`newId()`), so the optimistic copy and the saved one are the same row.
 - **One place for event dialogs.** `EventActionsProvider` (in the shell) owns the details dialog, the editor and the mutations; views and shortcuts call `useEventActions()` (`open`, `edit`, `create`, `remove`). The mutations live there, not in the dialogs, so their callbacks still run after a dialog closes.
-- **Layout.** `src/shell/` is the frame (one nav, placed by CSS grid areas per breakpoint; the global shortcuts and their help dialog), `src/views/` (shared header, paths), `src/day/`, `src/week/`, `src/month/`, `src/search/`, `src/quick-add/`, `src/events/` (queries, mutations, details dialog, editor), `src/auth/`.
+- **Layout.** `src/shell/` is the frame (one nav, placed by CSS grid areas per breakpoint; the global shortcuts and their help dialog), `src/views/` (shared header, paths), `src/day/`, `src/week/`, `src/month/`, `src/search/`, `src/quick-add/`, `src/events/` (queries, mutations, details dialog, editor), `src/settings/`, `src/pwa/` (update toast, install offer), `src/sw/` (the service worker), `src/auth/`.
 
 **Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Its pages run on `tauri://localhost` (macOS, Linux) or `http://tauri.localhost` (Windows), which is cross-site to the API, so the SameSite cookie would not be sent: desktop logs in with `client: 'token'` like the extension and mobile app, keeps the token in the OS keychain, and the web code's API client takes its auth strategy from the `platform` adapter (cookie on the web, bearer token in Tauri). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
 
@@ -175,6 +180,8 @@ export interface Platform {
 ```
 
 Each app provides its own implementation (`webPlatform`, `tauriPlatform`, `chromePlatform`, `expoPlatform`). Shared code only ever sees `Platform`.
+
+**What exists today:** the `Platform` type in `packages/core/src/platform.ts` has `saveFile({ name, mimeType, contents }): Promise<boolean>` (exports). `webPlatform` (`apps/web/src/app/platform.ts`) downloads through a Blob URL; it reaches components through `PlatformProvider`, so tests pass a recorder and the desktop app will pass a Tauri one (a native save dialog, which can resolve `false` when cancelled). The other members above arrive with the features that need them.
 
 ## 8. Quality gates
 
