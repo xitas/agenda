@@ -23,6 +23,8 @@ export default mergeConfig(
         exclude: [
           'src/**/*.test.{ts,tsx}',
           'src/main.tsx',
+          // Worker glue (install, fetch, message); its routing is src/sw/routes.ts, tested.
+          'src/sw/sw.ts',
           'src/test-utils/**',
           'src/test-setup.ts',
           'src/**/*.d.ts',

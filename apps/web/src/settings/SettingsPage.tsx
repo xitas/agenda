@@ -3,6 +3,7 @@ import { AccountSettings } from './AccountSettings';
 import { AppearanceSettings } from './AppearanceSettings';
 import { DataSettings } from './DataSettings';
 import { DeviceSettings } from './DeviceSettings';
+import { InstallSettings } from './InstallSettings';
 
 /** "/settings": appearance, data (import and export), devices and the account. */
 export function SettingsPage() {
@@ -12,6 +13,7 @@ export function SettingsPage() {
       <h1 id={headingId} className="view-header__heading">
         Settings
       </h1>
+      <InstallSettings />
       <AppearanceSettings />
       <DataSettings />
       <DeviceSettings />

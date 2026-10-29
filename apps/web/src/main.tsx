@@ -16,6 +16,7 @@ import './quick-add/quickAdd.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter } from 'react-router';
+import { registerSW } from 'virtual:pwa-register';
 import { RouterProvider } from 'react-router/dom';
 import { createWebApi } from './app/api';
 import { AppProviders } from './app/AppProviders';
@@ -23,11 +24,15 @@ import { browserEnv } from './app/env';
 import { webPlatform } from './app/platform';
 import { createQueryClient } from './app/queryClient';
 import { handleUnauthorized } from './app/session';
+import { listenForInstallPrompt } from './pwa/install';
+import { UpdatePrompt } from './pwa/UpdatePrompt';
 import { routes } from './router';
 import { applyTheme, readTheme } from './theme';
 
 // Before the first render, so the saved theme is used from the first frame.
 applyTheme(readTheme());
+// Chrome offers installation once, early; keep the offer for Settings.
+listenForInstallPrompt();
 
 const queryClient = createQueryClient();
 // The client needs the router for its 401 handler, and the router is created after it.
@@ -44,6 +49,7 @@ createRoot(root).render(
   <StrictMode>
     <AppProviders api={api} queryClient={queryClient} env={browserEnv()} platform={webPlatform}>
       <RouterProvider router={app.router} />
+      <UpdatePrompt register={registerSW} />
     </AppProviders>
   </StrictMode>,
 );
