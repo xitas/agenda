@@ -60,31 +60,41 @@ export function useSettings(): Settings {
   return query.data ?? DEFAULT_SETTINGS;
 }
 
+interface SettingsSave {
+  settings: Settings;
+  /** What to roll back to if the server says no. */
+  previous: Settings;
+}
+
 /**
  * Saves settings optimistically: they apply at once (the theme too) and roll back with
- * a toast if the server says no.
+ * a toast if the server says no. Returns `save`, which applies the change synchronously
+ * (a controlled radio button must not flick back while the save starts), then sends it.
  */
-export function useUpdateSettings() {
+export function useUpdateSettings(): { save: (settings: Settings) => void } {
   const api = useApi();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  return useMutation({
-    mutationFn: (settings: Settings) => api.settings.update(settings),
-    onMutate: async (settings) => {
-      await queryClient.cancelQueries({ queryKey: SETTINGS_KEY });
-      const previous = queryClient.getQueryData<Settings>(SETTINGS_KEY);
-      queryClient.setQueryData(SETTINGS_KEY, settings);
-      cacheSettings(settings);
-      applyTheme(settings.theme);
-      return { previous };
-    },
-    onError: (_error, _settings, context) => {
-      const previous = context?.previous ?? DEFAULT_SETTINGS;
-      queryClient.setQueryData(SETTINGS_KEY, previous);
-      cacheSettings(previous);
-      applyTheme(previous.theme);
+  const apply = (settings: Settings) => {
+    queryClient.setQueryData(SETTINGS_KEY, settings);
+    cacheSettings(settings);
+    applyTheme(settings.theme);
+  };
+  const { mutate } = useMutation({
+    mutationFn: ({ settings }: SettingsSave) => api.settings.update(settings),
+    onError: (_error, { previous }) => {
+      apply(previous);
       toast({ message: "Couldn't save your settings. Check your connection and try again." });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: SETTINGS_KEY }),
   });
+  return {
+    save: (settings) => {
+      // A load still in flight must not land on top of the change.
+      void queryClient.cancelQueries({ queryKey: SETTINGS_KEY });
+      const previous = queryClient.getQueryData<Settings>(SETTINGS_KEY) ?? DEFAULT_SETTINGS;
+      apply(settings);
+      mutate({ settings, previous });
+    },
+  };
 }

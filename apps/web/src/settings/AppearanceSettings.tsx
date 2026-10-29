@@ -10,7 +10,7 @@ export function AppearanceSettings() {
   const env = useEnv();
   const name = useId();
   const settings = useSettings();
-  const { mutate: save } = useUpdateSettings();
+  const { save } = useUpdateSettings();
   const set = (changes: Partial<Settings>) => {
     save({ ...settings, ...changes });
   };
