@@ -185,7 +185,7 @@ describe('CORS', () => {
     expect(res.status).toBe(204);
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(WEB_ORIGIN);
     expect(res.headers.get('Access-Control-Allow-Credentials')).toBe('true');
-    expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET,POST,PATCH,DELETE');
+    expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET,POST,PUT,PATCH,DELETE');
     expect(res.headers.get('Access-Control-Allow-Headers')).toBe('Content-Type,Authorization');
     expect(res.headers.get('Access-Control-Max-Age')).toBe('600');
   });

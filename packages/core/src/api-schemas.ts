@@ -57,6 +57,8 @@ export const SessionListSchema = z.object({
   sessions: z.array(SessionSchema.extend({ current: z.boolean() })),
 });
 
+export const RevokeOthersResponseSchema = z.object({ revoked: z.int().min(0) });
+
 export const EventPageSchema = z.object({
   events: z.array(AgendaEventSchema),
   nextCursor: z.string().min(1).nullable(),

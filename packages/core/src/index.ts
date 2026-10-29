@@ -47,6 +47,7 @@ export {
   EventListSchema,
   EventPageSchema,
   ImportReportSchema,
+  RevokeOthersResponseSchema,
   LoginRequestSchema,
   LoginTokenResponseSchema,
   SessionListSchema,

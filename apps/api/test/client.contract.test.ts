@@ -43,7 +43,7 @@ const called = new Set<string>();
 const exposed = new Set<string>();
 
 function tracked<C extends ApiClient>(client: C): C {
-  for (const group of ['auth', 'events'] as const) {
+  for (const group of ['auth', 'events', 'settings'] as const) {
     for (const name of Object.keys(client[group])) exposed.add(`${group}.${name}`);
   }
   const wrap = <T extends object>(group: string, target: T): T =>
@@ -53,7 +53,12 @@ function tracked<C extends ApiClient>(client: C): C {
         return Reflect.get(object, name, receiver) as unknown;
       },
     });
-  return { ...client, auth: wrap('auth', client.auth), events: wrap('events', client.events) };
+  return {
+    ...client,
+    auth: wrap('auth', client.auth),
+    events: wrap('events', client.events),
+    settings: wrap('settings', client.settings),
+  };
 }
 
 async function rejection(promise: Promise<unknown>): Promise<ApiError> {
@@ -203,12 +208,37 @@ describe('API client against the real API (token mode)', () => {
       ['contract', true],
       ['android', false],
     ]);
+    // Settings are shared: the phone sees what this device saved.
+    expect(await api.settings.get()).toEqual({
+      theme: 'system',
+      weekStart: 'monday',
+      timeFormat: 'auto',
+    });
+    const saved = await api.settings.update({
+      theme: 'dark',
+      weekStart: 'sunday',
+      timeFormat: '12h',
+    });
+    expect(await phone.settings.get()).toEqual(saved);
+
     await api.auth.revokeSession(phoneLogin.session.id);
     expect(await rejection(phone.auth.me())).toMatchObject({ status: 401, code: 'unauthorized' });
     expect(phoneUnauthorized).toHaveBeenCalledOnce();
     expect(await rejection(api.auth.revokeSession(phoneLogin.session.id))).toMatchObject({
       status: 404,
     });
+
+    // Log out everywhere else: a third device is revoked, this one keeps working
+    let tabletToken: string | null = null;
+    const tablet = createApiClient({
+      baseUrl: BASE,
+      auth: { kind: 'token', getToken: () => tabletToken },
+      fetch: appFetch(app),
+    });
+    tabletToken = (await tablet.auth.login(PASSWORD, { label: 'ipad' })).token;
+    expect(await api.auth.revokeOtherSessions()).toBe(1);
+    expect(await rejection(tablet.auth.me())).toMatchObject({ status: 401 });
+    expect((await api.auth.me()).label).toBe('contract');
 
     // Log out: the token stops working and onUnauthorized fires
     await api.auth.logout();
@@ -258,6 +288,7 @@ describe('contract coverage', () => {
       'auth.login',
       'auth.logout',
       'auth.me',
+      'auth.revokeOtherSessions',
       'auth.revokeSession',
       'auth.sessions',
       'events.create',
@@ -270,6 +301,8 @@ describe('contract coverage', () => {
       'events.remove',
       'events.restore',
       'events.update',
+      'settings.get',
+      'settings.update',
     ]);
     expect([...exposed].filter((name) => !called.has(name))).toEqual([]);
   });

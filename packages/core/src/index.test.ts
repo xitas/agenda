@@ -32,6 +32,7 @@ describe('public API', () => {
       'PlainDateSchema',
       'QUICK_ADD_WARNINGS',
       'REMINDER_CHOICES',
+      'RevokeOthersResponseSchema',
       'SessionListSchema',
       'SessionResponseSchema',
       'SessionSchema',

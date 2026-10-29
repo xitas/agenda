@@ -246,6 +246,9 @@ describe('requireAuth', () => {
     ['GET', '/auth/me'],
     ['GET', '/auth/sessions'],
     ['DELETE', `/auth/sessions/${ID}`],
+    ['POST', '/auth/sessions/revoke-others'],
+    ['GET', '/settings'],
+    ['PUT', '/settings'],
   ])('returns 401 for %s %s without a session', async (method, path) => {
     const { request } = await makeTestApp();
     const res: ErrorResponse = await request(method, path, method === 'GET' ? undefined : {}, {

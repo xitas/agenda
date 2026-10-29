@@ -12,6 +12,8 @@ import type { Db } from './db/client.js';
 import { ApiError } from './errors.js';
 import { createEventRepo } from './events/repo.js';
 import { eventRoutes } from './events/routes.js';
+import { createSettingsRepo } from './settings/repo.js';
+import { settingsRoutes } from './settings/routes.js';
 
 export interface AuthConfig {
   /** From AGENDA_PASSWORD_HASH; see src/auth/password.ts for the format. */
@@ -59,7 +61,7 @@ export function createApp(options: AppOptions) {
     cors({
       origin: (origin) => (auth.corsOrigins.includes(origin) ? origin : null),
       credentials: true,
-      allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
+      allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       allowHeaders: ['Content-Type', 'Authorization'],
       maxAge: 600,
     }),
@@ -86,6 +88,8 @@ export function createApp(options: AppOptions) {
   api.use('/events', signedIn);
   api.use('/events/*', signedIn);
   api.route('/events', eventRoutes({ repo: createEventRepo(db), now }));
+  api.use('/settings', signedIn);
+  api.route('/settings', settingsRoutes({ repo: createSettingsRepo(db, now) }));
   app.route('/api/v1', api);
 
   app.notFound((c) =>

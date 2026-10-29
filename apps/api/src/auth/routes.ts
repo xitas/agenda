@@ -94,6 +94,11 @@ export function authRoutes(options: AuthRoutesOptions) {
     });
   });
 
+  // "Log out everywhere else": one request, so it can't stop halfway through the list.
+  routes.post('/sessions/revoke-others', auth, async (c) => {
+    return c.json({ revoked: await store.revokeOthers(c.get('session').id) });
+  });
+
   routes.delete('/sessions/:id', auth, async (c) => {
     if (!(await store.revoke(c.req.param('id')))) throw notFound('Session');
     return c.body(null, 204);

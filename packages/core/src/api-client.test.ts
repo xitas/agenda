@@ -100,6 +100,20 @@ describe('requests', () => {
       '/auth/sessions/a%2Fb',
       null,
     ],
+    [
+      'revokeOtherSessions',
+      (api) => api.auth.revokeOtherSessions(),
+      'POST',
+      '/auth/sessions/revoke-others',
+      { revoked: 2 },
+    ],
+    [
+      'settings.get',
+      (api) => api.settings.get(),
+      'GET',
+      '/settings',
+      { theme: 'dark', weekStart: 'sunday', timeFormat: '12h' },
+    ],
     ['get', (api) => api.events.get(event.id), 'GET', `/events/${event.id}`, event],
     ['remove', (api) => api.events.remove(event.id), 'DELETE', `/events/${event.id}`, null],
     ['exportJson', (api) => api.events.exportJson(), 'GET', '/events/export.json', [event]],
@@ -119,6 +133,15 @@ describe('requests', () => {
     expect(calls[0]?.init.headers.Accept).toBe('application/json');
     expect(calls[0]?.init.body).toBeUndefined();
     expect(calls[0]?.init.headers['Content-Type']).toBeUndefined();
+  });
+
+  it('sends the settings as JSON with PUT, and returns the counts and values', async () => {
+    const value = { theme: 'light', weekStart: 'monday', timeFormat: '24h' } as const;
+    const { api, calls } = client([reply(200, value), reply(200, { revoked: 3 })]);
+    expect(await api.settings.update(value)).toEqual(value);
+    expect(await api.auth.revokeOtherSessions()).toBe(3);
+    expect(calls[0]?.init.method).toBe('PUT');
+    expect(JSON.parse(calls[0]?.init.body ?? '')).toEqual(value);
   });
 
   it('sends JSON bodies for create, update and import', async () => {
