@@ -106,12 +106,34 @@ export function fromV0(v0: V0Event, options: ImportOptions): AgendaEvent {
   return AgendaEventSchema.parse(v0Candidate(v0, resolveOptions(options)));
 }
 
+/**
+ * Why a row was skipped, in plain words for the import report (DESIGN.md §7): the first
+ * problem the schema found, by field.
+ */
 function describeIssues(error: z.ZodError): string {
-  return error.issues
-    .map((issue) =>
-      issue.path.length > 0 ? `${issue.path.join('.')}: ${issue.message}` : issue.message,
-    )
-    .join('; ');
+  const issue = error.issues[0];
+  const field = issue?.path[0];
+  switch (field) {
+    case 'title':
+      if (issue?.code === 'too_small') return 'No title';
+      if (issue?.code === 'too_big') return 'Title is longer than 200 characters';
+      return "The title can't be read";
+    case 'date':
+    case 'start':
+      return "The date can't be read";
+    case 'end':
+      return issue?.message === 'End must be after start'
+        ? 'It ends before it starts'
+        : "The end date can't be read";
+    case 'color':
+      return 'Unknown color';
+    case 'timezone':
+      return 'Unknown time zone';
+    case undefined:
+      return "This row isn't a valid event";
+    default:
+      return `The ${String(field)} can't be read`;
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -119,7 +141,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseRow(row: unknown, options: ResolvedOptions): AgendaEvent | string {
-  if (!isRecord(row)) return 'Not an event object';
+  if (!isRecord(row)) return "This row isn't an event";
 
   if ('start' in row) {
     const event = AgendaEventSchema.safeParse(row);
@@ -128,12 +150,12 @@ function parseRow(row: unknown, options: ResolvedOptions): AgendaEvent | string 
 
   if ('date' in row) {
     const v0 = V0EventSchema.safeParse(row);
-    if (!v0.success) return `v0 ${describeIssues(v0.error)}`;
+    if (!v0.success) return describeIssues(v0.error);
     const event = AgendaEventSchema.safeParse(v0Candidate(v0.data, options));
     return event.success ? event.data : describeIssues(event.error);
   }
 
-  return 'Unrecognized event format';
+  return "This row isn't an Agenda event";
 }
 
 /**
@@ -155,9 +177,9 @@ export function parseImport(input: unknown, options: ImportOptions): ImportResul
     if (typeof result === 'string') {
       skipped.push({ index, reason: result });
     } else if (result.deletedAt !== null) {
-      skipped.push({ index, reason: 'Deleted event' });
+      skipped.push({ index, reason: 'Was deleted' });
     } else if (seen.has(result.id)) {
-      skipped.push({ index, reason: `Duplicate id ${result.id}` });
+      skipped.push({ index, reason: 'Appears twice in the file' });
     } else {
       seen.add(result.id);
       events.push(result);
