@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { PASSWORD } from '../e2e-env.ts';
 
@@ -5,7 +6,7 @@ import { PASSWORD } from '../e2e-env.ts';
  * The main path through the real app, API and database: log in, add an event with
  * QuickAdd, see it in every view, edit it, find it with Search, delete it and undo.
  */
-test('plan, find, edit and undo a delete', async ({ page }) => {
+test('plan, find, edit and undo a delete, then settings and data', async ({ page, browser }) => {
   await test.step('log in', async () => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/login$/);
@@ -84,5 +85,44 @@ test('plan, find, edit and undo a delete', async ({ page }) => {
   await test.step('the server kept it', async () => {
     await page.reload();
     await expect(card('Dentist check-up')).toBeVisible();
+  });
+
+  await test.step('change the theme in Settings; it sticks after a reload', async () => {
+    await page.goto('/settings');
+    await page.getByRole('radio', { name: 'Dark' }).check();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.getByRole('radio', { name: 'Dark' })).toBeChecked();
+  });
+
+  await test.step('another device gets the same theme from the server', async () => {
+    // A fresh browser context has no local copy: the theme can only come from the API.
+    const other = await browser.newContext();
+    const phone = await other.newPage();
+    await phone.goto('/login');
+    await phone.getByLabel('Password').fill(PASSWORD);
+    await phone.getByRole('button', { name: 'Log in' }).click();
+    await expect(phone.getByRole('textbox', { name: 'Quick add' })).toBeVisible();
+    await expect(phone.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await other.close();
+  });
+
+  await test.step('export JSON, re-import it, and nothing duplicates', async () => {
+    await page.goto('/settings');
+    const exported = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Export as JSON' }).click();
+    const download = await exported;
+    expect(download.suggestedFilename()).toMatch(/^agenda-\d{4}-\d{2}-\d{2}\.json$/);
+    const file = await download.path();
+    const events = JSON.parse(await readFile(file, 'utf8')) as { title: string }[];
+    expect(events.map((event) => event.title)).toEqual(['Dentist check-up']);
+
+    await page.getByLabel('Import from a file').setInputFiles(file);
+    await expect(page.getByText('Imported 0 events. Skipped 1:')).toBeVisible();
+    await expect(page.getByText('Row 1 "Dentist check-up": Already exists')).toBeVisible();
+
+    const after = await page.request.get('/api/v1/events/export.json');
+    expect(((await after.json()) as unknown[]).length).toBe(events.length);
   });
 });
