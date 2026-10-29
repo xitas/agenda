@@ -26,12 +26,12 @@ export function MonthPage() {
 
   // The same range as the sidebar calendar for this month, so both share one query.
   const range = useMemo(() => {
-    const grid = monthGrid(month);
+    const grid = monthGrid(month, env.weekStart);
     return {
       start: dayRangeInTz(grid[0] ?? month, env.timezone).start,
       end: dayRangeInTz(grid[grid.length - 1] ?? month, env.timezone).end,
     };
-  }, [month, env.timezone]);
+  }, [month, env.timezone, env.weekStart]);
   const events = useRangeEvents(range, env.timezone);
 
   const go = (day: string) => {
@@ -95,6 +95,8 @@ export function MonthPage() {
       )}
       <MonthGrid
         month={month}
+        weekStart={env.weekStart}
+        hour12={env.hour12}
         events={events.data ?? []}
         timezone={env.timezone}
         locale={env.locale}

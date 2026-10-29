@@ -16,7 +16,7 @@ export function previewWhen(
   draft: Pick<EventCreate, 'start' | 'end' | 'allDay'>,
   env: AppEnv,
 ): string {
-  const time = formatEventTime(draft, env.timezone, env.locale);
+  const time = formatEventTime(draft, env.timezone, env.locale, { hour12: env.hour12 });
   const day = startDay(draft, env.timezone);
   const oneDay =
     draft.end === null ||

@@ -1,4 +1,4 @@
-import { addDaysToPlainDate, plainDateInTz } from '@agenda/core';
+import { addDaysToPlainDate, formatEventTime, plainDateInTz } from '@agenda/core';
 import type { AppEnv } from '../app/env';
 
 /** Today as a plain date in the viewer's zone. */
@@ -43,13 +43,16 @@ export function relativeDay(day: string, today: string): string | undefined {
   return undefined;
 }
 
-/** A short time of day ("14:05" or "2:05 PM") in the viewer's zone and locale. */
+/** A short time of day ("14:05" or "2:05 PM") in the viewer's zone, on their clock. */
 export function timeOfDay(date: Date, env: AppEnv): string {
-  return new Intl.DateTimeFormat(env.locale.code, {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: env.timezone,
-  }).format(date);
+  return formatEventTime(
+    { start: date.toISOString(), end: null, allDay: false },
+    env.timezone,
+    env.locale,
+    {
+      hour12: env.hour12,
+    },
+  );
 }
 
 /** "Wed, 28 Oct": a short date for previews and toasts. */

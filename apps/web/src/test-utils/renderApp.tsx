@@ -17,6 +17,8 @@ export const TEST_ENV: AppEnv = {
   timezone: 'Asia/Karachi',
   locale: enGB,
   now: () => NOW,
+  weekStart: 'monday',
+  hour12: false,
 };
 
 export interface RenderAppOptions {

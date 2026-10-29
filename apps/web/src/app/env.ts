@@ -1,4 +1,5 @@
-import type { Locale } from '@agenda/core';
+import { usesTwelveHour } from '@agenda/core';
+import type { Locale, WeekStart } from '@agenda/core';
 import { enGB, enUS } from 'date-fns/locale';
 import { createContext, useContext } from 'react';
 
@@ -9,6 +10,10 @@ export interface AppEnv {
   /** date-fns locale for times and dates (12- or 24-hour, day or month first). */
   locale: Locale;
   now: () => Date;
+  /** The first day of the week (a setting). */
+  weekStart: WeekStart;
+  /** Times on a 12-hour clock (a setting; "auto" follows the locale). */
+  hour12: boolean;
 }
 
 /** en-US gets US formats; every other language gets en-GB until real translations exist. */
@@ -16,11 +21,15 @@ export function pickLocale(language: string | undefined): Locale {
   return language === 'en-US' ? enUS : enGB;
 }
 
+/** The browser's zone, locale and clock; the settings start at their defaults. */
 export function browserEnv(): AppEnv {
+  const locale = pickLocale(navigator.language);
   return {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    locale: pickLocale(navigator.language),
+    locale,
     now: () => new Date(),
+    weekStart: 'monday',
+    hour12: usesTwelveHour('auto', locale.code),
   };
 }
 

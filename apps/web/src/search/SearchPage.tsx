@@ -90,7 +90,7 @@ export function SearchPage() {
                 >
                   <span className="search__title">{highlight(event.title, query)}</span>
                   <span className="search__time">
-                    {formatEventTime(event, env.timezone, env.locale)}
+                    {formatEventTime(event, env.timezone, env.locale, { hour12: env.hour12 })}
                   </span>
                   {where !== null && (
                     <span className="search__extra">{highlight(where, query)}</span>

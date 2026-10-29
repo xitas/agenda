@@ -1,7 +1,6 @@
 import { EVENT_COLORS, REMINDER_CHOICES, eventFromForm, plainDateInTz } from '@agenda/core';
 import type { EventForm, EventFormErrors, EventFormField, EventFormResult } from '@agenda/core';
-import { Button, DateField, Dialog, DialogClose, Input, Textarea } from '@agenda/ui';
-import { CircleAlert } from 'lucide-react';
+import { Button, DateField, Dialog, DialogClose, Input, Textarea, TimeField } from '@agenda/ui';
 import { useId, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { useEnv } from '../app/env';
@@ -27,16 +26,6 @@ const REMINDER_LABELS: Record<(typeof REMINDER_CHOICES)[number], string> = {
 
 /** Field order, for moving focus to the first problem. */
 const FIELD_ORDER: EventFormField[] = ['title', 'startDate', 'startTime', 'endDate', 'endTime'];
-
-function FieldError({ id, message }: { id: string; message: string | undefined }) {
-  if (message === undefined) return null;
-  return (
-    <p id={id} className="ag-field__error">
-      <CircleAlert aria-hidden="true" className="ag-field__error-icon" />
-      {message}
-    </p>
-  );
-}
 
 /**
  * The event editor (DESIGN.md §3): a dialog, or a full-height sheet on phones. Checks
@@ -83,24 +72,18 @@ export function EventEditor({ mode, initial, eventZone, onSave, onClose }: Event
     }
   };
 
+  // Typed times on the user's clock (the native time input follows the browser's language).
   const timeField = (field: 'startTime' | 'endTime', label: string): ReactNode => (
-    <div className="ag-field editor__time" data-field={field}>
-      <label className="ag-field__label" htmlFor={`${id}-${field}`}>
-        {label}
-      </label>
-      <input
-        id={`${id}-${field}`}
-        className="ag-input"
-        type="time"
-        step={300}
+    <div className="editor__time" data-field={field}>
+      <TimeField
+        label={label}
         value={form[field]}
-        aria-invalid={errors[field] !== undefined || undefined}
-        aria-describedby={errors[field] === undefined ? undefined : `${id}-${field}-error`}
-        onChange={(event) => {
-          update({ [field]: event.target.value });
+        hour12={env.hour12}
+        {...(errors[field] === undefined ? {} : { error: errors[field] })}
+        onChange={(value) => {
+          update({ [field]: value });
         }}
       />
-      <FieldError id={`${id}-${field}-error`} message={errors[field]} />
     </div>
   );
 
@@ -166,6 +149,7 @@ export function EventEditor({ mode, initial, eventZone, onSave, onClose }: Event
               value={form.startDate}
               today={today}
               locale={env.locale}
+              weekStart={env.weekStart}
               error={errors.startDate}
               onChange={(startDate) => {
                 update({ startDate });
@@ -179,6 +163,7 @@ export function EventEditor({ mode, initial, eventZone, onSave, onClose }: Event
               value={form.endDate}
               today={today}
               locale={env.locale}
+              weekStart={env.weekStart}
               error={errors.endDate}
               onChange={(endDate) => {
                 update({ endDate });
