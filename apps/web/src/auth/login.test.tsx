@@ -1,4 +1,4 @@
-import { ApiError, NetworkError } from '@agenda/core';
+import { ApiError, NetworkError, deviceLabel } from '@agenda/core';
 import { screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
@@ -19,7 +19,9 @@ describe('/login', () => {
     const app = renderApp('/login?next=%2Fplayground');
     app.auth.login.mockResolvedValue({ session: SESSION });
     await logIn();
-    expect(app.auth.login).toHaveBeenCalledWith('correct horse battery staple', { label: 'web' });
+    expect(app.auth.login).toHaveBeenCalledWith('correct horse battery staple', {
+      label: deviceLabel(navigator.userAgent),
+    });
     await waitFor(() => {
       expect(app.router.state.location.pathname).toBe('/playground');
     });

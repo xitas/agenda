@@ -49,7 +49,9 @@ describe('Month', () => {
       },
     });
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: /^A/ }));
+    await user.click(
+      await within(await screen.findByRole('main')).findByRole('button', { name: /^A/ }),
+    );
     const dialog = await screen.findByRole('dialog', { name: 'A' });
     await user.click(within(dialog).getByRole('button', { name: 'Close' }));
     await waitFor(() => {
@@ -117,7 +119,7 @@ describe('Month', () => {
         fake.events.listAll.mockResolvedValue(BUSY);
       },
     });
-    await screen.findByRole('button', { name: /^A/ });
+    await within(await screen.findByRole('main')).findByRole('button', { name: /^A/ });
     await expectNoAxeViolations();
   });
 });

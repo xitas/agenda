@@ -236,13 +236,6 @@
   }
 }
 
-/* No keyboard on phones, so no shortcuts button (the keys still work with one). */
-@media (width < 768px) {
-  .shell__help {
-    display: none;
-  }
-}
-
 /* The shortcuts help dialog. */
 .shortcuts {
   display: flex;

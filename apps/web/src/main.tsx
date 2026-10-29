@@ -9,6 +9,7 @@ import './day/day.css';
 import './week/week.css';
 import './month/month.css';
 import './search/search.css';
+import './settings/settings.css';
 import './events/events.css';
 import './events/editor.css';
 import './quick-add/quickAdd.css';

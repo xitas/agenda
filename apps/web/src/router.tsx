@@ -6,6 +6,7 @@ import { DayPage } from './day/DayPage';
 import { MonthPage } from './month/MonthPage';
 import { Playground } from './Playground';
 import { SearchPage } from './search/SearchPage';
+import { SettingsPage } from './settings/SettingsPage';
 import { AppShell } from './shell/AppShell';
 import { WeekPage } from './week/WeekPage';
 
@@ -26,6 +27,7 @@ export const routes: RouteObject[] = [
           { path: 'month', element: <MonthPage /> },
           { path: 'month/:month', element: <MonthPage /> },
           { path: 'search', element: <SearchPage /> },
+          { path: 'settings', element: <SettingsPage /> },
           { path: '*', element: <Navigate to="/" replace /> },
         ],
       },

@@ -1,3 +1,4 @@
+import { deviceLabel } from '@agenda/core';
 import { Button, Input } from '@agenda/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -16,7 +17,9 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
 
   const login = useMutation({
-    mutationFn: (value: string) => api.auth.login(value, { label: 'web' }),
+    // Name the session after this browser, so Settings > Devices can tell them apart.
+    mutationFn: (value: string) =>
+      api.auth.login(value, { label: deviceLabel(navigator.userAgent) }),
     onSuccess: ({ session }) => {
       queryClient.setQueryData(SESSION_KEY, session);
       void navigate(safeNext(params.get('next')), { replace: true });

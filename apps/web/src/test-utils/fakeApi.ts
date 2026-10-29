@@ -41,10 +41,14 @@ export function fakeApi(onUnauthorized: () => void = () => undefined): FakeApi {
       notMocked('auth.revokeOtherSessions'),
     ),
   };
-  // Settings start at the defaults and saves echo back, like the API.
+  // Settings start at the defaults and are remembered when saved, like the API.
+  let savedSettings = DEFAULT_SETTINGS;
   const settings = {
-    get: vi.fn<WebApi['settings']['get']>(() => Promise.resolve(DEFAULT_SETTINGS)),
-    update: vi.fn<WebApi['settings']['update']>((value) => Promise.resolve(value)),
+    get: vi.fn<WebApi['settings']['get']>(() => Promise.resolve(savedSettings)),
+    update: vi.fn<WebApi['settings']['update']>((value) => {
+      savedSettings = value;
+      return Promise.resolve(value);
+    }),
   };
   const events = {
     list: vi.fn<WebApi['events']['list']>(notMocked('events.list')),

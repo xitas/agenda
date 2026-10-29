@@ -1,12 +1,21 @@
 import { APP_NAME } from '@agenda/core';
-import { Dialog, IconButton, useToast } from '@agenda/ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, CalendarDays, CalendarRange, LogOut, Search, Sun } from 'lucide-react';
+import { Dialog, IconButton, Menu } from '@agenda/ui';
+import {
+  Calendar,
+  CalendarDays,
+  CalendarRange,
+  CircleUser,
+  Keyboard,
+  LogOut,
+  Search,
+  Settings,
+  Sun,
+} from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
-import { useApi } from '../app/api';
 import { PreferencesProvider } from '../app/PreferencesProvider';
+import { useLogout } from '../auth/logout';
 import { EventActionsProvider } from '../events/EventActionsProvider';
 import { QuickAdd } from '../quick-add/QuickAdd';
 import { CalendarPanel } from './CalendarPanel';
@@ -23,6 +32,7 @@ const NAV: NavItem[] = [
   { to: '/week', label: 'Week', icon: <CalendarRange /> },
   { to: '/month', label: 'Month', icon: <CalendarDays /> },
   { to: '/search', label: 'Search', icon: <Search /> },
+  { to: '/settings', label: 'Settings', icon: <Settings /> },
 ];
 
 /**
@@ -31,24 +41,11 @@ const NAV: NavItem[] = [
  * The calendar sits in the sidebar, or behind a top-bar button when there is no sidebar.
  */
 export function AppShell() {
-  const api = useApi();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { pathname } = useLocation();
-
-  const logout = useMutation({
-    mutationFn: () => api.auth.logout(),
-    onSuccess: () => {
-      // Everything cached belonged to this session.
-      queryClient.clear();
-      void navigate('/login', { replace: true });
-    },
-    onError: () => {
-      toast({ message: "Couldn't log out. Check your connection and try again." });
-    },
-  });
+  const logout = useLogout();
 
   return (
     <PreferencesProvider>
@@ -106,14 +103,32 @@ export function AppShell() {
                   />
                 </Dialog>
               </span>
-              <GlobalShortcuts />
-              <IconButton
-                label="Log out"
-                icon={<LogOut />}
-                disabled={logout.isPending}
-                onClick={() => {
-                  logout.mutate();
-                }}
+              <GlobalShortcuts helpOpen={helpOpen} onHelpOpenChange={setHelpOpen} />
+              <Menu
+                trigger={<IconButton label="Account" icon={<CircleUser />} />}
+                items={[
+                  {
+                    label: 'Settings',
+                    icon: <Settings />,
+                    onSelect: () => {
+                      void navigate('/settings');
+                    },
+                  },
+                  {
+                    label: 'Keyboard shortcuts',
+                    icon: <Keyboard />,
+                    onSelect: () => {
+                      setHelpOpen(true);
+                    },
+                  },
+                  {
+                    label: 'Log out',
+                    icon: <LogOut />,
+                    onSelect: () => {
+                      logout.mutate();
+                    },
+                  },
+                ]}
               />
             </div>
           </header>
