@@ -1,0 +1,3 @@
+# Agenda is a personal app behind a login: nothing here is for search engines.
+User-agent: *
+Disallow: /
