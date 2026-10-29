@@ -78,6 +78,16 @@ describe('precache list and cache name', () => {
     { url: '/favicon.ico', revision: null },
   ];
 
+  it('lists each path once, since cache.addAll rejects duplicates', () => {
+    expect(
+      precachePaths([
+        { url: 'pwa-192x192.png', revision: 'a' },
+        'index.html',
+        { url: '/pwa-192x192.png', revision: 'a' },
+      ]),
+    ).toEqual(['/pwa-192x192.png', '/index.html']);
+  });
+
   it('turns the build manifest into paths', () => {
     expect(precachePaths(manifest)).toEqual([
       '/index.html',

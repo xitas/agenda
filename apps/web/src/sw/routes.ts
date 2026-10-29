@@ -36,11 +36,18 @@ export function routeFor(
   return 'network-only';
 }
 
-/** The build's file list as the paths the worker precaches ("/assets/index-abc.js"). */
-export function precachePaths(manifest: readonly (string | { url: string })[]): string[] {
-  return manifest.map(
+/**
+ * The build's file list as the paths the worker precaches ("/assets/index-abc.js"), each
+ * once. The plugin lists the manifest's icons twice (from the glob and from the manifest),
+ * and cache.addAll rejects duplicates, which would fail the whole install.
+ */
+export function precachePaths(
+  manifest: readonly (string | { url: string; revision?: string | null })[],
+): string[] {
+  const paths = manifest.map(
     (entry) => `/${(typeof entry === 'string' ? entry : entry.url).replace(/^\//, '')}`,
   );
+  return [...new Set(paths)];
 }
 
 /**

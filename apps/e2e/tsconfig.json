@@ -2,6 +2,8 @@
   "extends": "@agenda/config/tsconfig/node.json",
   "compilerOptions": {
     "noEmit": true,
+    // page.evaluate callbacks run in the browser, so they need DOM types.
+    "lib": ["ES2023", "DOM"],
     // Node 24 and Playwright run these files as TypeScript directly: imports name the
     // .ts file, and only syntax that can simply be erased is allowed.
     "allowImportingTsExtensions": true,

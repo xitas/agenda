@@ -82,6 +82,14 @@ test('plan, find, edit and undo a delete, then settings and data', async ({ page
     await expect(card('Dentist check-up')).toBeVisible();
   });
 
+  await test.step('a service worker installs and takes over the page', async () => {
+    // The install precaches the build; if any file failed, there would be no worker.
+    await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+    await page.reload();
+    const controller = await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL);
+    expect(controller).toMatch(/\/sw\.js$/);
+  });
+
   await test.step('the server kept it', async () => {
     await page.reload();
     await expect(card('Dentist check-up')).toBeVisible();
