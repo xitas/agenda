@@ -1,6 +1,6 @@
 import { ApiError, DEFAULT_SETTINGS, NetworkError } from '@agenda/core';
 import type { SessionWithCurrent } from '@agenda/core';
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { expectNoAxeViolations } from '../test-utils/axe';
@@ -90,6 +90,20 @@ describe('Appearance', () => {
     expect(within(appearance).getByRole('radio', { name: 'Sunday' })).toHaveProperty(
       'checked',
       true,
+    );
+  });
+
+  it('ticks the picked option within the click itself', async () => {
+    // TanStack notifies the page of a cache change a tick later; a radio fed only by the
+    // cache would show unticked in between (Playwright caught that on a slow runner).
+    renderApp('/settings');
+    const appearance = await section('Appearance');
+    const dark = within(appearance).getByRole('radio', { name: 'Dark' });
+    fireEvent.click(dark);
+    expect(dark).toHaveProperty('checked', true);
+    expect(within(appearance).getByRole('radio', { name: 'Match the system' })).toHaveProperty(
+      'checked',
+      false,
     );
   });
 

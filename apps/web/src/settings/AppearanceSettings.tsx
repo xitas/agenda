@@ -11,9 +11,7 @@ export function AppearanceSettings() {
   const name = useId();
   const settings = useSettings();
   const { save } = useUpdateSettings();
-  const set = (changes: Partial<Settings>) => {
-    save({ ...settings, ...changes });
-  };
+  const set = (changes: Partial<Settings>) => save({ ...settings, ...changes });
   const example = (hour12: boolean) => formatTimeInput('16:30', hour12);
   const localeClock = example(usesTwelveHour('auto', env.locale.code));
 
@@ -31,9 +29,7 @@ export function AppearanceSettings() {
           { value: 'light', label: 'Light' },
           { value: 'dark', label: 'Dark' },
         ]}
-        onChange={(theme) => {
-          set({ theme });
-        }}
+        onChange={(theme) => set({ theme })}
       />
       <ChoiceGroup
         legend="Week starts on"
@@ -43,9 +39,7 @@ export function AppearanceSettings() {
           { value: 'monday', label: 'Monday' },
           { value: 'sunday', label: 'Sunday' },
         ]}
-        onChange={(weekStart) => {
-          set({ weekStart });
-        }}
+        onChange={(weekStart) => set({ weekStart })}
       />
       <ChoiceGroup
         legend="Time format"
@@ -56,9 +50,7 @@ export function AppearanceSettings() {
           { value: '24h', label: `24-hour (${example(false)})` },
           { value: '12h', label: `12-hour (${example(true)})` },
         ]}
-        onChange={(timeFormat) => {
-          set({ timeFormat });
-        }}
+        onChange={(timeFormat) => set({ timeFormat })}
       />
     </SettingsSection>
   );

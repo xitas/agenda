@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { startTransition, useId, useOptimistic } from 'react';
 import type { ReactNode } from 'react';
 
 /** A titled block on the Settings page. */
@@ -30,7 +30,13 @@ export interface ChoiceOption<T extends string> {
   label: string;
 }
 
-/** A labelled group of radio buttons that saves as soon as one is picked. */
+/**
+ * A labelled group of radio buttons that saves as soon as one is picked. The pick shows
+ * at once as an optimistic value (useOptimistic) while the save runs: the saved value
+ * reaches the page through the query cache a tick later, and a radio fed only by it
+ * would show unticked in between. When the save ends, the group shows the saved value,
+ * which is the pick if it worked and the old value if it was rolled back.
+ */
 export function ChoiceGroup<T extends string>({
   legend,
   name,
@@ -42,8 +48,10 @@ export function ChoiceGroup<T extends string>({
   name: string;
   value: T;
   options: readonly ChoiceOption<T>[];
-  onChange: (value: T) => void;
+  /** Saves the pick; resolves when the save has finished, whether it worked or not. */
+  onChange: (value: T) => Promise<unknown>;
 }) {
+  const [selected, setSelected] = useOptimistic(value);
   return (
     <fieldset className="settings__choices">
       <legend className="ag-field__label">{legend}</legend>
@@ -54,9 +62,12 @@ export function ChoiceGroup<T extends string>({
               type="radio"
               name={name}
               value={option.value}
-              checked={value === option.value}
+              checked={selected === option.value}
               onChange={() => {
-                onChange(option.value);
+                startTransition(async () => {
+                  setSelected(option.value);
+                  await onChange(option.value);
+                });
               }}
             />
             {option.label}

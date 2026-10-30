@@ -71,7 +71,7 @@ interface SettingsSave {
  * a toast if the server says no. Returns `save`, which applies the change synchronously
  * (a controlled radio button must not flick back while the save starts), then sends it.
  */
-export function useUpdateSettings(): { save: (settings: Settings) => void } {
+export function useUpdateSettings(): { save: (settings: Settings) => Promise<void> } {
   const api = useApi();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -80,7 +80,7 @@ export function useUpdateSettings(): { save: (settings: Settings) => void } {
     cacheSettings(settings);
     applyTheme(settings.theme);
   };
-  const { mutate } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: ({ settings }: SettingsSave) => api.settings.update(settings),
     onError: (_error, { previous }) => {
       apply(previous);
@@ -94,7 +94,11 @@ export function useUpdateSettings(): { save: (settings: Settings) => void } {
       void queryClient.cancelQueries({ queryKey: SETTINGS_KEY });
       const previous = queryClient.getQueryData<Settings>(SETTINGS_KEY) ?? DEFAULT_SETTINGS;
       apply(settings);
-      mutate({ settings, previous });
+      // Resolves when the save has finished either way; a failure is handled above.
+      return mutateAsync({ settings, previous }).then(
+        () => undefined,
+        () => undefined,
+      );
     },
   };
 }
