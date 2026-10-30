@@ -20,7 +20,10 @@ export default defineConfig({
   // One user, one database: the tests share state, so they run in order.
   workers: 1,
   forbidOnly: CI,
-  retries: CI ? 1 : 0,
+  // No retries: the servers and database live for the whole run, so a retry would start
+  // with the first attempt's events and fail for a different reason. A flaky step should
+  // be fixed, not retried.
+  retries: 0,
   reporter: CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
   globalSetup: './global-setup.ts',
   globalTeardown: './global-teardown.ts',
