@@ -5,6 +5,7 @@ import {
   EventPageSchema,
   ImportReportSchema,
   LoginTokenResponseSchema,
+  RevokeOthersResponseSchema,
   SessionListSchema,
   SessionResponseSchema,
 } from './api-schemas.js';
@@ -12,6 +13,8 @@ import type { EventPage, ImportReport, Session, SessionWithCurrent } from './api
 import { abortAfter } from './http.js';
 import type { AbortSignalLike, FetchLike, RequestInitLike, ResponseLike } from './http.js';
 import { AgendaEventSchema } from './schemas.js';
+import { SettingsSchema } from './settings.js';
+import type { Settings } from './settings.js';
 import type { AgendaEvent, EventCreateInput, EventPatch } from './types.js';
 
 export const API_PREFIX = '/api/v1';
@@ -358,9 +361,23 @@ export function createApiClient<A extends AuthStrategy>(options: ApiClientOption
 
     revokeSession: (sessionId: string, call?: CallOptions): Promise<void> =>
       empty('DELETE', `/auth/sessions/${id(sessionId)}`, { call }),
+
+    /** Logs out every other device; resolves to how many sessions were revoked. */
+    async revokeOtherSessions(call?: CallOptions): Promise<number> {
+      return (
+        await json(RevokeOthersResponseSchema, 'POST', '/auth/sessions/revoke-others', { call })
+      ).revoked;
+    },
   };
 
-  return { auth: authApi, events };
+  const settingsApi = {
+    get: (call?: CallOptions): Promise<Settings> =>
+      json(SettingsSchema, 'GET', '/settings', { call }),
+    update: (value: Settings, call?: CallOptions): Promise<Settings> =>
+      json(SettingsSchema, 'PUT', '/settings', { body: value, call }),
+  };
+
+  return { auth: authApi, events, settings: settingsApi };
 }
 
 export type ApiClient<A extends AuthStrategy = AuthStrategy> = ReturnType<

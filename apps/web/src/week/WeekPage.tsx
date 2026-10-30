@@ -45,7 +45,7 @@ export function WeekPage() {
   const anchor = parsed ?? today;
 
   const step = narrow ? 3 : 7;
-  const first = narrow ? anchor : startOfWeekPlain(anchor);
+  const first = narrow ? anchor : startOfWeekPlain(anchor, env.weekStart);
   const days = useMemo(() => daysFrom(first, step), [first, step]);
   const last = days[days.length - 1] ?? first;
   const range = useMemo(
@@ -141,6 +141,7 @@ export function WeekPage() {
       )}
       <div className="week__grid" onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
         <TimeGrid
+          hour12={env.hour12}
           key={first}
           days={days}
           events={events.data ?? []}

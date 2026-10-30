@@ -69,7 +69,7 @@ describe('POST /events/import', () => {
       imported: 1,
       skipped: [
         { index: 0, reason: 'Already exists' },
-        { index: 2, reason: 'v0 date: Invalid input' },
+        { index: 2, reason: "The date can't be read" },
       ],
     });
     expect((await target.request<Page>('GET', '/events')).body.events).toEqual(exported);

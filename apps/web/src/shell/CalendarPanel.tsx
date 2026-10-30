@@ -31,12 +31,12 @@ export function CalendarPanel({ onPicked }: CalendarPanelProps) {
   }
 
   const range = useMemo(() => {
-    const grid = monthGrid(month);
+    const grid = monthGrid(month, env.weekStart);
     return {
       start: dayRangeInTz(grid[0] ?? month, env.timezone).start,
       end: dayRangeInTz(grid[grid.length - 1] ?? month, env.timezone).end,
     };
-  }, [month, env.timezone]);
+  }, [month, env.timezone, env.weekStart]);
   const events = useRangeEvents(range, env.timezone);
   const days = useMemo(
     () => eventDays(events.data ?? [], env.timezone),
@@ -45,6 +45,7 @@ export function CalendarPanel({ onPicked }: CalendarPanelProps) {
 
   return (
     <MiniMonth
+      weekStart={env.weekStart}
       today={today}
       selected={selected}
       eventDays={days}

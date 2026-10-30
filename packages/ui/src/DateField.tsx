@@ -1,5 +1,5 @@
 import { formatDateInput, parseDateInput } from '@agenda/core';
-import type { Locale } from '@agenda/core';
+import type { Locale, WeekStart } from '@agenda/core';
 import { CalendarDays, CircleAlert } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
@@ -23,6 +23,8 @@ export interface DateFieldProps {
   locale: Locale;
   error?: string;
   hint?: string;
+  /** The calendar's first column (a setting; Monday by default). */
+  weekStart?: WeekStart;
 }
 
 const isPlainDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -32,7 +34,16 @@ const isPlainDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
  * opens inline below the field (WAI-ARIA date picker: the grid is an extra, typing always
  * works). Esc or a pick closes the calendar and returns focus to the field.
  */
-export function DateField({ label, value, onChange, today, locale, error, hint }: DateFieldProps) {
+export function DateField({
+  label,
+  value,
+  onChange,
+  today,
+  locale,
+  error,
+  hint,
+  weekStart = 'monday',
+}: DateFieldProps) {
   const id = useId();
   const calendarId = `${id}-calendar`;
   const input = useRef<HTMLInputElement>(null);
@@ -136,6 +147,7 @@ export function DateField({ label, value, onChange, today, locale, error, hint }
             today={today}
             {...(isPlainDate(value) ? { selected: value } : {})}
             locale={locale}
+            weekStart={weekStart}
             onSelect={(day) => {
               setDraft(null);
               onChange(day);

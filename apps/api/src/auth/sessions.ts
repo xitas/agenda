@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { newId } from '@agenda/core';
 import type { Session } from '@agenda/core';
-import { and, asc, eq, gt, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, isNull, ne } from 'drizzle-orm';
 import type { Db } from '../db/client.js';
 import { sessions } from '../db/schema.js';
 import type { SessionRow } from '../db/schema.js';
@@ -93,6 +93,16 @@ export function createSessionStore(db: Db, now: () => Date) {
         .where(and(eq(sessions.id, id), active()))
         .returning({ id: sessions.id });
       return revoked.length > 0;
+    },
+
+    /** Revokes every active session except `keepId`; returns how many were revoked. */
+    async revokeOthers(keepId: string): Promise<number> {
+      const revoked = await db
+        .update(sessions)
+        .set({ revokedAt: iso() })
+        .where(and(ne(sessions.id, keepId), active()))
+        .returning({ id: sessions.id });
+      return revoked.length;
     },
 
     async listActive(): Promise<Session[]> {

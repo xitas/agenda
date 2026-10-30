@@ -1,0 +1,12 @@
+{
+  // The service worker runs in a worker, not a page: WebWorker types instead of DOM.
+  "extends": "@agenda/config/tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "WebWorker"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "types": []
+  },
+  "include": ["sw.ts", "routes.ts", "routes.test.ts"]
+}

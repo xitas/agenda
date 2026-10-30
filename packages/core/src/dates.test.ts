@@ -8,6 +8,7 @@ import {
   plainDateInTz,
   rangeForView,
   startOfDayInTz,
+  startOfWeekPlain,
 } from './dates.js';
 
 const iso = (date: Date) => date.toISOString();
@@ -206,5 +207,40 @@ describe('addMonthsToPlainDate', () => {
 
   it('rejects an invalid date', () => {
     expect(() => addMonthsToPlainDate('2026-02-30', 1)).toThrow(RangeError);
+  });
+});
+
+describe('week start and clock options', () => {
+  it('starts weeks on Sunday when asked', () => {
+    expect(startOfWeekPlain('2026-10-28', 'sunday')).toBe('2026-10-25');
+    expect(startOfWeekPlain('2026-10-25', 'sunday')).toBe('2026-10-25');
+    expect(startOfWeekPlain('2026-10-28')).toBe('2026-10-26');
+    // Across a year boundary.
+    expect(startOfWeekPlain('2027-01-01', 'sunday')).toBe('2026-12-27');
+  });
+
+  it('builds Sunday-first month grids', () => {
+    const grid = monthGrid('2026-11-15', 'sunday');
+    expect(grid[0]).toBe('2026-11-01');
+    expect(grid).toHaveLength(42);
+    // November 2026 starts on a Sunday; Monday-first it starts on 26 Oct.
+    expect(monthGrid('2026-11-15')[0]).toBe('2026-10-26');
+    expect(monthGrid('2027-01-10', 'sunday')[0]).toBe('2026-12-27');
+  });
+
+  it('gives Sunday-first week ranges', () => {
+    const range = rangeForView('week', new Date('2026-10-28T12:00:00.000Z'), 'UTC', 'sunday');
+    expect(range.start.toISOString()).toBe('2026-10-25T00:00:00.000Z');
+  });
+
+  it('forces a 12- or 24-hour clock in event times', () => {
+    const event = {
+      start: '2026-10-28T16:00:00.000Z',
+      end: '2026-10-28T17:30:00.000Z',
+      allDay: false,
+    };
+    expect(formatEventTime(event, 'UTC', enGB, { hour12: true })).toBe('4:00 PM – 5:30 PM');
+    expect(formatEventTime(event, 'UTC', enUS, { hour12: false })).toBe('16:00 – 17:30');
+    expect(formatEventTime(event, 'UTC', enUS)).toBe('4:00 PM – 5:30 PM');
   });
 });

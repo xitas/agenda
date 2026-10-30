@@ -1,0 +1,40 @@
+/* Dropdown menus. A floating layer: border and shadow tokens like the dialog. */
+.ag-menu {
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: calc(var(--ag-size-sidebar) * 0.75);
+  padding: var(--ag-space-1);
+  border: var(--ag-border-hairline) solid var(--ag-color-floating-border);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+  box-shadow: var(--ag-shadow-floating);
+}
+
+.ag-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+  min-height: var(--ag-size-control-md);
+  padding: 0 var(--ag-space-3);
+  border-radius: var(--ag-radius-sm);
+  color: var(--ag-color-text);
+  font-size: var(--ag-text-body-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+/* Keyboard and pointer highlight the same way; the menu, not the item, holds focus styling. */
+.ag-menu__item[data-highlighted] {
+  background: var(--ag-color-surface-2);
+}
+
+.ag-menu__icon {
+  display: inline-flex;
+  color: var(--ag-color-text-muted);
+}
+
+.ag-menu__icon svg {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+}

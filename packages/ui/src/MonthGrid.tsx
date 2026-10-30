@@ -1,5 +1,5 @@
 import { eventsByDay, formatEventTime, hasEnded, monthGrid, plainDateInTz } from '@agenda/core';
-import type { AgendaEvent, Locale } from '@agenda/core';
+import type { AgendaEvent, Locale, WeekStart } from '@agenda/core';
 import { useMemo } from 'react';
 import { cx } from './cx.js';
 import { EventCard } from './EventCard.js';
@@ -23,6 +23,10 @@ export interface MonthGridProps<E extends MonthEvent> {
   onSelectEvent: (event: E) => void;
   /** Events listed per cell before "+N more" (DESIGN.md §3: 3). */
   maxPerDay?: number;
+  /** The first column (a setting; Monday by default). */
+  weekStart?: WeekStart;
+  /** Force a 12- (true) or 24-hour (false) clock; by default the locale decides. */
+  hour12?: boolean | undefined;
 }
 
 const atNoonUtc = (day: string) => new Date(`${day}T12:00:00.000Z`);
@@ -42,8 +46,10 @@ export function MonthGrid<E extends MonthEvent>({
   onSelectDay,
   onSelectEvent,
   maxPerDay = 3,
+  weekStart = 'monday',
+  hour12,
 }: MonthGridProps<E>) {
-  const days = useMemo(() => monthGrid(month), [month]);
+  const days = useMemo(() => monthGrid(month, weekStart), [month, weekStart]);
   const byDay = useMemo(() => eventsByDay(events, days, timezone), [events, days, timezone]);
   const formats = useMemo(
     () => ({
@@ -58,7 +64,9 @@ export function MonthGrid<E extends MonthEvent>({
   // events and the later days of long ones show just the title.
   const cellTime = (event: E, day: string) =>
     !event.allDay && plainDateInTz(new Date(event.start), timezone) === day
-      ? formatEventTime({ start: event.start, end: null, allDay: false }, timezone, locale)
+      ? formatEventTime({ start: event.start, end: null, allDay: false }, timezone, locale, {
+          hour12,
+        })
       : null;
 
   return (

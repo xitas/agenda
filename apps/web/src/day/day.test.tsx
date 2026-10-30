@@ -235,6 +235,8 @@ describe('dayFormat', () => {
         timezone: 'Asia/Karachi',
         locale: enUS,
         now: () => NOW,
+        weekStart: 'monday',
+        hour12: true,
       }),
     ).toBe('4:05 PM');
   });

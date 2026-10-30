@@ -254,3 +254,16 @@ button.ag-timegrid__day--today:hover .ag-timegrid__date {
   flex-shrink: 1;
   min-width: 0;
 }
+
+/* Each block is a size container, so its contents can react to its own width: an
+   overlapping event too narrow for its time shows only the title (the time is still in
+   its accessible name and tooltip). The width is size.eventTimeMin. */
+.ag-timegrid__event {
+  container-type: inline-size;
+}
+
+@container (width < 96px) {
+  .ag-timegrid__event-time {
+    display: none;
+  }
+}

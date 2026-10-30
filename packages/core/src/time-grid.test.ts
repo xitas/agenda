@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  daysFrom,
-  inAllDayStrip,
-  layoutAllDay,
-  layoutDay,
-  startOfWeekPlain,
-  wallClockMinutes,
-} from './time-grid.js';
+import { daysFrom, inAllDayStrip, layoutAllDay, layoutDay, wallClockMinutes } from './time-grid.js';
+import { startOfWeekPlain } from './dates.js';
 
 const timed = (title: string, start: string, end: string | null = null) => ({
   title,

@@ -52,3 +52,13 @@ export const sessions = sqliteTable(
 );
 
 export type SessionRow = typeof sessions.$inferSelect;
+
+/**
+ * The user's preferences (one user, so one row, id 1). Stored as JSON so a new
+ * preference needs no migration; reads merge it over the defaults and validate it.
+ */
+export const settings = sqliteTable('settings', {
+  id: integer('id').primaryKey(),
+  value: text('value', { mode: 'json' }).notNull(),
+  updatedAt: text('updated_at').notNull(),
+});

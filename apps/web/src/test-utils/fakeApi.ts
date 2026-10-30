@@ -1,4 +1,4 @@
-import { ApiError } from '@agenda/core';
+import { ApiError, DEFAULT_SETTINGS } from '@agenda/core';
 import type { AgendaEvent, Session } from '@agenda/core';
 import { vi } from 'vitest';
 import type { WebApi } from '../app/api';
@@ -10,6 +10,7 @@ export interface FakeApi {
   api: WebApi;
   auth: Mocked<WebApi['auth']>;
   events: Mocked<WebApi['events']>;
+  settings: Mocked<WebApi['settings']>;
 }
 
 export const SESSION: Session = {
@@ -36,6 +37,18 @@ export function fakeApi(onUnauthorized: () => void = () => undefined): FakeApi {
     me: vi.fn<WebApi['auth']['me']>(() => Promise.resolve(SESSION)),
     sessions: vi.fn<WebApi['auth']['sessions']>(notMocked('auth.sessions')),
     revokeSession: vi.fn<WebApi['auth']['revokeSession']>(notMocked('auth.revokeSession')),
+    revokeOtherSessions: vi.fn<WebApi['auth']['revokeOtherSessions']>(
+      notMocked('auth.revokeOtherSessions'),
+    ),
+  };
+  // Settings start at the defaults and are remembered when saved, like the API.
+  let savedSettings = DEFAULT_SETTINGS;
+  const settings = {
+    get: vi.fn<WebApi['settings']['get']>(() => Promise.resolve(savedSettings)),
+    update: vi.fn<WebApi['settings']['update']>((value) => {
+      savedSettings = value;
+      return Promise.resolve(value);
+    }),
   };
   const events = {
     list: vi.fn<WebApi['events']['list']>(notMocked('events.list')),
@@ -69,6 +82,10 @@ export function fakeApi(onUnauthorized: () => void = () => undefined): FakeApi {
 
   // The wrapped methods have the client's exact signatures; the cast only restores the
   // names that Object.fromEntries loses.
-  const api = { auth: wrapAll(auth), events: wrapAll(events) } as unknown as WebApi;
-  return { api, auth, events };
+  const api = {
+    auth: wrapAll(auth),
+    events: wrapAll(events),
+    settings: wrapAll(settings),
+  } as unknown as WebApi;
+  return { api, auth, events, settings };
 }

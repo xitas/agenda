@@ -151,6 +151,8 @@ export const size = {
   bottomNav: BOTTOM_NAV,
   /** One hour in the Week time grid (DESIGN.md §3: DayColumn / TimeGrid). */
   hourRow: 48,
+  /** A time-grid event narrower than this shows only its title (the time won't fit). */
+  eventTimeMin: 96,
 } as const;
 
 /**

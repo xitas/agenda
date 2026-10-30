@@ -1,0 +1,188 @@
+/* The Settings page. Token variables only. */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-8);
+  max-width: calc(var(--ag-size-dialog) * 1.5);
+}
+
+.settings__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+  padding-top: var(--ag-space-6);
+  border-top: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.settings__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+}
+
+.settings__title {
+  margin: 0;
+  font-size: var(--ag-text-title-sm);
+}
+
+.settings__description {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+}
+
+/* Radio groups. */
+.settings__choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings__choices legend {
+  padding: 0;
+  margin-bottom: var(--ag-space-2);
+}
+
+.settings__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ag-space-2);
+}
+
+.settings__option {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+  min-height: var(--ag-size-control-md);
+  padding: 0 var(--ag-space-3);
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-sm);
+  font-size: var(--ag-text-body-sm);
+  cursor: pointer;
+}
+
+.settings__option:has(input:checked) {
+  border-color: var(--ag-color-accent);
+  background: var(--ag-color-surface-2);
+}
+
+.settings__option input {
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+  margin: 0;
+  accent-color: var(--ag-color-accent);
+}
+
+/* Data. */
+.settings__file {
+  max-width: 100%;
+  color: var(--ag-color-text);
+  font: inherit;
+  font-size: var(--ag-text-body-sm);
+}
+
+.settings__file::file-selector-button {
+  margin-right: var(--ag-space-3);
+  padding: var(--ag-space-2) var(--ag-space-3);
+  border: var(--ag-border-hairline) solid var(--ag-color-border-strong);
+  border-radius: var(--ag-radius-sm);
+  background: var(--ag-color-surface);
+  color: var(--ag-color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.settings__report:empty {
+  display: none;
+}
+
+.settings__report p {
+  margin: 0;
+}
+
+.settings__report,
+.settings__status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+  font-size: var(--ag-text-body-sm);
+}
+
+.settings__error {
+  color: var(--ag-color-danger);
+}
+
+.settings__skipped {
+  margin: 0;
+  padding-left: var(--ag-space-6);
+  color: var(--ag-color-text-muted);
+}
+
+.settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ag-space-2);
+}
+
+/* Devices. */
+.settings__devices {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+  list-style: none;
+}
+
+.settings__device {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ag-space-3);
+  padding: var(--ag-space-3) var(--ag-space-4);
+}
+
+.settings__device + .settings__device {
+  border-top: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.settings__device-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  min-width: 0;
+}
+
+.settings__device-text p {
+  margin: 0;
+}
+
+.settings__device-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-2);
+  font-weight: var(--ag-weight-medium);
+}
+
+.settings__device-meta {
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+}
+
+.settings__badge {
+  padding: 0 var(--ag-space-2);
+  border-radius: var(--ag-radius-full);
+  background: var(--ag-color-surface-2);
+  color: var(--ag-color-text);
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-medium);
+}

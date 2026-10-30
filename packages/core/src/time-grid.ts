@@ -190,12 +190,6 @@ export function layoutAllDay<E extends Sortable>(
   return { blocks, lanes: laneEnds.length };
 }
 
-/** The Monday on or before `day` (weeks start on Monday, like monthGrid). */
-export function startOfWeekPlain(day: string): string {
-  const weekday = new Date(`${addDaysToPlainDate(day, 0)}T12:00:00.000Z`).getUTCDay();
-  return addDaysToPlainDate(day, -((weekday + 6) % 7));
-}
-
 /** `count` consecutive plain dates from `day`. */
 export function daysFrom(day: string, count: number): string[] {
   return Array.from({ length: count }, (_, i) => addDaysToPlainDate(day, i));

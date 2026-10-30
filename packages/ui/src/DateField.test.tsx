@@ -106,6 +106,13 @@ describe('DateField', () => {
     expect(field()).toHaveProperty('value', '30 Oct 2026');
   });
 
+  it('passes the week start to its calendar', async () => {
+    const user = userEvent.setup();
+    render(<Controlled weekStart="sunday" />);
+    await user.click(screen.getByRole('button', { name: /^Choose start date/ }));
+    expect(screen.getAllByRole('columnheader')[0]?.getAttribute('abbr')).toBe('Sunday');
+  });
+
   it('opens on today when the text is unreadable', async () => {
     const user = userEvent.setup();
     render(<Controlled initial="someday" />);

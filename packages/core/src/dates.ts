@@ -15,6 +15,17 @@ import type { AgendaEvent } from './types.js';
 
 export type CalendarView = 'day' | 'week' | 'month';
 
+/** The first day of the week (a setting; DESIGN.md's default is Monday). */
+export type WeekStart = 'monday' | 'sunday';
+
+const WEEK_STARTS_ON = { monday: 1, sunday: 0 } as const;
+
+/** Formatting options that come from the user's settings. */
+export interface TimeFormatOptions {
+  /** true: "4:30 PM"; false: "16:30"; undefined: the locale's own habit. */
+  hour12?: boolean | undefined;
+}
+
 /** A half-open range of instants: `start` is included, `end` is not. */
 export interface DateRange {
   start: Date;
@@ -22,7 +33,9 @@ export interface DateRange {
 }
 
 const DATE_FORMAT = 'EEE, d MMM';
-const TIME_FORMAT = 'p';
+/** date-fns patterns: the locale's own ("p"), or a forced 12- or 24-hour clock. */
+const timePattern = ({ hour12 }: TimeFormatOptions) =>
+  hour12 === undefined ? 'p' : hour12 ? 'h:mm a' : 'HH:mm';
 
 // date-fns returns TZDate objects in the requested zone; callers get plain Dates.
 function toDate(date: Date): Date {
@@ -39,8 +52,13 @@ export function plainDateInTz(date: Date, timeZone: string): string {
   return format(date, 'yyyy-MM-dd', { in: tz(timeZone) });
 }
 
-/** The range of instants a day, week (Monday first) or month view covers in `timeZone`. */
-export function rangeForView(view: CalendarView, date: Date, timeZone: string): DateRange {
+/** The range of instants a day, week or month view covers in `timeZone`. */
+export function rangeForView(
+  view: CalendarView,
+  date: Date,
+  timeZone: string,
+  weekStart: WeekStart = 'monday',
+): DateRange {
   const options = { in: tz(timeZone) };
   switch (view) {
     case 'day': {
@@ -48,7 +66,7 @@ export function rangeForView(view: CalendarView, date: Date, timeZone: string): 
       return { start: toDate(start), end: toDate(addDays(start, 1, options)) };
     }
     case 'week': {
-      const start = startOfWeek(date, { ...options, weekStartsOn: 1 });
+      const start = startOfWeek(date, { ...options, weekStartsOn: WEEK_STARTS_ON[weekStart] });
       return { start: toDate(start), end: toDate(addWeeks(start, 1, options)) };
     }
     case 'month': {
@@ -110,14 +128,18 @@ export function addMonthsToPlainDate(day: string, months: number): string {
   return target.toISOString().slice(0, 10);
 }
 
+/** The first day of the week (Monday or Sunday) on or before `day`. */
+export function startOfWeekPlain(day: string, weekStart: WeekStart = 'monday'): string {
+  const weekday = fromPlainDate(addDaysToPlainDate(day, 0)).getUTCDay();
+  return addDaysToPlainDate(day, -((weekday - WEEK_STARTS_ON[weekStart] + 7) % 7));
+}
+
 /**
- * The 42 plain dates of a month calendar (6 weeks, Monday first) for the month that
- * contains `day`. Calendar math on a plain date needs no time zone, so it runs in UTC.
+ * The 42 plain dates of a month calendar (6 weeks, starting on `weekStart`) for the month
+ * that contains `day`. Calendar math on a plain date needs no time zone.
  */
-export function monthGrid(day: string): string[] {
-  const month = rangeForView('month', fromPlainDate(addDaysToPlainDate(day, 0)), 'UTC');
-  const firstWeek = rangeForView('week', month.start, 'UTC');
-  const first = plainDateInTz(firstWeek.start, 'UTC');
+export function monthGrid(day: string, weekStart: WeekStart = 'monday'): string[] {
+  const first = startOfWeekPlain(`${addDaysToPlainDate(day, 0).slice(0, 7)}-01`, weekStart);
   return Array.from({ length: 42 }, (_, i) => addDaysToPlainDate(first, i));
 }
 
@@ -130,7 +152,9 @@ export function formatEventTime(
   event: Pick<AgendaEvent, 'start' | 'end' | 'allDay'>,
   timeZone: string,
   locale: Locale,
+  time: TimeFormatOptions = {},
 ): string {
+  const TIME_FORMAT = timePattern(time);
   if (event.allDay) {
     const first = fromPlainDate(event.start);
     // The all-day end is exclusive, so the last day shown is the day before it.

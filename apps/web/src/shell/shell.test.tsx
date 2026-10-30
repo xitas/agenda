@@ -16,7 +16,13 @@ describe('app shell', () => {
     renderApp('/day/2026-10-30');
     const nav = await screen.findByRole('navigation', { name: 'Views' });
     const links = within(nav).getAllByRole('link');
-    expect(links.map((link) => link.textContent)).toEqual(['Today', 'Week', 'Month', 'Search']);
+    expect(links.map((link) => link.textContent)).toEqual([
+      'Today',
+      'Week',
+      'Month',
+      'Search',
+      'Settings',
+    ]);
     expect(within(nav).getByRole('link', { name: 'Today' }).getAttribute('aria-current')).toBe(
       'page',
     );
@@ -109,7 +115,9 @@ describe('calendar', () => {
 describe('log out', () => {
   it('ends the session, forgets the cache and goes to /login', async () => {
     const app = renderApp('/');
-    await userEvent.setup().click(await screen.findByRole('button', { name: 'Log out' }));
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Account' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Log out' }));
     await waitFor(() => {
       expect(path(app)).toBe('/login');
     });
@@ -123,7 +131,9 @@ describe('log out', () => {
         fake.auth.logout.mockRejectedValue(new NetworkError('network', 'offline'));
       },
     });
-    await userEvent.setup().click(await screen.findByRole('button', { name: 'Log out' }));
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Account' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Log out' }));
     expect(
       await screen.findByText("Couldn't log out. Check your connection and try again."),
     ).toBeDefined();

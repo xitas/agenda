@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Agenda's app icon: a calendar page on the accent color. The PNGs in public/ are
+       generated from this file by the web app's icons script. -->
+  <rect width="512" height="512" rx="112" fill="#4F46E5"/>
+  <rect x="112" y="128" width="288" height="264" rx="40" fill="#FFFFFF"/>
+  <rect x="112" y="128" width="288" height="72" rx="40" fill="#C7C4F7"/>
+  <rect x="112" y="168" width="288" height="32" fill="#C7C4F7"/>
+  <rect x="168" y="96" width="32" height="72" rx="16" fill="#FFFFFF"/>
+  <rect x="312" y="96" width="32" height="72" rx="16" fill="#FFFFFF"/>
+  <g fill="#4F46E5">
+    <rect x="160" y="240" width="48" height="40" rx="10"/>
+    <rect x="232" y="240" width="48" height="40" rx="10"/>
+    <rect x="304" y="240" width="48" height="40" rx="10"/>
+    <rect x="160" y="304" width="48" height="40" rx="10"/>
+    <rect x="232" y="304" width="48" height="40" rx="10" fill-opacity="0.35"/>
+    <rect x="304" y="304" width="48" height="40" rx="10" fill-opacity="0.35"/>
+  </g>
+</svg>

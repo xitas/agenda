@@ -57,6 +57,12 @@ function withServer(initial: AgendaEvent[] = [REVIEW]) {
 }
 
 const dialog = (name: string) => screen.findByRole('dialog', { name });
+/** Types a time into a TimeField and leaves it, which is when it reads the text. */
+function setTime(scope: HTMLElement, name: string, value: string) {
+  const input = within(scope).getByLabelText<HTMLInputElement>(name);
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
+}
 const field = (scope: HTMLElement, name: string) =>
   within(scope).getByLabelText<HTMLInputElement>(name);
 
@@ -103,7 +109,7 @@ describe('editing an event', () => {
     app.events.update.mockImplementation(() => new Promise(() => undefined));
     await user.clear(field(editor, 'Title'));
     await user.type(field(editor, 'Title'), 'Design review');
-    fireEvent.change(field(editor, 'End time'), { target: { value: '17:30' } });
+    setTime(editor, 'End time', '17:30');
     await user.click(within(editor).getByRole('radio', { name: 'Teal' }));
     await user.click(within(editor).getByRole('checkbox', { name: '1 day before' }));
     await user.type(field(editor, 'Location'), ' (2nd floor)');
@@ -252,7 +258,7 @@ describe('editor validation', () => {
   it('shows friendly errors on Save, focuses the first, and clears them as fields are fixed', async () => {
     const app = renderApp('/', { setup: withServer([]) });
     const { user, editor } = await newEvent();
-    fireEvent.change(field(editor, 'End time'), { target: { value: '13:00' } });
+    setTime(editor, 'End time', '13:00');
     await user.click(within(editor).getByRole('button', { name: 'Save' }));
 
     expect(within(editor).getByText('Add a title')).toBeDefined();
@@ -264,7 +270,7 @@ describe('editor validation', () => {
 
     await user.type(field(editor, 'Title'), 'Dentist');
     expect(within(editor).queryByText('Add a title')).toBeNull();
-    fireEvent.change(field(editor, 'End time'), { target: { value: '15:00' } });
+    setTime(editor, 'End time', '15:00');
     expect(within(editor).queryByText('End must be after start')).toBeNull();
   });
 
@@ -286,7 +292,7 @@ describe('editor validation', () => {
     renderApp('/', { setup: withServer([]) });
     const { user, editor } = await newEvent();
     await user.type(field(editor, 'Title'), 'Dentist');
-    fireEvent.change(field(editor, 'Start time'), { target: { value: '' } });
+    setTime(editor, 'Start time', '');
     await user.click(within(editor).getByRole('button', { name: 'Save' }));
     expect(within(editor).getByText('Enter a time, like 14:30')).toBeDefined();
 

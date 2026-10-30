@@ -1,8 +1,6 @@
 import { plainDateInTz } from '@agenda/core';
-import { Dialog, IconButton } from '@agenda/ui';
+import { Dialog } from '@agenda/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { Keyboard } from 'lucide-react';
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useEnv } from '../app/env';
 import { useEventActions } from '../events/actions';
@@ -37,13 +35,18 @@ function focusedEventId(): string | null {
  * The shortcuts that work on every screen (DESIGN.md §5), and the "?" help dialog. The
  * views add their own ←/→/T, and QuickAdd its N and Ctrl/Cmd+K.
  */
-export function GlobalShortcuts() {
+export interface GlobalShortcutsProps {
+  /** The help dialog's state; the account menu opens it too. */
+  helpOpen: boolean;
+  onHelpOpenChange: (open: boolean) => void;
+}
+
+export function GlobalShortcuts({ helpOpen, onHelpOpenChange }: GlobalShortcutsProps) {
   const env = useEnv();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const queryClient = useQueryClient();
   const actions = useEventActions();
-  const [helpOpen, setHelpOpen] = useState(false);
 
   const switchTo = (view: CalendarViewName) => () => {
     const today = plainDateInTz(env.now(), env.timezone);
@@ -70,19 +73,12 @@ export function GlobalShortcuts() {
       if (event !== undefined) actions.remove(event);
     }),
     '?': () => {
-      setHelpOpen(true);
+      onHelpOpenChange(true);
     },
   });
 
   return (
-    <Dialog
-      open={helpOpen}
-      onOpenChange={setHelpOpen}
-      title="Keyboard shortcuts"
-      trigger={
-        <IconButton label="Keyboard shortcuts" icon={<Keyboard />} className="shell__help" />
-      }
-    >
+    <Dialog open={helpOpen} onOpenChange={onHelpOpenChange} title="Keyboard shortcuts">
       <dl className="shortcuts">
         {SHORTCUTS.map(([keys, action]) => (
           <div key={action} className="shortcuts__row">

@@ -20,3 +20,13 @@ for (const name of ['hasPointerCapture', 'setPointerCapture', 'releasePointerCap
     Object.defineProperty(proto, name, { value: () => false, configurable: true });
   }
 }
+
+// jsdom has no ResizeObserver; Radix's popper (the account menu) measures with it.
+class ResizeObserverStub {
+  observe = () => undefined;
+  unobserve = () => undefined;
+  disconnect = () => undefined;
+}
+if (typeof window !== 'undefined') {
+  (globalThis as { ResizeObserver?: unknown }).ResizeObserver ??= ResizeObserverStub;
+}

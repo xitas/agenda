@@ -109,7 +109,7 @@ describe('TimeGrid', () => {
     // A separate cluster: full width; no end means 30 minutes.
     expect([cssVar(block('Lunch'), 'cols'), cssVar(block('Lunch'), 'height')]).toEqual(['1', '30']);
     expect(block('Lunch').getAttribute('data-event-color')).toBe('green');
-    expect(block('Lunch').textContent).toContain('Category: Green');
+    expect(block('Lunch').getAttribute('aria-label')).toMatch(/, Green$/);
   });
 
   it('spans multi-day and 24-hour events across the all-day strip', () => {
@@ -292,5 +292,56 @@ describe('TimeGrid', () => {
       ],
     });
     await expectNoAxeViolations(container);
+  });
+});
+
+describe('TimeGrid clock', () => {
+  it('can force a 12-hour clock on hours and events', () => {
+    render(
+      <TimeGrid
+        days={WEEK}
+        events={[event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z')]}
+        timezone="UTC"
+        locale={enGB}
+        today="2026-10-27"
+        now={NOW}
+        hour12
+      />,
+    );
+    expect(screen.getByText('8:00 AM')).toBeDefined();
+    expect(screen.getByText('4:00 PM – 5:00 PM')).toBeDefined();
+  });
+});
+
+describe('TimeGrid names and narrow blocks', () => {
+  it('gives every block its full name and a title + time tooltip', () => {
+    render(
+      <TimeGrid
+        days={WEEK}
+        events={[
+          event('Dentist', '2026-10-28T16:00:00.000Z', '2026-10-28T17:00:00.000Z', {
+            color: 'red',
+          }),
+          event('Offsite', '2026-10-29', '2026-10-31', { allDay: true }),
+          event('Holiday', '2026-10-30', null, { allDay: true, color: 'green' }),
+        ]}
+        timezone="UTC"
+        locale={enGB}
+        today="2026-10-27"
+        now={NOW}
+      />,
+    );
+    const dentist = screen.getByRole('button', {
+      name: 'Dentist, Wednesday, 28 October 2026, 16:00 – 17:00, Red',
+    });
+    expect(dentist.getAttribute('title')).toBe('Dentist\n16:00 – 17:00');
+    expect(
+      screen
+        .getByRole('button', { name: 'Offsite, Thu, 29 Oct – Fri, 30 Oct, Blue' })
+        .getAttribute('title'),
+    ).toBe('Offsite\nThu, 29 Oct – Fri, 30 Oct');
+    expect(
+      screen.getByRole('button', { name: 'Holiday, Friday, 30 October 2026, all day, Green' }),
+    ).toBeDefined();
   });
 });

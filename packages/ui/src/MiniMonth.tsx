@@ -1,5 +1,10 @@
-import { addDaysToPlainDate, addMonthsToPlainDate, monthGrid } from '@agenda/core';
-import type { Locale } from '@agenda/core';
+import {
+  addDaysToPlainDate,
+  addMonthsToPlainDate,
+  monthGrid,
+  startOfWeekPlain,
+} from '@agenda/core';
+import type { Locale, WeekStart } from '@agenda/core';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
@@ -18,22 +23,13 @@ export interface MiniMonthProps {
   onMonthChange?: (firstOfMonth: string) => void;
   /** Month and weekday names follow this locale (its BCP 47 code). */
   locale: Locale;
+  /** The first column (a setting; Monday by default). */
+  weekStart?: WeekStart;
 }
 
 const firstOfMonth = (day: string) => `${day.slice(0, 7)}-01`;
 const sameMonth = (a: string, b: string) => a.slice(0, 7) === b.slice(0, 7);
 const atNoonUtc = (day: string) => new Date(`${day}T12:00:00.000Z`);
-
-/** Monday first, matching monthGrid. */
-const WEEK_ISO = [
-  '2026-10-26',
-  '2026-10-27',
-  '2026-10-28',
-  '2026-10-29',
-  '2026-10-30',
-  '2026-10-31',
-  '2026-11-01',
-];
 
 /**
  * A month calendar for the sidebar (WAI-ARIA date grid): one day is in the tab order at a
@@ -47,6 +43,7 @@ export function MiniMonth({
   onSelect,
   onMonthChange,
   locale,
+  weekStart = 'monday',
 }: MiniMonthProps) {
   const [focused, setFocused] = useState(selected ?? today);
   const [month, setMonth] = useState(firstOfMonth(selected ?? today));
@@ -79,7 +76,7 @@ export function MiniMonth({
     [locale.code],
   );
 
-  const grid = useMemo(() => monthGrid(month), [month]);
+  const grid = useMemo(() => monthGrid(month, weekStart), [month, weekStart]);
   const weeks = [0, 1, 2, 3, 4, 5].map((week) => grid.slice(week * 7, week * 7 + 7));
 
   useEffect(() => {
@@ -109,14 +106,14 @@ export function MiniMonth({
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
-    const weekdayIndex = (new Date(`${focused}T00:00:00.000Z`).getUTCDay() + 6) % 7; // Monday = 0
+    const weekFirst = startOfWeekPlain(focused, weekStart);
     const moves: Record<string, () => string> = {
       ArrowLeft: () => addDaysToPlainDate(focused, -1),
       ArrowRight: () => addDaysToPlainDate(focused, 1),
       ArrowUp: () => addDaysToPlainDate(focused, -7),
       ArrowDown: () => addDaysToPlainDate(focused, 7),
-      Home: () => addDaysToPlainDate(focused, -weekdayIndex),
-      End: () => addDaysToPlainDate(focused, 6 - weekdayIndex),
+      Home: () => weekFirst,
+      End: () => addDaysToPlainDate(weekFirst, 6),
       PageUp: () => addMonthsToPlainDate(focused, -1),
       PageDown: () => addMonthsToPlainDate(focused, 1),
     };
@@ -164,7 +161,7 @@ export function MiniMonth({
       >
         <thead>
           <tr>
-            {WEEK_ISO.map((day) => (
+            {grid.slice(0, 7).map((day) => (
               <th key={day} scope="col" abbr={formats.weekdayLong.format(atNoonUtc(day))}>
                 {formats.weekdayShort.format(atNoonUtc(day)).slice(0, 2)}
               </th>

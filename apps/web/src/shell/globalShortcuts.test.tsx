@@ -150,7 +150,8 @@ describe('shortcut help', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull();
     });
-    await user.click(screen.getByRole('button', { name: 'Keyboard shortcuts' }));
+    await user.click(screen.getByRole('button', { name: 'Account' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Keyboard shortcuts' }));
     expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeDefined();
   });
 });

@@ -52,6 +52,7 @@ export function DayPage() {
         event={event}
         timezone={env.timezone}
         locale={env.locale}
+        hour12={env.hour12}
         // Ended events are muted (still readable) so what's next stands out.
         past={hasEnded(event, now, today)}
         onSelect={() => {

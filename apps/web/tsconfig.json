@@ -1,7 +1,9 @@
 {
   "extends": "@agenda/config/tsconfig/react.json",
   "compilerOptions": {
-    "types": ["vite/client"]
+    "types": ["vite/client", "vite-plugin-pwa/client"]
   },
-  "include": ["src", "*.ts"]
+  "include": ["src", "*.ts"],
+  // The service worker has its own tsconfig (WebWorker types, not DOM).
+  "exclude": ["src/sw"]
 }

@@ -119,13 +119,35 @@ describe('parseImport', () => {
     expect(result.events.map((event) => event.title)).toEqual(['Meeting', 'Dentist', 'Vacation']);
     expect(result.indexes).toEqual([0, 1, 9]);
     expect(result.skipped).toEqual([
-      { index: 2, reason: 'title: Too big: expected string to have <=200 characters' },
-      { index: 3, reason: 'start: Expected a UTC ISO datetime' },
-      { index: 4, reason: 'Not an event object' },
-      { index: 5, reason: 'Unrecognized event format' },
-      { index: 6, reason: 'Duplicate id 0190f5a2-0000-7000-8000-000000000001' },
-      { index: 7, reason: 'Deleted event' },
-      { index: 8, reason: 'v0 date: Invalid input' },
+      { index: 2, reason: 'Title is longer than 200 characters' },
+      { index: 3, reason: "The date can't be read" },
+      { index: 4, reason: "This row isn't an event" },
+      { index: 5, reason: "This row isn't an Agenda event" },
+      { index: 6, reason: 'Appears twice in the file' },
+      { index: 7, reason: 'Was deleted' },
+      { index: 8, reason: "The date can't be read" },
+    ]);
+  });
+
+  it('says in plain words why each kind of row is skipped', () => {
+    const id = (n: number) => `0190f5a2-0000-7000-8000-00000000010${String(n)}`;
+    const rows = [
+      { ...v1Event, id: id(1), title: '' },
+      { ...v1Event, id: id(2), title: 42 },
+      { ...v1Event, id: id(3), end: '2020-01-01T00:00:00.000Z' },
+      { ...v1Event, id: id(4), end: 'later' },
+      { ...v1Event, id: id(5), color: 'mauve' },
+      { ...v1Event, id: id(6), timezone: 'Mars/Olympus' },
+      { ...v1Event, id: id(7), reminders: 'often' },
+    ];
+    expect(parseImport(rows, options).skipped.map((row) => row.reason)).toEqual([
+      'No title',
+      "The title can't be read",
+      'It ends before it starts',
+      "The end date can't be read",
+      'Unknown color',
+      'Unknown time zone',
+      "The reminders can't be read",
     ]);
   });
 
@@ -136,9 +158,7 @@ describe('parseImport', () => {
   it('skips a second v0 row with the same UUID', () => {
     const result = parseImport([seed[0], seed[0]], options);
     expect(result.events).toHaveLength(1);
-    expect(result.skipped).toEqual([
-      { index: 1, reason: 'Duplicate id 5f0c7a9e-2b1d-4c3e-9a8f-1d2e3f4a5b6c' },
-    ]);
+    expect(result.skipped).toEqual([{ index: 1, reason: 'Appears twice in the file' }]);
   });
 
   it('returns nothing for an empty file', () => {
