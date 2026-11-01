@@ -215,3 +215,48 @@ describe('CORS', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
   });
 });
+
+describe('the desktop app (Tauri)', () => {
+  // Tauri pages run on http://tauri.localhost (Windows) or tauri://localhost (macOS,
+  // Linux): cross-site to the API, so the app logs in as a token client.
+  const TAURI_ORIGINS = ['http://tauri.localhost', 'tauri://localhost'];
+
+  it.each(TAURI_ORIGINS)('lets %s preflight, log in with a token and write', async (origin) => {
+    const { app, request } = await makeTestApp({
+      auth: { corsOrigins: [WEB_ORIGIN, ...TAURI_ORIGINS] },
+    });
+    const preflight = await app.request('/api/v1/events', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: origin,
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'content-type, authorization',
+      },
+    });
+    expect(preflight.headers.get('Access-Control-Allow-Origin')).toBe(origin);
+
+    const login = await request<{ token: string }>(
+      'POST',
+      '/auth/login',
+      { password: PASSWORD, client: 'token', label: 'Desktop app on Windows' },
+      { auth: false, headers: { Origin: origin } },
+    );
+    expect(login.status).toBe(200);
+    const write = await request('POST', '/events', timed('Call Ali', '2026-10-24T10:00:00Z'), {
+      auth: login.body.token,
+      headers: { Origin: origin },
+    });
+    expect(write.status).toBe(201);
+    expect(write.headers.get('Access-Control-Allow-Origin')).toBe(origin);
+  });
+
+  it('skips the CSRF check for bearer writes, whatever their Origin', async () => {
+    // CORS_ORIGINS only decides what a browser page may read; a bearer token is never
+    // attached by the browser itself, so its requests need no Origin check.
+    const { request } = await makeTestApp();
+    const res = await request('POST', '/events', timed('Script', '2026-10-24T11:00:00Z'), {
+      headers: { Origin: 'http://tauri.localhost' },
+    });
+    expect(res.status).toBe(201);
+  });
+});

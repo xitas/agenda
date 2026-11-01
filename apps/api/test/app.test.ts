@@ -160,12 +160,12 @@ describe('environment', () => {
         AGENDA_PASSWORD_HASH: hash,
         PORT: '8080',
         NODE_ENV: 'development',
-        CORS_ORIGINS: ' http://localhost:5173 , https://agenda.example ',
+        CORS_ORIGINS: ' http://localhost:5173 , https://agenda.example , tauri://localhost ',
       }),
     ).toMatchObject({
       PORT: 8080,
       NODE_ENV: 'development',
-      CORS_ORIGINS: ['http://localhost:5173', 'https://agenda.example'],
+      CORS_ORIGINS: ['http://localhost:5173', 'https://agenda.example', 'tauri://localhost'],
     });
   });
 
@@ -174,6 +174,11 @@ describe('environment', () => {
     ['an empty hash', () => ({ AGENDA_PASSWORD_HASH: '' }), 'AGENDA_PASSWORD_HASH is not set'],
     ['a plain-text password', () => ({ AGENDA_PASSWORD_HASH: 'hunter2' }), 'is not a valid hash'],
     ['a bad port', (hash: string) => ({ AGENDA_PASSWORD_HASH: hash, PORT: 'eighty' }), 'PORT'],
+    [
+      'a custom-scheme origin with a path',
+      (hash: string) => ({ AGENDA_PASSWORD_HASH: hash, CORS_ORIGINS: 'tauri://localhost/' }),
+      'Expected an origin',
+    ],
     [
       'an origin with a path',
       (hash: string) => ({
