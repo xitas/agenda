@@ -5,7 +5,8 @@
  */
 
 .ag-timegrid {
-  --ag-timegrid-gutter: calc(var(--ag-space-12) + var(--ag-space-2));
+  /* Wide enough for the longest 12-hour label ("10:00 AM") and its inset. */
+  --ag-timegrid-gutter: calc(var(--ag-space-12) + var(--ag-space-6));
   --ag-timegrid-columns: var(--ag-timegrid-gutter) repeat(var(--days), minmax(0, 1fr));
 
   display: flex;
