@@ -6,7 +6,7 @@ Agenda is a personal agenda and calendar. It started as a small teaching project
 
 - a **web** app you can install (Vite + React, a PWA): **done**
 - an **API** (Hono + Drizzle + SQLite): **done**
-- a **desktop** app (Tauri): next
+- a **desktop** app for Windows (Tauri): **done**, talking to the API on your PC until there is a server
 - a **Chrome extension** (Manifest V3) and a **mobile** app (Expo): later
 
 See [docs/PLAN.md](docs/PLAN.md) for the phases.
@@ -25,6 +25,14 @@ See [docs/PLAN.md](docs/PLAN.md) for the phases.
 - **Installable** from Chrome, with an app shell that loads from a service worker. The API is never cached, so your data is always current.
 - **Light and dark themes,** WCAG AA contrast (checked by tests), keyboard focus everywhere, and axe checks in the test suite.
 
+## Features (desktop)
+
+- **The whole app in its own window,** logged in with a token kept in Windows Credential Manager.
+- **Quick add from anywhere:** Ctrl+Shift+Space (changeable) opens a small QuickAdd window over whatever you are doing.
+- **Tray menu** with your next 5 events today and tomorrow. Closing the window keeps Agenda in the tray.
+- **Reminder notifications** from each event's reminders, never twice, even after a restart.
+- **Launch at login,** and a **Server URL** setting for when the API runs somewhere else.
+
 ## Screenshots
 
 | Week                                    | Month (dark)                                         |
@@ -35,12 +43,27 @@ See [docs/PLAN.md](docs/PLAN.md) for the phases.
 | ------------------------------------------ | -------------------------------------------------------------- |
 | ![Settings](docs/screenshots/settings.png) | ![Week on a phone, dark](docs/screenshots/week-phone-dark.png) |
 
+### Desktop
+
+| Desktop window                                               | Desktop window (dark)                                                   |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| ![Desktop app, Week view](docs/screenshots/desktop-week.png) | ![Desktop app, Week view, dark](docs/screenshots/desktop-week-dark.png) |
+
+| Quick add from anywhere (Ctrl+Shift+Space)                                   | Tray menu                                       | Reminder                                                            |
+| ---------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| ![Quick-add window with its preview](docs/screenshots/desktop-quick-add.png) | ![Tray menu](docs/screenshots/desktop-tray.png) | ![Reminder notification](docs/screenshots/desktop-notification.png) |
+
+| Server not running                                                     |
+| ---------------------------------------------------------------------- |
+| ![Can't reach Agenda screen](docs/screenshots/desktop-unreachable.png) |
+
 ## Workspace layout
 
 ```
 apps/
   api/        Hono API: events, auth (cookie or token), settings, import/export
-  web/        Vite + React app (PWA)
+  web/        Vite + React app (PWA); also the desktop app's UI
+  desktop/    Tauri 2 desktop app: the Rust core around apps/web (see apps/desktop/README.md)
   e2e/        Playwright smoke test against the built api + web
 packages/
   core/       Shared types, validation, dates, layout, quick add and the API client
@@ -88,7 +111,7 @@ All scripts run through [Turborepo](https://turborepo.com), which orders tasks b
 
 | Command          | What it does                                                     |
 | ---------------- | ---------------------------------------------------------------- |
-| `pnpm dev`       | Start all apps in watch mode                                     |
+| `pnpm dev`       | Start the API and web app in watch mode                          |
 | `pnpm build`     | Build every package and app (`dist/`)                            |
 | `pnpm lint`      | ESLint across the workspace                                      |
 | `pnpm typecheck` | `tsc --noEmit` in every package                                  |
@@ -96,11 +119,11 @@ All scripts run through [Turborepo](https://turborepo.com), which orders tasks b
 | `pnpm e2e`       | Playwright smoke test on the built apps (run `pnpm build` first) |
 | `pnpm format`    | Format the repo with Prettier (`format:check` to verify)         |
 
-Add `--filter @agenda/<name>` (for example `--filter @agenda/core`) to any of them to limit the run to one package and its dependencies. `pnpm --filter @agenda/web icons` regenerates the app icons from `apps/web/public/icon.svg`.
+Add `--filter @agenda/<name>` (for example `--filter @agenda/core`) to any of them to limit the run to one package and its dependencies. `pnpm --filter @agenda/web icons` regenerates the app icons from `apps/web/public/icon.svg`. For the desktop app (Rust required), see [apps/desktop/README.md](apps/desktop/README.md): `pnpm --filter @agenda/desktop dev` and `pnpm desktop:installer`.
 
 ## Continuous integration
 
-Every pull request and push to `master` runs `.github/workflows/ci.yml`. One job installs with a frozen lockfile, then runs `format:check`, `lint`, `typecheck`, `test` and `build`. A second job builds the apps and runs the Playwright smoke test in Chromium. Run the same checks locally before opening a PR.
+Every pull request and push to `master` runs `.github/workflows/ci.yml`. One job installs with a frozen lockfile, then runs `format:check`, `lint`, `typecheck`, `test` and `build`. A second job builds the apps and runs the Playwright smoke test in Chromium. A third, on Windows, runs `cargo fmt`, `clippy` and the Rust tests for the desktop app, then builds its installer and keeps it as a downloadable artifact. Run the same checks locally before opening a PR.
 
 ## The original app
 

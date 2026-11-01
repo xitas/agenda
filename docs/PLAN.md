@@ -112,6 +112,14 @@ Each phase ends with something usable and merged to `master`. Work in small PRs,
 
 **Done when:** I can press a global hotkey anywhere and add an event.
 
+**Status (built before Phase 3):** `apps/desktop` (Tauri 2) wraps the web app and talks to the API on this PC (`http://localhost:4001`) until its Server URL setting points elsewhere. Built: token login with the token in Windows Credential Manager, the "Can't reach" screen, close to tray, a tray menu with the next 5 events, the global quick-add shortcut (Ctrl+Shift+Space, changeable) and its window, reminder notifications that survive restarts without repeating, launch at login, and an NSIS installer built by `pnpm desktop:installer` and by CI. To check by hand: [ ] installed from the installer, added "Call Ali tomorrow 3pm" from the hotkey, and got a reminder notification.
+
+**Not done yet (on purpose):**
+
+- **Code signing.** The installer and app are unsigned, so SmartScreen warns ("More info → Run anyway") and Smart App Control blocks them. Signing needs a certificate (an OV/EV code-signing certificate, or Azure Trusted Signing) and a CI secret; it comes with the first release for other people.
+- **Auto-update.** `tauri-plugin-updater` needs signed update bundles and a place to host them (GitHub Releases), so it waits for signing.
+- **macOS and Linux builds.** The code is cross-platform (the keyring crate and the plugins support all three), but only Windows is built and tested.
+
 ### Phase 5: Chrome extension (about 1 week)
 
 **Learn:** MV3 (service worker lifecycle), `chrome.storage`, `chrome.alarms`, context menus, side panel.

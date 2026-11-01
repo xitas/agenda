@@ -103,7 +103,9 @@ Lucide (web: `lucide-react`; mobile: `lucide-react-native`), 20 px in UI and 16 
 
 **Web / Desktop (≥ 1024 px):** left sidebar (240 px) with mini-month and categories; main area with the view switcher (Today · Week · Month) and QuickAdd at the top. Below 768 px the sidebar collapses and the layout follows the mobile pattern.
 
-**Desktop extras:** the tray menu shows the next 5 events. The global-hotkey quick-add window is 560×72 px, centered, with no chrome, and closes on save or blur.
+**Desktop extras:** the tray menu shows the next 5 events today and tomorrow ("Today, 15:00 · Call Ali", "Tomorrow · Holiday"; each opens its day), then Quick add…, Open Agenda and Quit; left-clicking the icon opens the app. The global-hotkey quick-add window is 560×72 px, centered, with no chrome, and closes on save, Esc or blur; it grows downward to fit QuickAdd's preview, which sits under the field there instead of floating. Reminder notifications show the title, then the day and time ("Today, 16:00 – 17:00 · Clinic"); all-day events remind from 09:00 on their day.
+
+**Can't reach the server:** "Can't reach Agenda at <url>" as the heading, "Is the API running? (pnpm dev)" below it, then Retry and (desktop) Change server URL.
 
 **Chrome popup (360×520):** header (date and settings icon), QuickAdd, today's list, and a footer link "Open full Agenda →". **Side panel:** a vertical week list.
 
