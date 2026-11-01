@@ -186,3 +186,26 @@
   font-size: var(--ag-text-caption);
   font-weight: var(--ag-weight-medium);
 }
+
+/* "This computer" (desktop app): label and value pairs. */
+.settings__facts {
+  display: grid;
+  gap: var(--ag-space-2);
+  margin: 0;
+}
+
+.settings__facts div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ag-space-1) var(--ag-space-3);
+}
+
+.settings__facts dt {
+  min-width: calc(var(--ag-space-8) * 3);
+  color: var(--ag-color-text-muted);
+}
+
+.settings__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

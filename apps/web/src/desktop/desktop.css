@@ -1,0 +1,129 @@
+/* The desktop app's screens: unreachable server, desktop settings, the quick-add window.
+   Token variables only. */
+
+/* Can't reach the server: the same centered card as the login page. */
+.unreachable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--ag-space-6) var(--ag-space-4);
+}
+
+.unreachable__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+  width: min(100%, var(--ag-size-dialog));
+  padding: var(--ag-space-8) var(--ag-space-6);
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-lg);
+  background: var(--ag-color-surface);
+}
+
+.unreachable__title {
+  margin: 0;
+  font-size: var(--ag-text-title);
+  overflow-wrap: anywhere;
+}
+
+.unreachable__hint {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+}
+
+.unreachable__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ag-space-2);
+  margin-top: var(--ag-space-2);
+}
+
+/* "Server: http://localhost:4001 · Change" under the login button. */
+.login__server {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-1);
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+  overflow-wrap: anywhere;
+}
+
+.login__card .login__server .ag-button {
+  width: auto;
+}
+
+/* The desktop settings dialog. */
+.desktop-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-6);
+}
+
+.desktop-settings__server,
+.desktop-settings__shortcut,
+.desktop-settings__login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+}
+
+.desktop-settings__label {
+  margin: 0;
+  font-weight: var(--ag-weight-medium);
+}
+
+.desktop-settings__keys {
+  font-weight: var(--ag-weight-regular);
+}
+
+.desktop-settings__keys kbd {
+  min-width: var(--ag-space-6);
+  padding: 0 var(--ag-space-2);
+  border: var(--ag-border-hairline) solid var(--ag-color-border-strong);
+  border-radius: var(--ag-radius-sm);
+  background: var(--ag-color-surface-2);
+  font: inherit;
+  text-align: center;
+}
+
+.desktop-settings__check {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+}
+
+.desktop-settings__error {
+  margin: 0;
+  color: var(--ag-color-danger);
+  font-size: var(--ag-text-body-sm);
+}
+
+/* The quick-add window: just the field (and its preview) on the page background. */
+.quick-add-window {
+  background: var(--ag-color-bg);
+}
+
+.quick-add-window__note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ag-space-2);
+  margin: 0;
+  padding: var(--ag-space-3);
+  color: var(--ag-color-text-muted);
+}
+
+.quick-add-window__note p {
+  margin: 0;
+}
+
+.quick-add-window__error {
+  margin: 0;
+  padding: 0 var(--ag-space-3) var(--ag-space-3);
+  color: var(--ag-color-danger);
+  font-size: var(--ag-text-body-sm);
+}

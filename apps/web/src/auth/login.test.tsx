@@ -113,14 +113,14 @@ describe('RequireAuth', () => {
     expect(app.auth.me).toHaveBeenCalledOnce();
   });
 
-  it('offers to try again when the server cannot be reached', async () => {
+  it('offers to retry when the server cannot be reached', async () => {
     const app = renderApp('/', {
       setup: ({ auth }) => {
         auth.me.mockRejectedValueOnce(new NetworkError('network', 'x'));
       },
     });
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Try again' }));
+    await user.click(await screen.findByRole('button', { name: 'Retry' }));
     expect(await screen.findByText('Agenda')).toBeDefined();
     expect(app.auth.me).toHaveBeenCalledTimes(2);
   });

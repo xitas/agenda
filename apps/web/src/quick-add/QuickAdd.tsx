@@ -17,11 +17,25 @@ function useViewedDay(today: string): string | null {
   return pathname.startsWith('/day/') ? parseDay(pathname.slice('/day/'.length)) : null;
 }
 
+export interface QuickAddProps {
+  /**
+   * The desktop quick-add window: the field has focus from the start, the preview sits
+   * under it instead of floating over a page, and these replace the toasts and Esc.
+   */
+  popup?: {
+    /** After a save, with the day the event is on. */
+    onAdded: (day: string) => void;
+    /** Esc: close the window. */
+    onCancel: () => void;
+    onFailed: (message: string) => void;
+  };
+}
+
 /**
  * One line to add an event ("Dentist tomorrow 4pm #red", DESIGN.md §3), with a live
  * preview of what will be created. Enter adds, Esc clears, N or Ctrl/Cmd+K focuses it.
  */
-export function QuickAdd() {
+export function QuickAdd({ popup }: QuickAddProps = {}) {
   const env = useEnv();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -54,6 +68,10 @@ export function QuickAdd() {
     setText('');
     create.mutate(draft, {
       onSuccess: () => {
+        if (popup !== undefined) {
+          popup.onAdded(day);
+          return;
+        }
         // Say where it went when that isn't the page on screen.
         if (day === viewedDay) return;
         toast({
@@ -70,12 +88,12 @@ export function QuickAdd() {
       onError: (error) => {
         // Give the text back so nothing typed is lost.
         setText((current) => (current === '' ? typed : current));
-        toast({
-          message:
-            error instanceof NetworkError
-              ? `Couldn't reach the server, so "${draft.title}" wasn't added. Try again.`
-              : `Couldn't add "${draft.title}". Try again.`,
-        });
+        const message =
+          error instanceof NetworkError
+            ? `Couldn't reach the server, so "${draft.title}" wasn't added. Try again.`
+            : `Couldn't add "${draft.title}". Try again.`;
+        if (popup === undefined) toast({ message });
+        else popup.onFailed(message);
       },
     });
   };
@@ -85,15 +103,18 @@ export function QuickAdd() {
       event.preventDefault();
       submit();
     } else if (event.key === 'Escape') {
-      if (text === '') event.currentTarget.blur();
+      if (popup !== undefined) popup.onCancel();
+      else if (text === '') event.currentTarget.blur();
       setText('');
     }
   };
 
   return (
-    <div className="quick-add">
+    <div className={popup === undefined ? 'quick-add' : 'quick-add quick-add--window'}>
       <input
         ref={input}
+        // The window opens for typing; nothing else is in it.
+        autoFocus={popup !== undefined}
         className="ag-input quick-add__input"
         type="text"
         aria-label="Quick add"
@@ -126,7 +147,9 @@ export function QuickAdd() {
               ))}
             </ul>
           )}
-          <p className="quick-add__hint">Enter to add · Esc to clear</p>
+          <p className="quick-add__hint">
+            {popup === undefined ? 'Enter to add · Esc to clear' : 'Enter to add · Esc to close'}
+          </p>
         </div>
       )}
     </div>

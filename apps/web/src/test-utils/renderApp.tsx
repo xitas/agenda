@@ -52,7 +52,7 @@ export function renderApp(path = '/', { env = {}, setup, platform }: RenderAppOp
       api={fake.api}
       queryClient={queryClient}
       env={{ ...TEST_ENV, ...env }}
-      platform={platform ?? { saveFile }}
+      platform={platform ?? { saveFile, auth: { kind: 'cookie' }, apiBaseUrl: '' }}
     >
       <RouterProvider router={router} />
     </AppProviders>,

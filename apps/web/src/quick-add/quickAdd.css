@@ -89,3 +89,20 @@
   color: var(--ag-color-text-muted);
   font-size: var(--ag-text-caption);
 }
+
+/* The desktop quick-add window (DESIGN.md §4): the field fills the window, and the preview
+   sits under it so the window can grow to fit it. */
+.quick-add--window {
+  max-width: none;
+  padding: var(--ag-space-3);
+}
+
+.quick-add--window .quick-add__input {
+  width: 100%;
+}
+
+.quick-add--window .quick-add__preview {
+  position: static;
+  margin-top: var(--ag-space-2);
+  box-shadow: none;
+}

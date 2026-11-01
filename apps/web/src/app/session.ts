@@ -12,6 +12,9 @@ export function safeNext(next: string | null | undefined): string {
   return next;
 }
 
+/** The desktop quick-add window's page: a popup, never sent to /login. */
+export const QUICK_ADD_PATH = '/quick-add';
+
 export function loginPath(next: string): string {
   return next === '/' ? '/login' : `/login?next=${encodeURIComponent(next)}`;
 }
@@ -26,8 +29,11 @@ interface Navigator {
  * (it belonged to that session) and go to /login, remembering where the user was.
  */
 export function handleUnauthorized(queryClient: QueryClient, router: Navigator): void {
-  queryClient.clear();
   const { pathname, search } = router.state.location;
+  // The quick-add popup says "log in first" itself (a login page doesn't fit in it) and
+  // stays on its page, so clearing would only refetch the session into another 401.
+  if (pathname === QUICK_ADD_PATH) return;
+  queryClient.clear();
   if (pathname === '/login') return;
   void router.navigate(loginPath(`${pathname}${search}`), { replace: true });
 }

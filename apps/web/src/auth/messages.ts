@@ -1,4 +1,5 @@
 import { ApiError, NetworkError } from '@agenda/core';
+import { unreachableMessage } from './server';
 
 /** "1 minute", "14 minutes", "45 seconds": when trying again will help. */
 export function waitText(seconds: number): string {
@@ -7,9 +8,13 @@ export function waitText(seconds: number): string {
   return `${String(minutes)} ${minutes === 1 ? 'minute' : 'minutes'}`;
 }
 
-/** What went wrong at login, and what to do about it (DESIGN.md §7). */
-export function loginErrorMessage(error: unknown): string {
+/**
+ * What went wrong at login, and what to do about it (DESIGN.md §7). With a server URL
+ * (the desktop app), an unreachable server is named.
+ */
+export function loginErrorMessage(error: unknown, serverUrl?: string): string {
   if (error instanceof NetworkError) {
+    if (serverUrl !== undefined) return unreachableMessage(serverUrl);
     return "Couldn't reach the server. Check your connection and try again.";
   }
   if (error instanceof ApiError) {

@@ -4,22 +4,33 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useApi } from '../app/api';
+import { usePlatform } from '../app/platform';
 import { safeNext } from '../app/session';
+import { DesktopSettingsDialog } from '../desktop/DesktopSettingsDialog';
 import { loginErrorMessage } from './messages';
 import { SESSION_KEY } from './session';
 
 /** /login: one password field; after logging in, back to where the user was. */
 export function LoginPage() {
   const api = useApi();
+  const platform = usePlatform();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [password, setPassword] = useState('');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { auth, desktop } = platform;
 
   const login = useMutation({
-    // Name the session after this browser, so Settings > Devices can tell them apart.
-    mutationFn: (value: string) =>
-      api.auth.login(value, { label: deviceLabel(navigator.userAgent) }),
+    mutationFn: async (value: string) => {
+      // Name the session after this browser or app, so Settings > Devices can tell
+      // them apart.
+      const app = desktop === undefined ? undefined : 'Desktop app';
+      const result = await api.auth.login(value, { label: deviceLabel(navigator.userAgent, app) });
+      // A token client gets its token once, here; it goes straight to the keychain.
+      if ('token' in result && auth.kind === 'token') await auth.tokens.set(result.token);
+      return result;
+    },
     onSuccess: ({ session }) => {
       queryClient.setQueryData(SESSION_KEY, session);
       void navigate(safeNext(params.get('next')), { replace: true });
@@ -48,12 +59,40 @@ export function LoginPage() {
           onChange={(event) => {
             setPassword(event.target.value);
           }}
-          {...(login.isError ? { error: loginErrorMessage(login.error) } : {})}
+          {...(login.isError
+            ? {
+                error: loginErrorMessage(
+                  login.error,
+                  desktop === undefined ? undefined : platform.apiBaseUrl,
+                ),
+              }
+            : {})}
         />
         <Button type="submit" loading={login.isPending}>
           Log in
         </Button>
+        {desktop !== undefined && (
+          <p className="login__server">
+            Server: {platform.apiBaseUrl}{' '}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSettingsOpen(true);
+              }}
+            >
+              Change
+            </Button>
+          </p>
+        )}
       </form>
+      {desktop !== undefined && (
+        <DesktopSettingsDialog
+          desktop={desktop}
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+        />
+      )}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import type { AgendaEvent, DateRange } from '@agenda/core';
 import { useQuery } from '@tanstack/react-query';
-import type { QueryClient } from '@tanstack/react-query';
+import type { QueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { useApi } from '../app/api';
 
 /** Every cached list of events starts with this, so one invalidation refreshes them all. */
@@ -24,10 +24,21 @@ export function rangeFromKey(
   return { range: { start: new Date(start), end: new Date(end) }, timezone };
 }
 
-/** All events overlapping a range, following the cursor until the last page. */
-export function useRangeEvents(range: DateRange, timezone: string) {
+/**
+ * All events overlapping a range, following the cursor until the last page. `options`
+ * adds refetching (the desktop tray keeps its list fresh while hidden).
+ */
+export function useRangeEvents(
+  range: DateRange,
+  timezone: string,
+  options: Pick<
+    UseQueryOptions<AgendaEvent[]>,
+    'refetchInterval' | 'refetchIntervalInBackground'
+  > = {},
+) {
   const api = useApi();
   return useQuery<AgendaEvent[]>({
+    ...options,
     queryKey: rangeKey(range, timezone),
     queryFn: ({ signal }) =>
       api.events.listAll({ from: range.start, to: range.end, tz: timezone }, { signal }),
