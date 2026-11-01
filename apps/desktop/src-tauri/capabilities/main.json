@@ -1,0 +1,20 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "The main window: the whole app. It talks to Rust only through Agenda's own commands; every plugin is used from Rust, so the page gets no plugin permissions.",
+  "windows": ["main"],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-token-get",
+    "allow-token-set",
+    "allow-token-clear",
+    "allow-desktop-settings",
+    "allow-set-server-url",
+    "allow-set-launch-at-login",
+    "allow-set-shortcut",
+    "allow-set-tray-items",
+    "allow-set-reminders",
+    "allow-save-file"
+  ]
+}

@@ -1,0 +1,4 @@
+# The Rust version CI and every machine use, so clippy gives the same warnings everywhere.
+[toolchain]
+channel = "1.99.1"
+components = ["rustfmt", "clippy"]
