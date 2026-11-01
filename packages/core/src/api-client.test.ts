@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, createApiClient, NetworkError } from './api-client.js';
+import { ApiError, createApiClient, isUnreachable, NetworkError } from './api-client.js';
 import type { AuthStrategy } from './api-client.js';
 import type { AbortSignalLike, ResponseLike } from './http.js';
 import type { AgendaEvent } from './types.js';
@@ -500,5 +500,24 @@ describe('fetch injection', () => {
     expect(() => createApiClient({ baseUrl: BASE, auth: tokenAuth() })).toThrow(
       'No global fetch here; pass `fetch` to createApiClient',
     );
+  });
+});
+
+describe('isUnreachable', () => {
+  it('is true when no answer came from the API itself', () => {
+    expect(isUnreachable(new NetworkError('network', 'down'))).toBe(true);
+    expect(isUnreachable(new NetworkError('timeout', 'slow'))).toBe(true);
+    for (const status of [502, 503, 504]) {
+      expect(isUnreachable(new ApiError(status, 'invalid_response', 'proxy'))).toBe(true);
+    }
+    // Vite's dev proxy answers a bare 500 when nothing listens behind it.
+    expect(isUnreachable(new ApiError(500, 'invalid_response', 'proxy'))).toBe(true);
+  });
+
+  it('is false for answers from the API and for aborted requests', () => {
+    expect(isUnreachable(new NetworkError('aborted', 'stopped'))).toBe(false);
+    expect(isUnreachable(new ApiError(500, 'internal', 'bug'))).toBe(false);
+    expect(isUnreachable(new ApiError(401, 'unauthorized', 'Log in'))).toBe(false);
+    expect(isUnreachable(new Error('other'))).toBe(false);
   });
 });

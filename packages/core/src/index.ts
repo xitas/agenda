@@ -29,6 +29,7 @@ export {
   ApiError,
   createApiClient,
   DEFAULT_TIMEOUT_MS,
+  isUnreachable,
   NetworkError,
 } from './api-client.js';
 export type {
@@ -88,7 +89,31 @@ export {
 export type { Settings, Theme, TimeFormat } from './settings.js';
 export { formatTimeInput, parseTimeInput, stepTime } from './time-input.js';
 export { deviceLabel } from './device.js';
-export type { Platform, SaveFileRequest } from './platform.js';
+export type {
+  DesktopBridge,
+  DesktopSettings,
+  Platform,
+  PlatformAuth,
+  SaveFileRequest,
+  ScheduledReminder,
+  TokenStore,
+  TrayItem,
+  Unsubscribe,
+} from './platform.js';
+export {
+  ALL_DAY_REMINDER_TIME,
+  REMINDER_GRACE_MS,
+  REMINDER_HORIZON_MS,
+  reminderSchedule,
+  reminderTime,
+} from './reminders.js';
+export type { ReminderScheduleOptions } from './reminders.js';
+export { TRAY_EMPTY, TRAY_LIMIT, TRAY_SIGNED_OUT, trayItems } from './tray.js';
+export type { TrayOptions } from './tray.js';
+export { DEFAULT_SHORTCUT, SHORTCUT_MESSAGES, shortcutFromKeys, shortcutKeys } from './shortcut.js';
+export type { KeyPress, ShortcutResult } from './shortcut.js';
+export { DEFAULT_SERVER_URL, normalizeServerUrl, SERVER_URL_MESSAGES } from './server-url.js';
+export type { ServerUrlResult } from './server-url.js';
 /** The locale type formatEventTime takes, so apps and ui need no direct date-fns import. */
 export type { Locale } from 'date-fns';
 export {
