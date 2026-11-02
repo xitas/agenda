@@ -84,6 +84,8 @@ jobs:
         with:
           name: agenda-chrome-extension
           path: apps/extension/.output/agenda-chrome-*.zip
+          # WXT writes to .output/, and upload-artifact skips dot-folders unless told.
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
 
