@@ -92,6 +92,8 @@ export { deviceLabel } from './device.js';
 export type {
   DesktopBridge,
   DesktopSettings,
+  ExtensionBridge,
+  ExtensionSettings,
   Platform,
   PlatformAuth,
   SaveFileRequest,
