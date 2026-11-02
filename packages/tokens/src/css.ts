@@ -40,6 +40,8 @@ function staticDeclarations(t: Tokens): Declarations {
     [`${PREFIX}-size-bottom-nav`, px(t.size.bottomNav)],
     [`${PREFIX}-size-hour-row`, px(t.size.hourRow)],
     [`${PREFIX}-size-event-time-min`, px(t.size.eventTimeMin)],
+    [`${PREFIX}-size-popup-width`, px(t.size.popup.width)],
+    [`${PREFIX}-size-popup-height`, px(t.size.popup.height)],
     [`${PREFIX}-toast-offset-wide`, px(t.toastOffset.wide)],
     [`${PREFIX}-toast-offset-narrow`, px(t.toastOffset.narrow)],
     // For reference only: CSS variables cannot be used inside @media conditions.

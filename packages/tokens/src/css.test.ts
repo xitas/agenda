@@ -28,6 +28,8 @@ describe('toCss', () => {
     expect(root).toContain('--ag-size-bottom-nav: 64px;');
     expect(root).toContain('--ag-size-hour-row: 48px;');
     expect(root).toContain('--ag-size-event-time-min: 96px;');
+    expect(root).toContain('--ag-size-popup-width: 360px;');
+    expect(root).toContain('--ag-size-popup-height: 520px;');
     expect(root).toContain('--ag-toast-offset-wide: 24px;');
     expect(root).toContain('--ag-toast-offset-narrow: 80px;');
     expect(root).toContain('--ag-breakpoint-narrow: 768px;');

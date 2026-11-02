@@ -153,6 +153,8 @@ export const size = {
   hourRow: 48,
   /** A time-grid event narrower than this shows only its title (the time won't fit). */
   eventTimeMin: 96,
+  /** The Chrome extension's toolbar popup (DESIGN.md §4). */
+  popup: { width: 360, height: 520 },
 } as const;
 
 /**
