@@ -7,3 +7,5 @@ apps/api/drizzle
 # Rust build output and files tauri-build generates
 apps/desktop/src-tauri/target
 apps/desktop/src-tauri/gen
+.output
+.wxt
