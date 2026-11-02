@@ -37,13 +37,13 @@ If a request conflicts with these docs, point it out and ask before deviating. I
 ```
 pnpm i                              # install (pnpm via Corepack; version pinned in package.json)
 pnpm dev                            # run the API and web app in watch mode (not desktop)
-pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; extension, mobile later)
+pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; mobile later)
                                     # web: http://localhost:5173 (log in with the API password);
                                     # /playground shows every ui component
 pnpm build                          # build every package and app
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # what CI runs (plus pnpm e2e); must pass before a PR
 pnpm format                         # fix formatting with Prettier
-pnpm build && pnpm e2e              # Playwright smoke test (Chromium) on the built api + web; own temp DB, ports 4101/5101
+pnpm build && pnpm e2e              # Playwright smoke tests (Chromium) on the built api, web and extension; own temp DB, ports 4101/5101
                                     # first time: pnpm --filter @agenda/e2e exec playwright install chromium
 pnpm --filter @agenda/web icons     # regenerate the PWA icons from apps/web/public/icon.svg (commit the PNGs)
 ```
@@ -56,6 +56,14 @@ pnpm desktop:installer                    # web build + NSIS installer in apps/d
 pnpm --filter @agenda/desktop rust:check  # cargo fmt --check + clippy -D warnings (as in CI)
 pnpm --filter @agenda/desktop rust:test   # Rust unit tests
 pnpm --filter @agenda/desktop icons       # app icons from apps/web/public/icon.svg (commit them)
+```
+
+Chrome extension (WXT, MV3; see `apps/extension/README.md`):
+
+```
+pnpm --filter @agenda/extension dev       # opens Chrome with the extension and hot reload (API on :4001)
+pnpm build                                # includes apps/extension/.output/chrome-mv3 (Load unpacked)
+pnpm --filter @agenda/extension zip       # apps/extension/.output/agenda-chrome-<version>.zip
 ```
 
 The web app imports Tauri only in `apps/web/src/platform/tauri.ts` (ESLint enforces it).

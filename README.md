@@ -7,7 +7,8 @@ Agenda is a personal agenda and calendar. It started as a small teaching project
 - a **web** app you can install (Vite + React, a PWA): **done**
 - an **API** (Hono + Drizzle + SQLite): **done**
 - a **desktop** app for Windows (Tauri): **done**, talking to the API on your PC until there is a server
-- a **Chrome extension** (Manifest V3) and a **mobile** app (Expo): later
+- a **Chrome extension** (Manifest V3, WXT): **done**
+- a **mobile** app (Expo): later
 
 See [docs/PLAN.md](docs/PLAN.md) for the phases.
 
@@ -33,6 +34,14 @@ See [docs/PLAN.md](docs/PLAN.md) for the phases.
 - **Reminder notifications** from each event's reminders, never twice, even after a restart.
 - **Launch at login,** and a **Server URL** setting for when the API runs somewhere else.
 
+## Features (Chrome extension)
+
+- **Popup:** today at a glance and QuickAdd with its preview, one click from any tab.
+- **Add to Agenda:** highlight "Call Ali Friday 3pm" on any page, right-click, check the preview, Add.
+- **Side panel** with this week, and a **toolbar badge** with what's still to come today.
+- **Reminders in Chrome** if you want them (off by default, so the desktop app's aren't doubled).
+- Asks only for what it uses: no content scripts, and access to your server only.
+
 ## Screenshots
 
 | Week                                    | Month (dark)                                         |
@@ -57,6 +66,18 @@ See [docs/PLAN.md](docs/PLAN.md) for the phases.
 | ---------------------------------------------------------------------- |
 | ![Can't reach Agenda screen](docs/screenshots/desktop-unreachable.png) |
 
+### Chrome extension
+
+| Popup                                                    | Popup with the badge (dark)                                                 | Side panel                                                          |
+| -------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| ![Extension popup](docs/screenshots/extension-popup.png) | ![Popup under the toolbar badge](docs/screenshots/extension-popup-dark.png) | ![Side panel, this week](docs/screenshots/extension-side-panel.png) |
+
+| Add to Agenda (right-click)                                               | Confirm before saving                                     | Server not running                                                |
+| ------------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
+| ![Add to Agenda in the menu](docs/screenshots/extension-context-menu.png) | ![Confirm window](docs/screenshots/extension-confirm.png) | ![Can't reach Agenda](docs/screenshots/extension-unreachable.png) |
+
+![Reminder from the extension](docs/screenshots/extension-reminder.png)
+
 ## Workspace layout
 
 ```
@@ -64,6 +85,7 @@ apps/
   api/        Hono API: events, auth (cookie or token), settings, import/export
   web/        Vite + React app (PWA); also the desktop app's UI
   desktop/    Tauri 2 desktop app: the Rust core around apps/web (see apps/desktop/README.md)
+  extension/  Chrome extension (WXT, MV3): popup, side panel, Add to Agenda (see apps/extension/README.md)
   e2e/        Playwright smoke test against the built api + web
 packages/
   core/       Shared types, validation, dates, layout, quick add and the API client
@@ -123,7 +145,7 @@ Add `--filter @agenda/<name>` (for example `--filter @agenda/core`) to any of th
 
 ## Continuous integration
 
-Every pull request and push to `master` runs `.github/workflows/ci.yml`. One job installs with a frozen lockfile, then runs `format:check`, `lint`, `typecheck`, `test` and `build`. A second job builds the apps and runs the Playwright smoke test in Chromium. A third, on Windows, runs `cargo fmt`, `clippy` and the Rust tests for the desktop app, then builds its installer and keeps it as a downloadable artifact. Run the same checks locally before opening a PR.
+Every pull request and push to `master` runs `.github/workflows/ci.yml`. One job installs with a frozen lockfile, then runs `format:check`, `lint`, `typecheck`, `test` and `build`. The first also zips the Chrome extension and keeps it as an artifact. A second job builds the apps and runs the Playwright smoke tests in Chromium, the extension loaded in one of them. A third, on Windows, runs `cargo fmt`, `clippy` and the Rust tests for the desktop app, then builds its installer and keeps it as a downloadable artifact. Run the same checks locally before opening a PR.
 
 ## The original app
 

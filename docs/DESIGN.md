@@ -107,7 +107,9 @@ Lucide (web: `lucide-react`; mobile: `lucide-react-native`), 20 px in UI and 16 
 
 **Can't reach the server:** "Can't reach Agenda at <url>" as the heading, "Is the API running? (pnpm dev)" below it, then Retry and (desktop) Change server URL.
 
-**Chrome popup (360×520):** header (date and settings icon), QuickAdd, today's list, and a footer link "Open full Agenda →". **Side panel:** a vertical week list.
+**Chrome popup (360×520, `--ag-size-popup-*`):** header (date, a side-panel button and the settings icon), QuickAdd with its preview under the field, today's list as compact cards, and a footer link "Open full Agenda →". Settings replace the list in place. **Side panel:** this week as a vertical list, one section per day ("Today · Mon 2 Nov" in the accent), "Nothing planned." for empty days. **Add to Agenda:** a 440×400 window titled "Add to Agenda" with QuickAdd prefilled from the selection, its preview, "Goes on Fri 6 Nov.", then Add and Cancel; Enter adds, Esc cancels. **Badge:** the count of today's timed events that haven't ended, in the accent color, empty for none, "9+" above 9.
+
+**Times in day lists** (side panel, popup): each card shows what happens on that day: "16:00 – 17:00", or "23:30 →" and "→ 01:30" for an overnight event, and "All day" for all-day events.
 
 **Mobile:** bottom tabs (Today · Calendar · Search · Settings), a floating **+** button bottom-right (or QuickAdd at the top of Today), and the editor as a bottom sheet. Swipe left on an event to delete (with Undo).
 
