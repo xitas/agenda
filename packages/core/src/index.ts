@@ -102,12 +102,26 @@ export type {
 } from './platform.js';
 export {
   ALL_DAY_REMINDER_TIME,
+  dueReminders,
+  nextReminderAt,
+  pruneShown,
   REMINDER_GRACE_MS,
   REMINDER_HORIZON_MS,
+  REMINDER_KEEP_SHOWN_MS,
   reminderSchedule,
   reminderTime,
 } from './reminders.js';
-export type { ReminderScheduleOptions } from './reminders.js';
+export type { ReminderScheduleOptions, ShownReminders } from './reminders.js';
+export { badgeCount, badgeText, nextBadgeChange } from './badge.js';
+export {
+  eventColorName,
+  eventStartDay,
+  formatShortDate,
+  previewWhen,
+  quickAddPreview,
+} from './preview.js';
+export type { PreviewOptions, QuickAddPreview } from './preview.js';
+export { loginErrorMessage, unreachableMessage, waitText } from './messages.js';
 export { TRAY_EMPTY, TRAY_LIMIT, TRAY_SIGNED_OUT, trayItems } from './tray.js';
 export type { TrayOptions } from './tray.js';
 export { DEFAULT_SHORTCUT, SHORTCUT_MESSAGES, shortcutFromKeys, shortcutKeys } from './shortcut.js';
