@@ -60,6 +60,18 @@ export class NetworkError extends Error {
   }
 }
 
+/**
+ * The API couldn't be reached: no response or no response in time, or a proxy in front
+ * of it answering for it (502/503/504, or a 500 that isn't the API's own JSON error,
+ * which is what Vite's dev proxy sends when nothing listens behind it).
+ */
+export function isUnreachable(error: unknown): boolean {
+  if (error instanceof NetworkError) return error.kind !== 'aborted';
+  if (!(error instanceof ApiError)) return false;
+  if (error.status === 500) return error.code === 'invalid_response';
+  return error.status === 502 || error.status === 503 || error.status === 504;
+}
+
 type MaybePromise<T> = T | Promise<T>;
 
 export type AuthStrategy =

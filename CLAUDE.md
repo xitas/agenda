@@ -29,14 +29,15 @@ If a request conflicts with these docs, point it out and ask before deviating. I
 - Node 24 (`.nvmrc`), pnpm 12 via Corepack (version pinned in `packageManager`), Turborepo 2.
 - TypeScript 6.0, kept below 6.1 until typescript-eslint supports newer versions.
 - LF line endings everywhere (`.gitattributes`); Prettier checks them.
-- CI: `.github/workflows/ci.yml`, runs on every PR and push to `master`.
+- Rust 1.99.1 for the desktop app (`apps/desktop/src-tauri/rust-toolchain.toml`).
+- CI: `.github/workflows/ci.yml`, runs on every PR and push to `master` (a Windows job checks and builds the desktop app).
 
 ## Commands
 
 ```
 pnpm i                              # install (pnpm via Corepack; version pinned in package.json)
-pnpm dev                            # run all apps in watch mode
-pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; desktop, extension, mobile later)
+pnpm dev                            # run the API and web app in watch mode (not desktop)
+pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; extension, mobile later)
                                     # web: http://localhost:5173 (log in with the API password);
                                     # /playground shows every ui component
 pnpm build                          # build every package and app
@@ -46,6 +47,19 @@ pnpm build && pnpm e2e              # Playwright smoke test (Chromium) on the bu
                                     # first time: pnpm --filter @agenda/e2e exec playwright install chromium
 pnpm --filter @agenda/web icons     # regenerate the PWA icons from apps/web/public/icon.svg (commit the PNGs)
 ```
+
+Desktop (Tauri; needs Rust via rustup and, on Windows, the MSVC build tools; see `apps/desktop/README.md`):
+
+```
+pnpm --filter @agenda/desktop dev         # desktop app against the API on :4001 (web dev server on :5174)
+pnpm desktop:installer                    # web build + NSIS installer in apps/desktop/src-tauri/target/release/bundle/nsis/
+pnpm --filter @agenda/desktop rust:check  # cargo fmt --check + clippy -D warnings (as in CI)
+pnpm --filter @agenda/desktop rust:test   # Rust unit tests
+pnpm --filter @agenda/desktop icons       # app icons from apps/web/public/icon.svg (commit them)
+```
+
+The web app imports Tauri only in `apps/web/src/platform/tauri.ts` (ESLint enforces it).
+Cargo.lock only takes crates published 14+ days ago; the update command is in `apps/desktop/README.md`.
 
 Filters need the full scoped package name (`@agenda/web`, not `web`).
 CI installs with `pnpm install --frozen-lockfile`: commit `pnpm-lock.yaml` together with any `package.json` change.

@@ -5,11 +5,20 @@ const HASH_HELP =
   'Run `pnpm -s --filter @agenda/api hash-password` and put the line it prints in apps/api/.env.';
 
 /** An exact origin such as https://agenda.example or http://localhost:5173. */
-const OriginSchema = z
-  .string()
-  .refine((value) => URL.canParse(value) && new URL(value).origin === value, {
-    message: 'Expected an origin like https://agenda.example (no path or trailing slash)',
-  });
+/**
+ * scheme://host[:port], exactly. URL gives custom schemes such as tauri:// the origin
+ * "null", so for those the origin is rebuilt from the scheme and host.
+ */
+function isOrigin(value: string): boolean {
+  if (!URL.canParse(value)) return false;
+  const url = new URL(value);
+  const origin = url.origin === 'null' ? `${url.protocol}//${url.host}` : url.origin;
+  return origin === value;
+}
+
+const OriginSchema = z.string().refine(isOrigin, {
+  message: 'Expected an origin like https://agenda.example (no path or trailing slash)',
+});
 
 const DbEnvSchema = z.object({
   DATABASE_URL: z.string().min(1).default('file:./data/agenda.db'),

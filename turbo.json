@@ -19,6 +19,11 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
+    },
+    "installer": {
+      "dependsOn": ["^build"],
+      "outputs": ["src-tauri/target/release/bundle/**"],
+      "cache": false
     }
   }
 }

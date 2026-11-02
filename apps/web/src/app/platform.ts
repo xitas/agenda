@@ -1,11 +1,15 @@
 import type { Platform, SaveFileRequest } from '@agenda/core';
 import { createContext, useContext } from 'react';
+import { apiBaseUrl } from './api';
 
 /**
- * The web app's platform adapter (ARCHITECTURE.md §7). The desktop app will pass its
- * own (a native save dialog through Tauri) in the same place.
+ * The web app's platform adapter (ARCHITECTURE.md §7): the session cookie, and
+ * downloads. The desktop app's is in src/platform/tauri.ts.
  */
 export const webPlatform: Platform = {
+  auth: { kind: 'cookie' },
+  apiBaseUrl: apiBaseUrl(),
+
   /** A download: a Blob URL clicked through a temporary link. */
   saveFile({ name, mimeType, contents }: SaveFileRequest) {
     const url = URL.createObjectURL(new Blob([contents], { type: mimeType }));

@@ -14,8 +14,10 @@ import {
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
+import { usePlatform } from '../app/platform';
 import { PreferencesProvider } from '../app/PreferencesProvider';
 import { useLogout } from '../auth/logout';
+import { DesktopSync } from '../desktop/DesktopSync';
 import { EventActionsProvider } from '../events/EventActionsProvider';
 import { QuickAdd } from '../quick-add/QuickAdd';
 import { CalendarPanel } from './CalendarPanel';
@@ -46,10 +48,12 @@ export function AppShell() {
   const [helpOpen, setHelpOpen] = useState(false);
   const { pathname } = useLocation();
   const logout = useLogout();
+  const { desktop } = usePlatform();
 
   return (
     <PreferencesProvider>
       <EventActionsProvider>
+        {desktop?.window === 'main' && <DesktopSync desktop={desktop} />}
         <div className="shell">
           <a className="shell__skip" href="#main">
             Skip to content

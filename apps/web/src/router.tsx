@@ -2,7 +2,9 @@ import { Navigate } from 'react-router';
 import type { RouteObject } from 'react-router';
 import { LoginPage } from './auth/LoginPage';
 import { RequireAuth } from './auth/RequireAuth';
+import { QUICK_ADD_PATH } from './app/session';
 import { DayPage } from './day/DayPage';
+import { QuickAddWindow } from './desktop/QuickAddWindow';
 import { MonthPage } from './month/MonthPage';
 import { Playground } from './Playground';
 import { SearchPage } from './search/SearchPage';
@@ -14,6 +16,8 @@ import { WeekPage } from './week/WeekPage';
 export const routes: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
   { path: '/playground', element: <Playground /> },
+  // The desktop app's quick-add window; it handles a missing session itself.
+  { path: QUICK_ADD_PATH, element: <QuickAddWindow /> },
   {
     element: <RequireAuth />,
     children: [

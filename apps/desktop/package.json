@@ -1,0 +1,18 @@
+{
+  "name": "@agenda/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run build --filter=@agenda/web^... && tauri dev",
+    "installer": "tauri build --bundles nsis",
+    "icons": "tauri icon ../web/public/icon.svg --output src-tauri/icons && node scripts/prune-icons.js",
+    "rust:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --locked -- -D warnings",
+    "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --locked",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@agenda/web": "workspace:*",
+    "@tauri-apps/cli": "2.12.3"
+  }
+}

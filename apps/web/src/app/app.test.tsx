@@ -2,7 +2,7 @@ import { ApiError, NetworkError } from '@agenda/core';
 import { render } from '@testing-library/react';
 import { enGB, enUS } from 'date-fns/locale';
 import { describe, expect, it, vi } from 'vitest';
-import { apiBaseUrl, createWebApi, useApi } from './api';
+import { apiBaseUrl, useApi } from './api';
 import { browserEnv, pickLocale, useEnv } from './env';
 import { createQueryClient, shouldRetry } from './queryClient';
 import { renderApp } from '../test-utils/renderApp';
@@ -84,7 +84,6 @@ describe('env and api', () => {
     expect(apiBaseUrl({ VITE_API_URL: 'https://api.agenda.example' })).toBe(
       'https://api.agenda.example',
     );
-    expect('list' in createWebApi(() => undefined).events).toBe(true);
   });
 
   it('requires the providers', () => {

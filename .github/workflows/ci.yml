@@ -140,3 +140,77 @@ jobs:
             apps/e2e/playwright-report/
             apps/e2e/test-results/
           retention-days: 7
+
+  desktop:
+    name: Desktop (Rust checks, Windows installer)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Locate pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The runner has rustup; this installs the version rust-toolchain.toml pins, with
+      # rustfmt and clippy, so every machine gets the same lints.
+      - name: Install the pinned Rust toolchain
+        working-directory: apps/desktop/src-tauri
+        run: rustup toolchain install
+
+      # Crates only change with Cargo.lock; the build output is kept with them.
+      - name: Cache Cargo
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            apps/desktop/src-tauri/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock', 'apps/desktop/src-tauri/rust-toolchain.toml') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      # tauri-build embeds the web app at compile time, so even clippy needs dist/.
+      - name: Build the web app
+        run: pnpm exec turbo run build --filter=@agenda/web
+
+      - name: Rust format and lint (cargo fmt, clippy -D warnings)
+        run: pnpm --filter @agenda/desktop rust:check
+
+      - name: Rust tests
+        run: pnpm --filter @agenda/desktop rust:test
+
+      - name: Build the Windows installer (NSIS)
+        run: pnpm desktop:installer
+
+      - name: Upload the installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: agenda-windows-installer
+          path: apps/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
+          retention-days: 14

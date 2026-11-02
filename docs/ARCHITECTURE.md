@@ -28,14 +28,15 @@ agenda/
 ├─ apps/
 │  ├─ api/          Hono server, Drizzle schema + migrations, auth
 │  ├─ web/          Vite + React + TS, PWA
-│  ├─ desktop/      Tauri 2 (src-tauri/ in Rust), points at apps/web build
+│  ├─ desktop/      Tauri 2: src-tauri/ (Rust core, capabilities, icons) around apps/web
 │  ├─ extension/    WXT (MV3): popup, sidepanel, background service worker
 │  ├─ mobile/       Expo + Expo Router
 │  └─ e2e/          Playwright smoke test against the built api + web
 ├─ packages/
 │  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, agenda.ts, time-grid.ts, month.ts,
 │  │                event-form.ts, import.ts, ics.ts, quick-add.ts, api-schemas.ts,
-│  │                api-client.ts, http.ts
+│  │                api-client.ts, http.ts, platform.ts, reminders.ts, tray.ts,
+│  │                shortcut.ts, server-url.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -128,7 +129,7 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 **Auth (single user):** the password hash lives in an env var (`AGENDA_PASSWORD_HASH`), made with `pnpm --filter @agenda/api hash-password`. It is scrypt (N=2^17, r=8, p=1) in a self-describing format (`scrypt:<logN>:<r>:<p>:<salt>:<key>`), so the cost or the algorithm (argon2id, once Node's built-in is stable) can change later by re-hashing at the next login. The API refuses to start without it.
 
 - **Sessions** live in the `sessions` table: a random 256-bit token is given to the client once; only its SHA-256 is stored. Sessions slide: each use (recorded at most once a minute) moves the expiry 30 days ahead. Logout and `DELETE /auth/sessions/:id` set `revoked_at`.
-- **Only the web app uses the cookie** (`client: 'browser'`): httpOnly, SameSite=Lax, and Secure with the `__Host-` prefix unless `NODE_ENV=development`. **Desktop, extension and mobile use `client: 'token'`** and send `Authorization: Bearer`; the token is stored in the OS keychain (desktop, via a Tauri plugin chosen in Phase 4), `chrome.storage.local` or `expo-secure-store`.
+- **Only the web app uses the cookie** (`client: 'browser'`): httpOnly, SameSite=Lax, and Secure with the `__Host-` prefix unless `NODE_ENV=development`. **Desktop, extension and mobile use `client: 'token'`** and send `Authorization: Bearer`; the token is stored in the OS credential store (desktop, through the `keyring` crate behind three Rust commands), `chrome.storage.local` or `expo-secure-store`.
 - **CSRF:** cookie-authenticated writes and browser logins must carry an `Origin` listed in `CORS_ORIGINS` (403 otherwise; a missing Origin too). Bearer requests need no check, because tokens are never attached automatically. **CORS** allows only `CORS_ORIGINS`, with credentials.
 - **Same site required for the cookie:** a SameSite=Lax cookie is only sent when the web app and the API are on the same _site_ (same registrable domain). Phase 3 must therefore serve both from one domain with subdomains, for example `agenda.<domain>` (web) and `api.<domain>` (API), and list the web origin in `CORS_ORIGINS`. Hosting them on unrelated domains (e.g. `*.pages.dev` and `*.fly.dev`) would break cookie login.
 - **Rate limit:** 5 failed logins per IP per 15 minutes, then 429 with `Retry-After`; only failures count. The IP is the socket address; `X-Forwarded-For` is only trusted behind our own proxy (`TRUST_PROXY`, Phase 3). Passwords and tokens are never logged.
@@ -156,7 +157,15 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 - **One place for event dialogs.** `EventActionsProvider` (in the shell) owns the details dialog, the editor and the mutations; views and shortcuts call `useEventActions()` (`open`, `edit`, `create`, `remove`). The mutations live there, not in the dialogs, so their callbacks still run after a dialog closes.
 - **Layout.** `src/shell/` is the frame (one nav, placed by CSS grid areas per breakpoint; the global shortcuts and their help dialog), `src/views/` (shared header, paths), `src/day/`, `src/week/`, `src/month/`, `src/search/`, `src/quick-add/`, `src/events/` (queries, mutations, details dialog, editor), `src/settings/`, `src/pwa/` (update toast, install offer), `src/sw/` (the service worker), `src/auth/`.
 
-**Desktop (Tauri).** Loads `apps/web` (`devUrl` in dev, the built `dist` in prod). Its pages run on `tauri://localhost` (macOS, Linux) or `http://tauri.localhost` (Windows), which is cross-site to the API, so the SameSite cookie would not be sent: desktop logs in with `client: 'token'` like the extension and mobile app, keeps the token in the OS keychain, and the web code's API client takes its auth strategy from the `platform` adapter (cookie on the web, bearer token in Tauri). Native features go through Tauri plugins (`notification`, `global-shortcut`, `autostart`, `updater`) plus a tray. The web code detects Tauri with `isTauri()` and calls a small `platform` adapter, so web code never imports Tauri directly.
+**Desktop (Tauri 2).** `apps/desktop` wraps `apps/web`: the window loads the Vite dev server in dev (`devUrl`, port 5174 so it runs beside `pnpm dev`) and the built `dist` in the installer (`frontendDist`). There is no separate desktop frontend; the same build runs in the browser and in Tauri, and `apps/desktop/README.md` covers setup, commands and permissions in detail.
+
+- **The process model.** A Tauri app is one native process (the **Rust core**, `src-tauri/src/`) that owns the OS: windows, the tray, the global shortcut, notifications, files and the credential store. Each window holds a **webview** (WebView2 on Windows, WebKit on macOS and Linux) that runs our web app like a browser tab: it has no Node, no file system and no OS access of its own. The two talk only through IPC messages. That split is the security model: the page is untrusted UI, and the core decides what it may do.
+- **Calling into Rust: commands and events.** A _command_ is a Rust function marked `#[tauri::command]` and registered in `main.rs`; the page calls it with `invoke('set_tray_items', { items })` and gets a promise of its `Result` (arguments and results are JSON, through serde). An _event_ goes the other way (or between windows): Rust calls `app.emit_to("main", "navigate", "/day/2026-11-02")` and the page receives it with `listen('navigate', …)`. Agenda's commands are listed in `build.rs`; the events are `navigate` (tray → main window), `events-changed` (quick-add → main window, through a command) and `quick-add-open` (shortcut → quick-add window).
+- **Capabilities and permissions.** Every IPC call is checked against the calling window's _capability_ (`src-tauri/capabilities/*.json`), a list of _permissions_. Plugins ship permissions such as `notification:allow-notify`, and because `build.rs` lists our commands, Tauri also generates `allow-<command>` for each and refuses anything not granted. Agenda's pages get **no plugin permissions at all**: every plugin is used from Rust, and the pages can only call Agenda's own commands (the main window more of them than the quick-add window). Capabilities apply to the app's own pages, so even a page loaded from elsewhere could call nothing; a strict CSP in `tauri.conf.json` limits what a page may load.
+- **Auth and the server.** The pages run on `http://tauri.localhost` (Windows) or `tauri://localhost`, cross-site to the API, so the SameSite cookie would not be sent: the desktop app logs in with `client: 'token'`, sends `Authorization: Bearer` to the Server URL from the device settings (default `http://localhost:4001`, absolute URLs, no proxy), and keeps the token in the OS credential store through the `keyring` crate (Windows Credential Manager, encrypted with the user's login), never in `localStorage`. Bearer requests skip the CSRF check; the API lists the Tauri origins in `CORS_ORIGINS` for CORS only. A 401 forgets the token and returns to `/login`; a network failure, a timeout or a proxy's 502/503/504 shows "Can't reach Agenda at <url>" (`isUnreachable` in core) with Retry and a link to change the Server URL.
+- **Tray, quick add and reminders.** The main window keeps running while hidden (closing it hides it; Quit is in the tray). It owns the data: one query for today and the next three days, refreshed every 5 minutes, feeds core's `trayItems` (the tray's next 5 events) and `reminderSchedule` (all-day events count from 09:00), which it sends to Rust whenever they change. Rust only renders the menu and times the notifications on its own thread, because a hidden webview's timers are slowed to about once a minute. Reminder keys (event, offset, start) that have fired are stored, so a restart shows nothing twice and a moved event's reminders fire for the new time. The global shortcut (Ctrl+Shift+Space by default, changeable) shows the `quick-add` window, which renders `/quick-add` (QuickAdd with its preview), grows to fit the preview, saves on Enter and closes on Esc or blur.
+- **Device settings** (Server URL, shortcut) live in a JSON file in the app's data folder (`tauri-plugin-store`), launch at login in the OS (`tauri-plugin-autostart`). The shared preferences stay on the server.
+- **Builds.** `pnpm desktop:installer` builds web, then an NSIS installer (per-user, no admin). CI's `desktop` job on windows-latest runs `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`, builds the installer and uploads it as an artifact. Code signing and auto-update are not set up yet (PLAN.md, Phase 4).
 
 **Extension (WXT, MV3).**
 
@@ -168,24 +177,31 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 
 ## 7. Platform adapter pattern
 
-Anything that differs per platform goes behind one interface in `core`:
+Anything that differs per platform goes behind one interface in `core` (`packages/core/src/platform.ts`):
 
 ```ts
 export interface Platform {
-  notify(title: string, body: string): Promise<void>;
-  scheduleReminder(event: AgendaEvent): Promise<void>;
-  storage: { get(k: string): Promise<string | null>; set(k: string, v: string): Promise<void> };
-  openExternal(url: string): Promise<void>;
+  saveFile(file: SaveFileRequest): Promise<boolean>; // a download, or a native save dialog
+  auth: { kind: 'cookie' } | { kind: 'token'; tokens: TokenStore }; // TokenStore: get/set/clear
+  apiBaseUrl: string; // '' = the page's own origin (the web app's dev proxy)
+  desktop?: DesktopBridge; // only in the desktop app
 }
 ```
 
-Each app provides its own implementation (`webPlatform`, `tauriPlatform`, `chromePlatform`, `expoPlatform`). Shared code only ever sees `Platform`.
+`DesktopBridge` holds what only the desktop app has: which window the page is in, the device settings (`settings`, `setServerUrl`, `setShortcut`, `setLaunchAtLogin`), `setTrayItems`, `setReminders` (replaces the whole schedule, which makes rescheduling and "no duplicates" one rule in one place), the events from Rust (`onNavigate`, `onEventsChanged`, `onQuickAddOpen`, each returning an unsubscribe), and the quick-add window's calls (`hideQuickAdd`, `resizeQuickAdd`, `showMain`, `eventsChanged`). The data it carries (`TrayItem`, `ScheduledReminder`) is computed by pure, tested functions in core.
 
-**What exists today:** the `Platform` type in `packages/core/src/platform.ts` has `saveFile({ name, mimeType, contents }): Promise<boolean>` (exports). `webPlatform` (`apps/web/src/app/platform.ts`) downloads through a Blob URL; it reaches components through `PlatformProvider`, so tests pass a recorder and the desktop app will pass a Tauri one (a native save dialog, which can resolve `false` when cancelled). The other members above arrive with the features that need them.
+Each app provides its own implementation; shared code only ever sees `Platform`, through `usePlatform()`:
+
+- `webPlatform` (`apps/web/src/app/platform.ts`): the cookie, `VITE_API_URL` (or the dev proxy), downloads through a Blob URL.
+- `tauriPlatform` (`apps/web/src/platform/tauri.ts`): a bearer token from the OS keychain, the Server URL, and `invoke`/`listen` for everything else. It is the only file that imports `@tauri-apps/api` (an ESLint rule), and `loadPlatform()` (`platform/detect.ts`) fetches it as a separate chunk only when `isTauri()` sees Tauri's injected internals, so the browser build never loads it.
+- `chromePlatform` and `expoPlatform` come with the extension and mobile phases, and add members (notifications, storage) as those need them.
+
+`main.tsx` awaits `loadPlatform()`, builds the API client from it (`createAppApi`: cookie or token mode), and passes it to `AppProviders`. Tests pass fakes (`test-utils/fakeDesktop.ts`).
 
 ## 8. Quality gates
 
 - CI (`.github/workflows/ci.yml`) runs `pnpm format:check`, `lint`, `typecheck`, `test` and `build` on every PR and push to `master`; all must pass.
+- A desktop job on windows-latest runs `cargo fmt --check`, `cargo clippy -D warnings` and `cargo test` on the Rust core, then builds the NSIS installer and uploads it as an artifact. Rust checks stay out of `pnpm lint`/`test`, so the other jobs and machines without Rust are unaffected.
 - A second CI job runs the Playwright smoke test (`apps/e2e`, Chromium only) against the built apps: the API with a temp-file database per run (not libSQL's `:memory:`, which gives each transaction an empty database), `NODE_ENV=development` and `CORS_ORIGINS` set to the preview server, and `vite preview` proxying `/api` to it. Locally: `pnpm build && pnpm e2e` (ports 4101 and 5101, so a dev API on 4001 is untouched). Unit tests cover the details; the smoke test covers what only a real browser, server and database show (cookies through the proxy, the CSRF check, migrations, CSS that blocks a click).
 - CI installs with `pnpm install --frozen-lockfile`, so lockfile changes must be committed with the `package.json` change that caused them.
 - Line endings are LF everywhere (`.gitattributes`), so Prettier gives the same result on Windows, macOS and Linux.

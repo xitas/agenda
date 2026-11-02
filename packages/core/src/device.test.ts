@@ -38,4 +38,11 @@ describe('deviceLabel', () => {
   ])('%s → %s', (userAgent, label) => {
     expect(deviceLabel(userAgent)).toBe(label);
   });
+
+  it('names the app instead of its webview when given one', () => {
+    const webview =
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0';
+    expect(deviceLabel(webview, 'Desktop app')).toBe('Desktop app on Windows');
+    expect(deviceLabel('', 'Desktop app')).toBe('Desktop app');
+  });
 });

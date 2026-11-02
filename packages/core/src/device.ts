@@ -23,8 +23,9 @@ const SYSTEMS: [RegExp, string][] = [
 const first = (list: [RegExp, string][], text: string) =>
   list.find(([pattern]) => pattern.test(text))?.[1];
 
-export function deviceLabel(userAgent: string): string {
-  const browser = first(BROWSERS, userAgent);
+/** `app` names an app instead of the browser it runs in: "Desktop app on Windows". */
+export function deviceLabel(userAgent: string, app?: string): string {
+  const browser = app ?? first(BROWSERS, userAgent);
   const system = first(SYSTEMS, userAgent);
   if (browser !== undefined && system !== undefined) return `${browser} on ${system}`;
   return browser ?? system ?? 'Web browser';

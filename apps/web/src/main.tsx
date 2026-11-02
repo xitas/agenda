@@ -13,17 +13,18 @@ import './settings/settings.css';
 import './events/events.css';
 import './events/editor.css';
 import './quick-add/quickAdd.css';
+import './desktop/desktop.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter } from 'react-router';
 import { registerSW } from 'virtual:pwa-register';
 import { RouterProvider } from 'react-router/dom';
-import { createWebApi } from './app/api';
+import { createAppApi } from './app/api';
 import { AppProviders } from './app/AppProviders';
 import { browserEnv } from './app/env';
-import { webPlatform } from './app/platform';
 import { createQueryClient } from './app/queryClient';
 import { handleUnauthorized } from './app/session';
+import { isTauri, loadPlatform } from './platform/detect';
 import { listenForInstallPrompt } from './pwa/install';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
 import { routes } from './router';
@@ -31,25 +32,32 @@ import { applyTheme, readTheme } from './theme';
 
 // Before the first render, so the saved theme is used from the first frame.
 applyTheme(readTheme());
-// Chrome offers installation once, early; keep the offer for Settings.
-listenForInstallPrompt();
+// The PWA parts are for the browser only: the desktop app is installed and updated as a
+// program. Chrome offers installation once, early; keep the offer for Settings.
+const inBrowser = !isTauri();
+if (inBrowser) listenForInstallPrompt();
 
-const queryClient = createQueryClient();
-// The client needs the router for its 401 handler, and the router is created after it.
-const app: { router?: ReturnType<typeof createBrowserRouter> } = {};
-const api = createWebApi(() => {
-  if (app.router) handleUnauthorized(queryClient, app.router);
-});
-app.router = createBrowserRouter(routes);
+async function start() {
+  const platform = await loadPlatform();
+  const queryClient = createQueryClient();
+  // The client needs the router for its 401 handler, and the router is created after it.
+  const app: { router?: ReturnType<typeof createBrowserRouter> } = {};
+  const api = createAppApi(platform, () => {
+    if (app.router) handleUnauthorized(queryClient, app.router);
+  });
+  app.router = createBrowserRouter(routes);
 
-const root = document.getElementById('root');
-if (!root) throw new Error('Missing #root element in index.html');
+  const root = document.getElementById('root');
+  if (!root) throw new Error('Missing #root element in index.html');
 
-createRoot(root).render(
-  <StrictMode>
-    <AppProviders api={api} queryClient={queryClient} env={browserEnv()} platform={webPlatform}>
-      <RouterProvider router={app.router} />
-      <UpdatePrompt register={registerSW} />
-    </AppProviders>
-  </StrictMode>,
-);
+  createRoot(root).render(
+    <StrictMode>
+      <AppProviders api={api} queryClient={queryClient} env={browserEnv()} platform={platform}>
+        <RouterProvider router={app.router} />
+        {inBrowser && <UpdatePrompt register={registerSW} />}
+      </AppProviders>
+    </StrictMode>,
+  );
+}
+
+void start();

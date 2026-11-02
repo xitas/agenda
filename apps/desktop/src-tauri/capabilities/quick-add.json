@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "quick-add",
+  "description": "The quick-add window: it reads the session and server, saves one event, tells the main window, and hides or resizes itself. Nothing else.",
+  "windows": ["quick-add"],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-token-get",
+    "allow-token-clear",
+    "allow-desktop-settings",
+    "allow-events-changed",
+    "allow-hide-quick-add",
+    "allow-resize-quick-add",
+    "allow-show-main"
+  ]
+}
