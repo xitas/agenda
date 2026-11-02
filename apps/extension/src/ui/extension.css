@@ -1,0 +1,164 @@
+/* The extension's pages: popup, side panel, confirm window. Token variables only. */
+
+body {
+  margin: 0;
+  background: var(--ag-color-bg);
+  color: var(--ag-color-text);
+  font-family: var(--ag-font-sans);
+}
+
+/* Chrome sizes the popup to its content, up to its own maximum; this is DESIGN.md §4. */
+.ext-popup {
+  display: flex;
+  flex-direction: column;
+  width: var(--ag-size-popup-width);
+  height: var(--ag-size-popup-height);
+}
+
+.ext-popup__header {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-1);
+  padding: var(--ag-space-2) var(--ag-space-2) var(--ag-space-2) var(--ag-space-4);
+  border-bottom: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.ext-popup__date {
+  flex: 1;
+  margin: 0;
+  font-weight: var(--ag-weight-semibold);
+}
+
+.ext-popup__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+  min-height: 0;
+  padding: var(--ag-space-3) var(--ag-space-4);
+  overflow-y: auto;
+}
+
+.ext-popup__footer {
+  padding: var(--ag-space-2) var(--ag-space-4);
+  border-top: var(--ag-border-hairline) solid var(--ag-color-border);
+}
+
+.ext-popup__open {
+  color: var(--ag-color-accent);
+  font-weight: var(--ag-weight-medium);
+  text-decoration: none;
+}
+
+.ext-popup__open:hover {
+  text-decoration: underline;
+}
+
+.ext-heading {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+  font-weight: var(--ag-weight-semibold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ext-heading--today {
+  color: var(--ag-color-accent);
+}
+
+.ext-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ext-list__empty,
+.ext-message {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+}
+
+.ext-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ag-space-3);
+}
+
+.ext-error,
+.ext-settings__error {
+  margin: 0;
+  color: var(--ag-color-danger);
+  font-size: var(--ag-text-body-sm);
+}
+
+/* The "Can't reach" card fills the popup's width. */
+.ext-popup__body .ag-unreachable,
+.ext-confirm .ag-unreachable {
+  width: auto;
+  padding: var(--ag-space-4);
+}
+
+.ext-login,
+.ext-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+}
+
+.ext-login__title,
+.ext-settings__title,
+.ext-confirm__title,
+.ext-panel__title {
+  margin: 0;
+  font-size: var(--ag-text-title-sm);
+}
+
+.ext-login__intro,
+.ext-login__server,
+.ext-settings__note,
+.ext-confirm__day {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-body-sm);
+  overflow-wrap: anywhere;
+}
+
+.ext-settings__check {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-2);
+}
+
+.ext-settings__actions,
+.ext-confirm__actions {
+  display: flex;
+  gap: var(--ag-space-2);
+}
+
+/* The side panel: a column of days. */
+.ext-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-4);
+  padding: var(--ag-space-4);
+}
+
+.ext-panel__day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+}
+
+/* The confirm window for selected text. */
+.ext-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+  padding: var(--ag-space-4);
+}
