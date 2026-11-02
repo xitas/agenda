@@ -12,6 +12,8 @@ export default defineConfig({
   autoIcons: { baseIconPath: '../../web/public/icon.svg' },
   // `pnpm dev` opens Chrome with the extension loaded and hot reload.
   webExt: { startUrls: ['http://localhost:5173'] },
+  // .output/agenda-chrome-0.1.0.zip: what CI uploads and the Web Store would take.
+  zip: { artifactTemplate: 'agenda-chrome-{{version}}.zip' },
   manifest: {
     name: 'Agenda',
     description: 'Your agenda in Chrome: today at a glance, quick add, and Add to Agenda.',
