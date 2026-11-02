@@ -1,14 +1,12 @@
-import { NetworkError, newId, parseQuickAdd } from '@agenda/core';
-import { useToast } from '@agenda/ui';
-import { CircleAlert } from 'lucide-react';
-import { useId, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import { NetworkError, newId, parseQuickAdd, quickAddPreview } from '@agenda/core';
+import { QuickAddField, useToast } from '@agenda/ui';
+import { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useEnv } from '../app/env';
 import { dayPath, parseDay, shortDate, todayIn } from '../day/dayFormat';
 import { useCreateEvent } from '../events/mutations';
 import { useShortcuts } from '../shortcuts';
-import { colorName, previewWhen, startDay } from './preview';
+import { startDay } from './preview';
 
 /** The day the page shows, or null when it isn't a day page (Week, Month, Search). */
 function useViewedDay(today: string): string | null {
@@ -41,7 +39,6 @@ export function QuickAdd({ popup }: QuickAddProps = {}) {
   const { toast } = useToast();
   const create = useCreateEvent();
   const input = useRef<HTMLInputElement>(null);
-  const previewId = useId();
   const [text, setText] = useState('');
   const today = todayIn(env);
   const viewedDay = useViewedDay(today);
@@ -98,60 +95,23 @@ export function QuickAdd({ popup }: QuickAddProps = {}) {
     });
   };
 
-  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      submit();
-    } else if (event.key === 'Escape') {
-      if (popup !== undefined) popup.onCancel();
-      else if (text === '') event.currentTarget.blur();
-      setText('');
-    }
-  };
-
   return (
-    <div className={popup === undefined ? 'quick-add' : 'quick-add quick-add--window'}>
-      <input
-        ref={input}
-        // The window opens for typing; nothing else is in it.
-        autoFocus={popup !== undefined}
-        className="ag-input quick-add__input"
-        type="text"
-        aria-label="Quick add"
-        placeholder="Add an event…"
-        autoComplete="off"
-        spellCheck={false}
-        enterKeyHint="done"
-        value={text}
-        aria-describedby={parsed === null ? undefined : previewId}
-        onChange={(event) => {
-          setText(event.target.value);
-        }}
-        onKeyDown={onKeyDown}
-      />
-      {parsed !== null && (
-        <div id={previewId} className="quick-add__preview">
-          <p className="quick-add__chip" data-event-color={parsed.draft.color}>
-            <span className="quick-add__dot" aria-hidden="true" />
-            <span className="quick-add__title">{parsed.draft.title}</span>
-            <span className="quick-add__when">{previewWhen(parsed.draft, env)}</span>
-            <span className="quick-add__color">{colorName(parsed.draft.color)}</span>
-          </p>
-          {parsed.warnings.length > 0 && (
-            <ul className="quick-add__warnings">
-              {parsed.warnings.map((warning) => (
-                <li key={warning}>
-                  <CircleAlert aria-hidden="true" className="quick-add__warning-icon" />
-                  {warning}
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="quick-add__hint">
-            {popup === undefined ? 'Enter to add · Esc to clear' : 'Enter to add · Esc to close'}
-          </p>
-        </div>
-      )}
-    </div>
+    <QuickAddField
+      className={popup === undefined ? 'quick-add' : 'quick-add quick-add--window'}
+      layout={popup === undefined ? 'floating' : 'inline'}
+      // The window opens for typing; nothing else is in it.
+      autoFocus={popup !== undefined}
+      inputRef={input}
+      value={text}
+      onChange={setText}
+      onSubmit={submit}
+      onEscape={(field) => {
+        if (popup !== undefined) popup.onCancel();
+        else if (text === '') field.blur();
+        setText('');
+      }}
+      preview={parsed === null ? null : quickAddPreview(parsed, env)}
+      hint={popup === undefined ? 'Enter to add · Esc to clear' : 'Enter to add · Esc to close'}
+    />
   );
 }

@@ -10,35 +10,6 @@
   padding: var(--ag-space-6) var(--ag-space-4);
 }
 
-.unreachable__card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ag-space-3);
-  width: min(100%, var(--ag-size-dialog));
-  padding: var(--ag-space-8) var(--ag-space-6);
-  border: var(--ag-border-hairline) solid var(--ag-color-border);
-  border-radius: var(--ag-radius-lg);
-  background: var(--ag-color-surface);
-}
-
-.unreachable__title {
-  margin: 0;
-  font-size: var(--ag-text-title);
-  overflow-wrap: anywhere;
-}
-
-.unreachable__hint {
-  margin: 0;
-  color: var(--ag-color-text-muted);
-}
-
-.unreachable__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ag-space-2);
-  margin-top: var(--ag-space-2);
-}
-
 /* "Server: http://localhost:4001 · Change" under the login button. */
 .login__server {
   display: flex;

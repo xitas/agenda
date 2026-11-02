@@ -11,6 +11,4 @@ export function serverLabel(
   return apiBaseUrl === '' ? origin : apiBaseUrl;
 }
 
-export function unreachableMessage(url: string): string {
-  return `Can't reach Agenda at ${url}. Is the API running? (pnpm dev)`;
-}
+export { unreachableMessage } from '@agenda/core';

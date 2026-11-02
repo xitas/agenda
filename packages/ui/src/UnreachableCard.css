@@ -1,0 +1,30 @@
+/* UnreachableCard: "Can't reach Agenda at <url>". Token variables only. */
+
+.ag-unreachable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-3);
+  width: min(100%, var(--ag-size-dialog));
+  padding: var(--ag-space-8) var(--ag-space-6);
+  border: var(--ag-border-hairline) solid var(--ag-color-border);
+  border-radius: var(--ag-radius-lg);
+  background: var(--ag-color-surface);
+}
+
+.ag-unreachable__title {
+  margin: 0;
+  font-size: var(--ag-text-title);
+  overflow-wrap: anywhere;
+}
+
+.ag-unreachable__hint {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+}
+
+.ag-unreachable__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ag-space-2);
+  margin-top: var(--ag-space-2);
+}
