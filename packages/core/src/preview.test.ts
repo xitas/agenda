@@ -6,6 +6,7 @@ import {
   formatShortDate,
   previewWhen,
   quickAddPreview,
+  timeOnDay,
 } from './preview.js';
 import { parseQuickAdd } from './quick-add.js';
 
@@ -78,5 +79,40 @@ describe('quickAddPreview', () => {
       colorName: 'Red',
       warnings: [],
     });
+  });
+});
+
+describe('timeOnDay', () => {
+  // 23:30 on Thursday 5 Nov to 01:30 on Friday, in Karachi.
+  const flight = {
+    start: '2026-11-05T18:30:00.000Z',
+    end: '2026-11-05T20:30:00.000Z',
+    allDay: false,
+  };
+
+  it('splits an overnight event over its days', () => {
+    expect(timeOnDay(flight, '2026-11-05', karachi)).toBe('23:30 →');
+    expect(timeOnDay(flight, '2026-11-06', karachi)).toBe('→ 01:30');
+    const long = { ...flight, end: '2026-11-07T05:00:00.000Z' };
+    expect(timeOnDay(long, '2026-11-06', karachi)).toBe('All day');
+  });
+
+  it('shows a one-day event whole, an open one by its start, and all-day as All day', () => {
+    const dentist = {
+      start: '2026-11-02T11:00:00.000Z',
+      end: '2026-11-02T12:00:00.000Z',
+      allDay: false,
+    };
+    expect(timeOnDay(dentist, '2026-11-02', karachi)).toBe('16:00 – 17:00');
+    expect(timeOnDay({ ...dentist, end: null }, '2026-11-02', karachi)).toBe('16:00');
+    // Ends at midnight: still one day.
+    const evening = {
+      start: '2026-11-02T17:00:00.000Z',
+      end: '2026-11-02T19:00:00.000Z',
+      allDay: false,
+    };
+    expect(timeOnDay(evening, '2026-11-02', karachi)).toBe('22:00 – 00:00');
+    const trip = { start: '2026-11-07', end: '2026-11-10', allDay: true };
+    expect(timeOnDay(trip, '2026-11-08', karachi)).toBe('All day');
   });
 });

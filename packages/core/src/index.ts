@@ -121,6 +121,7 @@ export {
   formatShortDate,
   previewWhen,
   quickAddPreview,
+  timeOnDay,
 } from './preview.js';
 export type { PreviewOptions, QuickAddPreview } from './preview.js';
 export { loginErrorMessage, unreachableMessage, waitText } from './messages.js';

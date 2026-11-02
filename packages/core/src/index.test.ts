@@ -107,6 +107,7 @@ describe('public API', () => {
       'startOfDayInTz',
       'startOfWeekPlain',
       'stepTime',
+      'timeOnDay',
       'toICalendar',
       'trayItems',
       'unreachableMessage',

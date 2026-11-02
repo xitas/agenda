@@ -72,3 +72,27 @@ export function quickAddPreview(
     warnings,
   };
 }
+
+/**
+ * An event's time as one day of a list shows it: "16:00 – 17:00" for an event within the
+ * day, "23:30 →" on the day an overnight event starts, "→ 01:30" on the day it ends, and
+ * "All day" for all-day events and the days in between.
+ */
+export function timeOnDay(
+  event: Pick<EventCreate, 'start' | 'end' | 'allDay'>,
+  day: string,
+  { timezone, locale, hour12 }: PreviewOptions,
+): string {
+  if (event.allDay) return 'All day';
+  const at = (iso: string) =>
+    formatEventTime({ start: iso, end: null, allDay: false }, timezone, locale, { hour12 });
+  const first = plainDateInTz(new Date(event.start), timezone);
+  // An end at midnight belongs to the day before.
+  const last =
+    event.end === null ? first : plainDateInTz(new Date(Date.parse(event.end) - 1), timezone);
+  if (event.end === null) return at(event.start);
+  if (first === last) return `${at(event.start)} – ${at(event.end)}`;
+  if (day === first) return `${at(event.start)} →`;
+  if (day === last) return `→ ${at(event.end)}`;
+  return 'All day';
+}
