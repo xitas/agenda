@@ -215,7 +215,7 @@ describe('Add to Agenda (context menu)', () => {
     await onMenuClick({ menuItemId: MENU_ID, selectionText: '  Call Ali Friday 3pm  ' });
     const url = new URL(String(create.mock.calls[0]?.[0]?.url));
     expect(url.pathname).toBe('/confirm.html');
-    expect(create.mock.calls[0]?.[0]).toMatchObject({ type: 'popup', width: 440, height: 340 });
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ type: 'popup', width: 440, height: 400 });
     const id = url.searchParams.get('id') ?? '';
     const pending = await fakeBrowser.storage.session.get(pendingKey(id));
     expect(pending[pendingKey(id)]).toBe('Call Ali Friday 3pm');

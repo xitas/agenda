@@ -1,4 +1,4 @@
-import { dayAgenda, hasEnded } from '@agenda/core';
+import { dayAgenda, hasEnded, timeOnDay } from '@agenda/core';
 import type { AgendaEvent } from '@agenda/core';
 import { EventCard } from '@agenda/ui';
 import { useExtension } from './context';
@@ -33,6 +33,12 @@ export function EventList({
             locale={env.locale}
             hour12={hour12}
             past={hasEnded(event, now, today)}
+            // What happens on this day: an overnight event shows "23:30 →" or "→ 01:30".
+            time={timeOnDay(event, day, {
+              timezone: env.timezone,
+              locale: env.locale,
+              ...(hour12 === undefined ? {} : { hour12 }),
+            })}
           />
         </li>
       ))}

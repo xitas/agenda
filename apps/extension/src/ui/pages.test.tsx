@@ -31,6 +31,12 @@ describe('the side panel', () => {
       event({ title: 'Dentist' }),
       event({ title: 'Call Ali', start: '2026-11-06T10:00:00.000Z', end: null }),
       event({ title: 'Last week', start: '2026-10-30T10:00:00.000Z', end: null }),
+      // 23:30 Thursday to 01:30 Friday in Karachi.
+      event({
+        title: 'Late flight',
+        start: '2026-11-05T18:30:00.000Z',
+        end: '2026-11-05T20:30:00.000Z',
+      }),
     ];
     await renderPage(<SidePanel />);
     await screen.findByText('Dentist');
@@ -51,6 +57,9 @@ describe('the side panel', () => {
     expect(day('Fri 6 Nov').getByText('Call Ali')).toBeDefined();
     expect(day('Tue 3 Nov').getByText('Nothing planned.')).toBeDefined();
     expect(screen.queryByText('Last week')).toBeNull();
+    // An overnight event shows what happens on each of its days.
+    expect(day('Thu 5 Nov').getByText('23:30 →')).toBeDefined();
+    expect(day('Fri 6 Nov').getByText('→ 01:30')).toBeDefined();
     await expectNoAxeViolations();
   });
 

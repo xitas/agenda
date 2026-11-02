@@ -156,7 +156,7 @@ export async function onMenuClick(info: { menuItemId: string | number; selection
     url: `${browser.runtime.getURL('/confirm.html')}?id=${id}`,
     type: 'popup',
     width: 440,
-    height: 340,
+    height: 400,
     focused: true,
   });
 }
