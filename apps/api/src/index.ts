@@ -27,6 +27,7 @@ const app = createApp({
 
 serve({ fetch: app.fetch, port: env.PORT, hostname: env.HOST }, (info) => {
   console.log(`Agenda API listening on http://${env.HOST}:${String(info.port)}/api/v1`);
-  if (env.HOST !== 'localhost') console.log(`Listening on ${env.HOST}: reachable from other devices.`);
+  if (env.HOST !== 'localhost')
+    console.log(`Listening on ${env.HOST}: reachable from other devices.`);
   if (env.NODE_ENV === 'development') console.log('Development mode: cookies are not Secure.');
 });
