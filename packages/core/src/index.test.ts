@@ -82,6 +82,7 @@ describe('public API', () => {
       'fromV0',
       'hasEnded',
       'inAllDayStrip',
+      'isLocalServer',
       'isUnreachable',
       'layoutAllDay',
       'layoutDay',
