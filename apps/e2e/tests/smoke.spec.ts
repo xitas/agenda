@@ -32,11 +32,16 @@ test('plan, find, edit and undo a delete, then settings and data', async ({ page
   await test.step('switch between Day, Week and Month', async () => {
     // Leave QuickAdd so single-key shortcuts reach the page.
     await page.getByRole('heading', { level: 1 }).click();
+    // The URL changes before React renders the new view, and the next key is handled by
+    // whatever view is on screen; so wait for a control only the new view has (in main:
+    // the sidebar calendar has its own "Next month").
     await page.keyboard.press('w');
     await expect(page).toHaveURL(/\/week\/\d{4}-\d{2}-\d{2}$/);
+    await expect(page.getByRole('main').getByRole('button', { name: 'Next week' })).toBeVisible();
     await expect(card('Dentist')).toBeVisible();
     await page.keyboard.press('m');
     await expect(page).toHaveURL(/\/month/);
+    await expect(page.getByRole('main').getByRole('button', { name: 'Next month' })).toBeVisible();
     await expect(card('Dentist')).toBeVisible();
     // From this month, D opens today; the dentist is tomorrow.
     await page.keyboard.press('d');
