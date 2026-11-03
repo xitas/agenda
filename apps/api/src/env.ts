@@ -26,6 +26,9 @@ const DbEnvSchema = z.object({
 
 const ServerEnvSchema = DbEnvSchema.extend({
   PORT: z.coerce.number().int().min(1).max(65535).default(4001),
+  // Only this PC by default. 0.0.0.0 listens on every network interface, so a phone on
+  // the same Wi-Fi can reach the API (apps/mobile/README.md).
+  HOST: z.string().trim().min(1).default('localhost'),
   // Anything but "development" counts as production, so cookies are Secure by default.
   NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
   AGENDA_PASSWORD_HASH: z

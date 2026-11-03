@@ -151,6 +151,7 @@ describe('environment', () => {
     expect(loadServerEnv({ AGENDA_PASSWORD_HASH: hash })).toEqual({
       DATABASE_URL: 'file:./data/agenda.db',
       PORT: 4001,
+      HOST: 'localhost',
       NODE_ENV: 'production',
       AGENDA_PASSWORD_HASH: hash,
       CORS_ORIGINS: [],
@@ -159,11 +160,13 @@ describe('environment', () => {
       loadServerEnv({
         AGENDA_PASSWORD_HASH: hash,
         PORT: '8080',
+        HOST: '0.0.0.0',
         NODE_ENV: 'development',
         CORS_ORIGINS: ' http://localhost:5173 , https://agenda.example , tauri://localhost ',
       }),
     ).toMatchObject({
       PORT: 8080,
+      HOST: '0.0.0.0',
       NODE_ENV: 'development',
       CORS_ORIGINS: ['http://localhost:5173', 'https://agenda.example', 'tauri://localhost'],
     });
