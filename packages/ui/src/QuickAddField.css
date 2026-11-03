@@ -1,0 +1,102 @@
+/* QuickAddField and its preview. Token variables only. */
+
+.ag-quickadd {
+  position: relative;
+}
+
+/* The preview floats over the page under the field, only while the field has focus. */
+.ag-quickadd__preview {
+  position: absolute;
+  top: calc(100% + var(--ag-space-2));
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-2);
+  padding: var(--ag-space-3);
+  border: var(--ag-border-hairline) solid var(--ag-color-floating-border);
+  border-radius: var(--ag-radius-md);
+  background: var(--ag-color-surface);
+  box-shadow: var(--ag-shadow-floating);
+}
+
+.ag-quickadd--floating:not(:focus-within) .ag-quickadd__preview {
+  display: none;
+}
+
+.ag-quickadd__chip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ag-space-1) var(--ag-space-2);
+  margin: 0;
+  padding: var(--ag-space-2) var(--ag-space-3);
+  border-left: var(--ag-border-bar) solid var(--ag-event-strong);
+  border-radius: var(--ag-radius-sm);
+  background: var(--ag-event-soft);
+  font-size: var(--ag-text-body-sm);
+}
+
+.ag-quickadd__dot {
+  width: var(--ag-space-2);
+  height: var(--ag-space-2);
+  border-radius: var(--ag-radius-full);
+  background: var(--ag-event-strong);
+}
+
+.ag-quickadd__title {
+  font-weight: var(--ag-weight-medium);
+}
+
+.ag-quickadd__when {
+  color: var(--ag-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ag-quickadd__color {
+  margin-left: auto;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+}
+
+.ag-quickadd__warnings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ag-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+}
+
+.ag-quickadd__warnings li {
+  display: flex;
+  align-items: center;
+  gap: var(--ag-space-1);
+}
+
+.ag-quickadd__warning-icon {
+  flex-shrink: 0;
+  width: var(--ag-size-icon-sm);
+  height: var(--ag-size-icon-sm);
+}
+
+.ag-quickadd__hint {
+  margin: 0;
+  color: var(--ag-color-text-muted);
+  font-size: var(--ag-text-caption);
+}
+
+/* inline: the preview sits under the field (popups and small windows), so the window
+   or page can grow to fit it. */
+.ag-quickadd--inline .ag-quickadd__input {
+  width: 100%;
+}
+
+.ag-quickadd--inline .ag-quickadd__preview {
+  position: static;
+  margin-top: var(--ag-space-2);
+  box-shadow: none;
+}

@@ -1,4 +1,4 @@
-import { addDaysToPlainDate, formatEventTime, plainDateInTz } from '@agenda/core';
+import { addDaysToPlainDate, formatEventTime, formatShortDate, plainDateInTz } from '@agenda/core';
 import type { AppEnv } from '../app/env';
 
 /** Today as a plain date in the viewer's zone. */
@@ -55,12 +55,5 @@ export function timeOfDay(date: Date, env: AppEnv): string {
   );
 }
 
-/** "Wed, 28 Oct": a short date for previews and toasts. */
-export function shortDate(day: string, localeCode: string | undefined): string {
-  return new Intl.DateTimeFormat(localeCode, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'UTC',
-  }).format(atNoonUtc(day));
-}
+/** "Wed, 28 Oct": a short date for previews and toasts (from core, shared with the extension). */
+export const shortDate = formatShortDate;

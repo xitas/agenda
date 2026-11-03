@@ -36,7 +36,7 @@ agenda/
 │  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, agenda.ts, time-grid.ts, month.ts,
 │  │                event-form.ts, import.ts, ics.ts, quick-add.ts, api-schemas.ts,
 │  │                api-client.ts, http.ts, platform.ts, reminders.ts, tray.ts,
-│  │                shortcut.ts, server-url.ts
+│  │                shortcut.ts, server-url.ts, badge.ts, preview.ts, messages.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -169,9 +169,12 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 
 **Extension (WXT, MV3).**
 
-- `entrypoints/popup`, `entrypoints/sidepanel`: React, reuses `packages/ui`
-- `entrypoints/background.ts`: service worker that owns `chrome.alarms` (refresh + reminders), the context menu, and the badge. It is **stateless**, because MV3 workers are killed when idle, so everything must persist in `chrome.storage`.
-- `host_permissions` limited to the API origin only
+- **Pages:** `popup` (360×520: QuickAdd, today, settings), `sidepanel` (this week by day) and `confirm` (the window for "Add to Agenda"), in React with `packages/ui` (QuickAddField, EventCard, UnreachableCard) and the core client in token mode. `SessionGate` puts the host permission, login and "Can't reach" screens before every page.
+- **Service worker** (`src/background/worker.ts`): owns `chrome.alarms` (a 15-minute refresh, one at the next badge change, one at the next reminder), the context menu and the badge. It is **stateless**: Chrome stops idle workers, so every handler reads the token, settings, cached events, schedule and shown keys from `chrome.storage.local` and writes back. Listeners are registered synchronously in `entrypoints/background.ts`; `onStartup`/`onInstalled` re-create the alarms. Pages tell it about changes with a runtime message (`chromePlatform.extension.eventsChanged`), and a login or logout reaches it through `storage.onChanged`.
+- **Badge and reminders** use core's `badgeCount` (today's timed events that haven't ended) and the shared reminder rule (`reminderSchedule`, `dueReminders`, `pruneShown`: the desktop app's rule, in TypeScript). Reminders are off unless "Show reminders in Chrome" is on, so they aren't shown twice next to the desktop app.
+- **Add to Agenda:** the menu click carries `selectionText`, so there is **no content script**. The worker puts the text in `chrome.storage.session` and opens a 440×400 popup window (`confirm.html?id=`) that shows the parsed preview and saves only on Add.
+- **Permissions:** `storage`, `alarms`, `contextMenus`, `sidePanel`; `notifications` is optional (asked for with the reminders setting). The only host permission is `http://localhost/*` (the default server, any port); `optional_host_permissions` (`http://*/*`, `https://*/*`) grant nothing until a new Server URL is saved, which asks for that origin alone. Host permissions also exempt the extension's calls from CORS, so the API needs no `CORS_ORIGINS` entry; bearer requests skip the CSRF check. CSP: `script-src 'self'; object-src 'none'; base-uri 'none'`.
+- **Builds:** `pnpm build` writes `.output/chrome-mv3` (load unpacked); `zip` writes `agenda-chrome-<version>.zip`, which CI keeps as an artifact. `apps/extension/README.md` explains the lifecycle, permissions and how extension pages differ from web pages.
 
 **Mobile (Expo).** Expo Router tabs. It uses the `core` API client and TanStack Query. Reminders are scheduled locally with `expo-notifications` whenever events change. `expo-secure-store` holds the token. In Phase 7, `expo-sqlite` becomes the local store for offline use.
 
@@ -194,13 +197,15 @@ Each app provides its own implementation; shared code only ever sees `Platform`,
 
 - `webPlatform` (`apps/web/src/app/platform.ts`): the cookie, `VITE_API_URL` (or the dev proxy), downloads through a Blob URL.
 - `tauriPlatform` (`apps/web/src/platform/tauri.ts`): a bearer token from the OS keychain, the Server URL, and `invoke`/`listen` for everything else. It is the only file that imports `@tauri-apps/api` (an ESLint rule), and `loadPlatform()` (`platform/detect.ts`) fetches it as a separate chunk only when `isTauri()` sees Tauri's injected internals, so the browser build never loads it.
-- `chromePlatform` and `expoPlatform` come with the extension and mobile phases, and add members (notifications, storage) as those need them.
+- `chromePlatform` (`apps/extension/src/platform.ts`): a bearer token in `chrome.storage.local`, the Server URL from the extension's settings, Blob downloads, and an `extension` member (`ExtensionBridge`: its settings, host and notification permission requests, `eventsChanged` to the service worker, `openTab`).
+- `expoPlatform` comes with the mobile phase and adds what it needs.
 
 `main.tsx` awaits `loadPlatform()`, builds the API client from it (`createAppApi`: cookie or token mode), and passes it to `AppProviders`. Tests pass fakes (`test-utils/fakeDesktop.ts`).
 
 ## 8. Quality gates
 
 - CI (`.github/workflows/ci.yml`) runs `pnpm format:check`, `lint`, `typecheck`, `test` and `build` on every PR and push to `master`; all must pass.
+- The main CI job also zips the Chrome extension and uploads it; the e2e job runs a second spec that loads the built extension in Chromium (log in through the popup, QuickAdd, the badge).
 - A desktop job on windows-latest runs `cargo fmt --check`, `cargo clippy -D warnings` and `cargo test` on the Rust core, then builds the NSIS installer and uploads it as an artifact. Rust checks stay out of `pnpm lint`/`test`, so the other jobs and machines without Rust are unaffected.
 - A second CI job runs the Playwright smoke test (`apps/e2e`, Chromium only) against the built apps: the API with a temp-file database per run (not libSQL's `:memory:`, which gives each transaction an empty database), `NODE_ENV=development` and `CORS_ORIGINS` set to the preview server, and `vite preview` proxying `/api` to it. Locally: `pnpm build && pnpm e2e` (ports 4101 and 5101, so a dev API on 4001 is untouched). Unit tests cover the details; the smoke test covers what only a real browser, server and database show (cookies through the proxy, the CSRF check, migrations, CSS that blocks a click).
 - CI installs with `pnpm install --frozen-lockfile`, so lockfile changes must be committed with the `package.json` change that caused them.

@@ -132,6 +132,10 @@ Each phase ends with something usable and merged to `master`. Work in small PRs,
 
 **Done when:** I can highlight "Call Ali Friday 3pm" on any page and it becomes an event.
 
+**Status (built before Phase 3):** `apps/extension` (WXT, MV3): popup with login, QuickAdd and today; the week in the side panel; "Add to Agenda" on selected text with a confirm window (never saves silently); the badge; reminders in Chrome (off by default, so the desktop app's aren't doubled); a stateless service worker that survives being stopped. Like the desktop app, it talks to the API on this PC until its Server URL is changed. Load it unpacked (`apps/extension/README.md`); CI keeps the zip. To check by hand: [ ] highlighted "Call Ali Friday 3pm" on a page, added it, and saw it in the popup, the web app and the desktop app.
+
+**Not done yet (on purpose):** publishing on the Chrome Web Store (privately or unlisted). It needs a developer account, a privacy policy for the stored token, store screenshots and a review; the zip CI builds is what would be uploaded.
+
 ### Phase 6: Mobile with Expo (about 2–4 weeks)
 
 **Learn:** React Native layout, Expo Router, native modules, notifications, EAS Build.

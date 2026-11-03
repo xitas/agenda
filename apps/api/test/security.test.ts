@@ -260,3 +260,39 @@ describe('the desktop app (Tauri)', () => {
     expect(res.status).toBe(201);
   });
 });
+
+describe('the Chrome extension', () => {
+  // Extension pages and the service worker send Origin: chrome-extension://<id>. Chrome
+  // lets them call any host they have a host permission for without CORS, so the origin
+  // is not (and need not be) in CORS_ORIGINS; the e2e test checks that in Chromium.
+  const EXTENSION_ORIGIN = 'chrome-extension://abcdefghijklmnopabcdefghijklmnop';
+
+  it('logs in as a token client and writes with the bearer token, no CSRF check', async () => {
+    const { request } = await makeTestApp();
+    const login = await request<{ token: string }>(
+      'POST',
+      '/auth/login',
+      { password: PASSWORD, client: 'token', label: 'Chrome extension' },
+      { auth: false, headers: { Origin: EXTENSION_ORIGIN } },
+    );
+    expect(login.status).toBe(200);
+    const write = await request('POST', '/events', timed('Call Ali', '2026-10-24T10:00:00Z'), {
+      auth: login.body.token,
+      headers: { Origin: EXTENSION_ORIGIN },
+    });
+    expect(write.status).toBe(201);
+    // Not a listed origin: no CORS headers, which Chrome ignores for host-permitted calls.
+    expect(write.headers.get('Access-Control-Allow-Origin')).toBeNull();
+  });
+
+  it('still refuses a cookie write from the extension origin', async () => {
+    const { request } = await makeTestApp();
+    const res = await request(
+      'POST',
+      '/auth/login',
+      { password: PASSWORD, client: 'browser' },
+      { auth: false, headers: { Origin: EXTENSION_ORIGIN } },
+    );
+    expect(res.status).toBe(403);
+  });
+});

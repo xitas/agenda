@@ -77,3 +77,44 @@ export function reminderSchedule(
   }
   return reminders.sort((a, b) => a.atMs - b.atMs || a.key.localeCompare(b.key));
 }
+
+/** Shown reminder keys are forgotten after this long; their events are long past by then. */
+export const REMINDER_KEEP_SHOWN_MS = 2 * 24 * 60 * 60_000;
+
+/** The keys of reminders already shown, with the time each was due (ms since 1970). */
+export type ShownReminders = Record<string, number>;
+
+/**
+ * The reminders to show at `nowMs`: due, at most REMINDER_GRACE_MS late, and not shown
+ * before. The same rule as the desktop app's Rust core (src-tauri/src/reminders.rs), so
+ * a reminder is never shown twice by one app, whatever restarts in between.
+ */
+export function dueReminders(
+  schedule: readonly ScheduledReminder[],
+  shown: ShownReminders,
+  nowMs: number,
+): ScheduledReminder[] {
+  return schedule.filter(
+    (r) => r.atMs <= nowMs && nowMs - r.atMs <= REMINDER_GRACE_MS && !(r.key in shown),
+  );
+}
+
+/** When the next reminder not yet shown is due, or null when there is none. */
+export function nextReminderAt(
+  schedule: readonly ScheduledReminder[],
+  shown: ShownReminders,
+  nowMs: number,
+): number | null {
+  let next: number | null = null;
+  for (const r of schedule) {
+    if (r.atMs > nowMs && !(r.key in shown) && (next === null || r.atMs < next)) next = r.atMs;
+  }
+  return next;
+}
+
+/** `shown` without the keys due more than REMINDER_KEEP_SHOWN_MS ago. */
+export function pruneShown(shown: ShownReminders, nowMs: number): ShownReminders {
+  return Object.fromEntries(
+    Object.entries(shown).filter(([, atMs]) => nowMs - atMs <= REMINDER_KEEP_SHOWN_MS),
+  );
+}

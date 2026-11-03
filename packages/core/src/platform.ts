@@ -79,6 +79,32 @@ export interface DesktopBridge {
   showMain: (path?: string) => Promise<void>;
 }
 
+/** The Chrome extension's own settings (the shared preferences live on the server). */
+export interface ExtensionSettings {
+  /** The API, e.g. http://localhost:4001. */
+  serverUrl: string;
+  /** What "Open full Agenda" opens, e.g. http://localhost:5173. */
+  webUrl: string;
+  /** Off by default, so reminders don't show twice while the desktop app runs. */
+  remindersInChrome: boolean;
+}
+
+/** What only the Chrome extension has: its settings, permissions and service worker. */
+export interface ExtensionBridge {
+  settings: () => Promise<ExtensionSettings>;
+  /** Stores them; a new server also logs out (a token belongs to its server). */
+  saveSettings: (settings: ExtensionSettings) => Promise<void>;
+  /** Whether the extension may call this server (a host permission). */
+  hasServerAccess: (serverUrl: string) => Promise<boolean>;
+  /** Asks Chrome for access to this server; only works from a click. */
+  requestServerAccess: (serverUrl: string) => Promise<boolean>;
+  /** Asks for the notifications permission; only works from a click. */
+  requestNotifications: () => Promise<boolean>;
+  /** Tells the service worker that events changed (badge, reminders). */
+  eventsChanged: () => Promise<void>;
+  openTab: (url: string) => Promise<void>;
+}
+
 export interface Platform {
   /**
    * Hands a file to the user: a download on the web, a native save dialog on desktop.
@@ -90,4 +116,6 @@ export interface Platform {
   apiBaseUrl: string;
   /** Only in the desktop app. */
   desktop?: DesktopBridge;
+  /** Only in the Chrome extension. */
+  extension?: ExtensionBridge;
 }

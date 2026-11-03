@@ -1,0 +1,33 @@
+import { ApiError, NetworkError } from './api-client.js';
+
+/** "1 minute", "14 minutes", "45 seconds": when trying again will help. */
+export function waitText(seconds: number): string {
+  if (seconds < 60) return `${String(seconds)} ${seconds === 1 ? 'second' : 'seconds'}`;
+  const minutes = Math.ceil(seconds / 60);
+  return `${String(minutes)} ${minutes === 1 ? 'minute' : 'minutes'}`;
+}
+
+/** The API couldn't be reached at `url` (DESIGN.md §4, "Can't reach the server"). */
+export function unreachableMessage(url: string): string {
+  return `Can't reach Agenda at ${url}. Is the API running? (pnpm dev)`;
+}
+
+/**
+ * What went wrong at login, and what to do about it (DESIGN.md §7). With a server URL
+ * (the desktop app, the extension), an unreachable server is named.
+ */
+export function loginErrorMessage(error: unknown, serverUrl?: string): string {
+  if (error instanceof NetworkError) {
+    if (serverUrl !== undefined) return unreachableMessage(serverUrl);
+    return "Couldn't reach the server. Check your connection and try again.";
+  }
+  if (error instanceof ApiError) {
+    if (error.code === 'invalid_credentials') return "That password didn't work. Try again.";
+    if (error.code === 'rate_limited') {
+      return error.retryAfterSeconds === undefined
+        ? 'Too many attempts. Try again later.'
+        : `Too many attempts. Try again in ${waitText(error.retryAfterSeconds)}.`;
+    }
+  }
+  return 'Something went wrong. Try again.';
+}

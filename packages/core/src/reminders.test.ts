@@ -1,6 +1,14 @@
 import { enGB, enUS } from 'date-fns/locale';
 import { describe, expect, it } from 'vitest';
-import { REMINDER_GRACE_MS, reminderSchedule, reminderTime } from './reminders.js';
+import {
+  dueReminders,
+  nextReminderAt,
+  pruneShown,
+  REMINDER_GRACE_MS,
+  REMINDER_KEEP_SHOWN_MS,
+  reminderSchedule,
+  reminderTime,
+} from './reminders.js';
 import type { AgendaEvent } from './types.js';
 
 // Monday 2 November 2026, 10:00 in Karachi (UTC+5).
@@ -132,5 +140,33 @@ describe('reminderSchedule', () => {
   it('follows the 12-hour clock setting', () => {
     const [reminder] = reminderSchedule([event()], { ...options, hour12: true });
     expect(reminder?.body).toBe('Today, 4:00 PM – 5:00 PM');
+  });
+});
+
+describe('the shown-once rule', () => {
+  const NOW = 1_793_000_000_000;
+  const at = (key: string, atMs: number) => ({ key, atMs, title: 'Dentist', body: 'Today' });
+
+  it('shows what is due, up to the grace period late, and never a key twice', () => {
+    const schedule = [
+      at('due-now', NOW),
+      at('a-minute-late', NOW - 60_000),
+      at('too-late', NOW - REMINDER_GRACE_MS - 1),
+      at('later', NOW + 1),
+      at('shown', NOW - 1_000),
+    ];
+    const due = dueReminders(schedule, { shown: NOW - 1_000 }, NOW);
+    expect(due.map((r) => r.key)).toEqual(['due-now', 'a-minute-late']);
+  });
+
+  it('finds the next reminder not yet shown', () => {
+    const schedule = [at('shown', NOW + 5_000), at('next', NOW + 10_000), at('last', NOW + 20_000)];
+    expect(nextReminderAt(schedule, { shown: NOW + 5_000 }, NOW)).toBe(NOW + 10_000);
+    expect(nextReminderAt([at('past', NOW - 1)], {}, NOW)).toBeNull();
+  });
+
+  it('forgets keys after two days', () => {
+    const shown = { old: NOW - REMINDER_KEEP_SHOWN_MS - 1, recent: NOW - 1_000 };
+    expect(pruneShown(shown, NOW)).toEqual({ recent: NOW - 1_000 });
   });
 });

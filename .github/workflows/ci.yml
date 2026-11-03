@@ -75,6 +75,20 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # The same build as a zip, ready for "Load unpacked" (unzipped) or the Web Store.
+      - name: Zip the Chrome extension
+        run: pnpm --filter @agenda/extension zip
+
+      - name: Upload the extension
+        uses: actions/upload-artifact@v7
+        with:
+          name: agenda-chrome-extension
+          path: apps/extension/.output/agenda-chrome-*.zip
+          # WXT writes to .output/, and upload-artifact skips dot-folders unless told.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
   e2e:
     name: End-to-end (Playwright, Chromium)
     runs-on: ubuntu-latest
@@ -127,8 +141,9 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Starts its own API (temp database, port 4101) and `vite preview` (port 5101).
-      - name: Run the smoke test
+      # Starts its own API (temp database, port 4101) and `vite preview` (port 5101); the
+      # extension spec loads the built extension in Chromium against the same API.
+      - name: Run the smoke tests
         run: pnpm e2e
 
       - name: Upload the report
