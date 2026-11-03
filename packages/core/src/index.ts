@@ -171,3 +171,5 @@ export type {
   EventCreateInput,
   EventPatch,
 } from './types.js';
+export { createApiEventRepository, SEARCH_LIMIT } from './repository.js';
+export type { EventRepository } from './repository.js';
