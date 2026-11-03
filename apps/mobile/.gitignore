@@ -1,0 +1,6 @@
+# Expo and Metro output, and the native projects `expo prebuild` / `expo run:android` generate
+.expo/
+dist/
+android/
+ios/
+coverage/
