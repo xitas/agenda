@@ -1,5 +1,5 @@
 import type { Theme } from '@agenda/core';
-import { border, color, eventColor, font, radius, size, space } from '@agenda/tokens';
+import { border, color, eventColor, font, radius, size, space, toastOffset } from '@agenda/tokens';
 import type { EventColor, EventColorName, ThemeColors, ThemeName } from '@agenda/tokens';
 import { createContext, useContext } from 'react';
 
@@ -31,7 +31,7 @@ export function usePalette(): Palette {
 }
 
 /** Spacing, radii and type sizes (numbers: density-independent pixels on Android). */
-export { border, radius, size, space };
+export { border, radius, size, space, toastOffset };
 export const text = font.size;
 /** React Native wants font weights as strings. */
 export const weight = {

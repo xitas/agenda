@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { radius, space, text, usePalette, weight } from '../theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { radius, space, text, toastOffset, usePalette, weight } from '../theme';
 
 export interface SnackbarMessage {
   message: string;
@@ -23,6 +24,8 @@ export function useSnackbar() {
 /** One message at a time at the bottom of the screen, above the tab bar. */
 export function SnackbarProvider({ children }: { children: ReactNode }) {
   const { color } = usePalette();
+  // Above the tab bar and the system navigation bar (gestures or 3 buttons) under it.
+  const { bottom } = useSafeAreaInsets();
   const [current, setCurrent] = useState<(SnackbarMessage & { id: number }) | null>(null);
   const show = useCallback((message: SnackbarMessage) => {
     setCurrent({ ...message, id: Date.now() });
@@ -45,7 +48,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
       {current !== null && (
         <View
           accessibilityLiveRegion="polite"
-          style={[styles.bar, { backgroundColor: color.text }]}
+          style={[styles.bar, { backgroundColor: color.text, bottom: toastOffset.narrow + bottom }]}
           pointerEvents="box-none"
         >
           <Text style={[styles.message, { color: color.bg }]}>{current.message}</Text>
@@ -72,7 +75,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: space[4],
     right: space[4],
-    bottom: space[8] * 3,
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[3],
