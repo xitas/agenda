@@ -1,5 +1,5 @@
 import { addMonthsToPlainDate, formatShortDate, monthGrid, plainDateInTz } from '@agenda/core';
-import type { Theme, TimeFormat, WeekStart } from '@agenda/core';
+import type { Settings, Theme, TimeFormat, WeekStart } from '@agenda/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -233,20 +233,25 @@ export function SettingsScreen({
   const { preferences } = usePreferences();
   const [changingServer, setChangingServer] = useState(false);
   // Shown at once, saved in the background. Quick changes in a row must not undo each
-  // other: a refetch still running is cancelled, and only the last save refetches.
+  // other, so each one starts from the cache as it is now (not as of the last render),
+  // a refetch still running is dropped, and only the last save refetches.
   const save = useMutation({
     mutationKey: SETTINGS_KEY,
-    mutationFn: (next: NonNullable<typeof preferences>) => api.settings.update(next),
-    onMutate: async (next) => {
-      await client.cancelQueries({ queryKey: SETTINGS_KEY });
-      client.setQueryData(SETTINGS_KEY, next);
-    },
+    mutationFn: (next: Settings) => api.settings.update(next),
     onSettled: () => {
       if (client.isMutating({ mutationKey: SETTINGS_KEY }) === 1) {
         void client.invalidateQueries({ queryKey: SETTINGS_KEY });
       }
     },
   });
+  const change = (patch: Partial<Settings>) => {
+    const current = client.getQueryData<Settings>(SETTINGS_KEY) ?? preferences;
+    if (current === undefined) return;
+    const next = { ...current, ...patch };
+    void client.cancelQueries({ queryKey: SETTINGS_KEY }, { revert: false });
+    client.setQueryData(SETTINGS_KEY, next);
+    save.mutate(next);
+  };
   const sessions = useQuery({
     queryKey: ['sessions'],
     queryFn: ({ signal }) => api.auth.sessions({ signal }),
@@ -275,7 +280,7 @@ export function SettingsScreen({
             value={preferences.theme}
             options={THEMES}
             onChange={(theme) => {
-              save.mutate({ ...preferences, theme });
+              change({ theme });
             }}
           />
           <Choice
@@ -283,7 +288,7 @@ export function SettingsScreen({
             value={preferences.weekStart}
             options={WEEK_STARTS}
             onChange={(weekStart) => {
-              save.mutate({ ...preferences, weekStart });
+              change({ weekStart });
             }}
           />
           <Choice
@@ -291,7 +296,7 @@ export function SettingsScreen({
             value={preferences.timeFormat}
             options={CLOCKS}
             onChange={(timeFormat) => {
-              save.mutate({ ...preferences, timeFormat });
+              change({ timeFormat });
             }}
           />
         </Section>
