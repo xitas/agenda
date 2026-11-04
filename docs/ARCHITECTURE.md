@@ -36,7 +36,8 @@ agenda/
 │  ├─ core/         schemas.ts, types.ts, ids.ts, dates.ts, agenda.ts, time-grid.ts, month.ts,
 │  │                event-form.ts, import.ts, ics.ts, quick-add.ts, api-schemas.ts,
 │  │                api-client.ts, http.ts, platform.ts, reminders.ts, tray.ts,
-│  │                shortcut.ts, server-url.ts, badge.ts, preview.ts, messages.ts
+│  │                shortcut.ts, server-url.ts, badge.ts, preview.ts, messages.ts,
+│  │                repository.ts
 │  ├─ ui/           React DOM components (no app logic)
 │  ├─ tokens/       tokens.ts → generates tokens.css (CSS vars)
 │  └─ config/       shared tsconfig, eslint, prettier, vitest
@@ -65,8 +66,8 @@ agenda/
 | DB / ORM      | SQLite (libSQL) + Drizzle                                                   | Same SQLite you know, plus typed queries and real migrations                              |
 | Desktop       | Tauri 2                                                                     | Small installers and native APIs. **Alternative:** Electron, if you'd rather stay 100% JS |
 | Extension     | WXT                                                                         | Vite-based MV3 framework with hot reload; handles manifest generation                     |
-| Mobile        | Expo (SDK latest) + Expo Router                                             | Fastest path to a real native app; EAS for builds                                         |
-| Tests         | Vitest, Testing Library, Playwright (web e2e)                               | Same runner in every package                                                              |
+| Mobile        | Expo (SDK 58) + Expo Router, Android only                                   | Fastest path to a real native app; local Gradle builds (EAS later, for iOS or the store)  |
+| Tests         | Vitest, Testing Library, Playwright (web e2e); Jest in mobile               | Vitest everywhere else; `jest-expo` is the maintained React Native preset                 |
 | CI/CD         | GitHub Actions                                                              | Lint, typecheck, test on PR; deploy on `master`                                           |
 
 ## 4. Data model
@@ -176,7 +177,13 @@ Errors always use the shape `{ error: { code, message, fields? } }`: 400 `invali
 - **Permissions:** `storage`, `alarms`, `contextMenus`, `sidePanel`; `notifications` is optional (asked for with the reminders setting). The only host permission is `http://localhost/*` (the default server, any port); `optional_host_permissions` (`http://*/*`, `https://*/*`) grant nothing until a new Server URL is saved, which asks for that origin alone. Host permissions also exempt the extension's calls from CORS, so the API needs no `CORS_ORIGINS` entry; bearer requests skip the CSRF check. CSP: `script-src 'self'; object-src 'none'; base-uri 'none'`.
 - **Builds:** `pnpm build` writes `.output/chrome-mv3` (load unpacked); `zip` writes `agenda-chrome-<version>.zip`, which CI keeps as an artifact. `apps/extension/README.md` explains the lifecycle, permissions and how extension pages differ from web pages.
 
-**Mobile (Expo).** Expo Router tabs. It uses the `core` API client and TanStack Query. Reminders are scheduled locally with `expo-notifications` whenever events change. `expo-secure-store` holds the token. In Phase 7, `expo-sqlite` becomes the local store for offline use.
+**Mobile (Expo, Android).** `apps/mobile` is React Native with native components built from `@agenda/tokens`; it shares logic with the other apps, not UI. `apps/mobile/README.md` covers setup, networking, builds and how each part works.
+
+- **Routes** (Expo Router, files in `app/`): `_layout.tsx` puts the providers around everything; `(tabs)/_layout.tsx` puts `SessionGate` (login, "Can't reach Agenda at <url>", the same `isUnreachable` rule as desktop) and `ReminderSync` before the four tabs, Today · Calendar · Search · Settings. The editor is one bottom sheet owned by `EditorProvider`, opened with `useEditor()`, like the web's `EventActionsProvider`.
+- **Data.** Screens read and write events only through core's `EventRepository` (`repository.ts`), today `createApiEventRepository` over the token-mode client, with TanStack Query on top (`src/data.ts`: events per day range, search, an optimistic delete with Undo). Phase 7 swaps in a SQLite repository that syncs, and the screens don't change.
+- **Server and token.** The Server URL (default `http://10.0.2.2:4001`, the emulator's name for the PC) and the token live in `expo-secure-store` (Android Keystore). Saving a new Server URL also forgets the token. `http://` is accepted only for local addresses (`normalizeServerUrl` with `httpsOutsideLocal`), and the build allows cleartext only to localhost, 10.0.2.2 and `AGENDA_DEV_HOSTS` (a network security config written by `plugins/with-local-cleartext.js`). The API listens on `localhost` unless `HOST` says otherwise.
+- **Reminders.** `rescheduleReminders` takes the next 14 days, runs core's `reminderSchedule` (the desktop and extension rule) and replaces every scheduled notification: cancel all, then one `expo-notifications` date trigger per key, so the set never holds duplicates. Android's AlarmManager fires them with the app closed; `USE_EXACT_ALARM` makes them exact in Doze, and expo-notifications re-arms them after a reboot. They're rescheduled whenever the app opens or the events change in it; background refresh is Phase 7.
+- **Builds and CI.** `expo run:android` (local Gradle) for the development build and a release APK; `android/` is generated and not committed. CI runs lint, typecheck, Jest with a 90% coverage gate, and `expo export --platform android` (the Metro bundle), but no Gradle build.
 
 ## 7. Platform adapter pattern
 
@@ -198,7 +205,7 @@ Each app provides its own implementation; shared code only ever sees `Platform`,
 - `webPlatform` (`apps/web/src/app/platform.ts`): the cookie, `VITE_API_URL` (or the dev proxy), downloads through a Blob URL.
 - `tauriPlatform` (`apps/web/src/platform/tauri.ts`): a bearer token from the OS keychain, the Server URL, and `invoke`/`listen` for everything else. It is the only file that imports `@tauri-apps/api` (an ESLint rule), and `loadPlatform()` (`platform/detect.ts`) fetches it as a separate chunk only when `isTauri()` sees Tauri's injected internals, so the browser build never loads it.
 - `chromePlatform` (`apps/extension/src/platform.ts`): a bearer token in `chrome.storage.local`, the Server URL from the extension's settings, Blob downloads, and an `extension` member (`ExtensionBridge`: its settings, host and notification permission requests, `eventsChanged` to the service worker, `openTab`).
-- `expoPlatform` comes with the mobile phase and adds what it needs.
+- **Mobile has no `Platform`.** The interface exists so shared DOM code (`packages/ui`, `apps/web`) can run in several shells; the mobile app shares no UI code. Expo modules are still called in one place each (`src/storage.ts`, `src/reminders.ts`, `src/api.ts`), and screens get them through `AppContext` (api, `EventRepository`, token store, server, env), which tests replace with fakes.
 
 `main.tsx` awaits `loadPlatform()`, builds the API client from it (`createAppApi`: cookie or token mode), and passes it to `AppProviders`. Tests pass fakes (`test-utils/fakeDesktop.ts`).
 

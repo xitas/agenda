@@ -37,7 +37,7 @@ If a request conflicts with these docs, point it out and ask before deviating. I
 ```
 pnpm i                              # install (pnpm via Corepack; version pinned in package.json)
 pnpm dev                            # run the API and web app in watch mode (not desktop)
-pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; mobile later)
+pnpm dev --filter @agenda/web       # run one app (@agenda/api, @agenda/web; mobile: see below)
                                     # web: http://localhost:5173 (log in with the API password);
                                     # /playground shows every ui component
 pnpm build                          # build every package and app
@@ -71,6 +71,17 @@ Cargo.lock only takes crates published 14+ days ago; the update command is in `a
 
 Filters need the full scoped package name (`@agenda/web`, not `web`).
 CI installs with `pnpm install --frozen-lockfile`: commit `pnpm-lock.yaml` together with any `package.json` change.
+Mobile (Expo, Android; needs Android Studio's SDK, JDK and environment variables; see `apps/mobile/README.md`):
+
+```
+pnpm --filter @agenda/mobile android      # build + install the development build, start Metro (emulator: API at 10.0.2.2:4001)
+pnpm --filter @agenda/mobile dev          # Metro only, for an installed development build
+pnpm --filter @agenda/mobile exec expo run:android --variant release   # release APK for your own phone
+```
+
+Plain HTTP from the phone works only to localhost, 10.0.2.2 and `AGENDA_DEV_HOSTS` (set before prebuild); the API needs `HOST=0.0.0.0` for a phone on Wi-Fi.
+Mobile tests use Jest (`jest-expo`), not Vitest.
+
 API database (see `apps/api/README.md`):
 
 ```
