@@ -9,7 +9,7 @@
     "build": "expo export --platform android --output-dir dist",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest --coverage",
+    "test": "jest --coverage --maxWorkers=50%",
     "eas-build-post-install": "pnpm --filter @agenda/tokens --filter @agenda/core run build"
   },
   "dependencies": {
