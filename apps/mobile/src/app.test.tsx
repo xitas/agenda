@@ -1,5 +1,5 @@
 import { NetworkError } from '@agenda/core';
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { act, render, screen, waitFor } from '@testing-library/react-native';
 import { enUS } from 'date-fns/locale';
 import * as SecureStore from 'expo-secure-store';
 import { Text } from 'react-native';
@@ -173,7 +173,8 @@ describe('AppProviders', () => {
       </AppProviders>,
     );
     expect(await screen.findByText('http://192.168.1.20:4001')).toBeTruthy();
-    await change?.('http://10.0.2.2:4001');
+    // Saving the address and switching to it re-renders the providers: inside act(...).
+    await act(() => change?.('http://10.0.2.2:4001'));
     expect(await screen.findByText('http://10.0.2.2:4001')).toBeTruthy();
     expect(await readServerUrl()).toBe('http://10.0.2.2:4001');
     spy.mockRestore();

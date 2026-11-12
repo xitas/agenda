@@ -2,6 +2,8 @@
 // one the app touches is replaced: the libraries' own mocks where they ship one, and small
 // in-memory fakes for the rest.
 import 'react-native-gesture-handler/jestSetup';
+import { notifyManager } from '@tanstack/react-query';
+import { act } from 'react';
 
 process.env.TZ = 'Pacific/Kiritimati';
 
@@ -81,4 +83,19 @@ jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
         renderRightActions?.(),
       ),
   };
+});
+
+/**
+ * TanStack Query hands query and mutation results to components from a timer (its notify
+ * manager), so a result can land between a test's last step and the cleanup: on a slow,
+ * loaded run React then warns that an update wasn't wrapped in act(...). Each hand-off is
+ * real UI work, so it goes through act(...) like any other. Not while RNTL's waitFor polls:
+ * it turns the act environment off then, and act would warn about that instead.
+ */
+notifyManager.setNotifyFunction((notify) => {
+  if ((globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT === true) {
+    act(notify);
+  } else {
+    notify();
+  }
 });
