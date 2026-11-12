@@ -74,11 +74,11 @@ Android 9+ refuses unencrypted HTTP unless the app says otherwise. The API on yo
 
 `plugins/with-local-cleartext.js` writes a [network security config](https://developer.android.com/privacy-and-security/security-config) instead: HTTPS everywhere, plain HTTP only to `localhost`, `127.0.0.1`, `10.0.2.2` and the hosts in `AGENDA_DEV_HOSTS` (comma-separated). Android can only list exact hosts there (not "any 192.168.x.x"), so the address is fixed at build time: change it, and prebuild again. The app checks the same rule when you save a Server URL: `http://` is accepted only for local addresses (core's `normalizeServerUrl` with `httpsOutsideLocal`), and anything else must be `https://`.
 
-## Builds: local, not EAS (for now)
+## Builds: local and EAS
 
-**What EAS Build is.** Expo's cloud service: it uploads the project, runs the same `prebuild` and Gradle build on Expo's machines, and keeps the signing keys for you. You get an APK or AAB link and never install Android Studio. The free plan queues builds and limits how many you run a month; it's the easy way to build for iOS without a Mac.
+Both are set up and make the same app. **Local** builds (above, with Android Studio) are the default for day-to-day work: free, no queue, offline, and they show exactly what Gradle does. **EAS Build** makes the same APKs in the cloud, without Android Studio on the machine.
 
-**Why local here.** You already have Android Studio; local builds are free, don't wait in a queue, work offline, and show exactly what Gradle does, which is the point of this phase. EAS becomes worth it for iOS or Play Store releases.
+### Local
 
 **A release APK to keep on the phone** (no Metro, JavaScript bundled inside):
 
@@ -88,7 +88,40 @@ pnpm --filter @agenda/mobile exec expo run:android --variant release
 
 The APK lands in `android/app/build/outputs/apk/release/`. Expo's template signs release builds with the debug key, which is fine for your own phone and nothing else; a store build needs a real upload key (`android/app/build.gradle`'s `signingConfigs`, or EAS credentials). Install it on a connected phone with `adb install -r <apk>`.
 
-**In CI** the main job runs this package's lint, typecheck, Jest tests (with the 90% coverage gate) and `build`, which is `expo export --platform android`: it bundles the JavaScript with Metro exactly as a release build would, so a broken import or a module Metro can't resolve fails CI. CI doesn't build an APK: Gradle with the NDK takes 10 to 20 minutes and gigabytes of SDK on every run, for little more than this check catches.
+### EAS Build
+
+**What it is.** Expo's cloud build service. `eas build` uploads the repository (the files git tracks), and an Expo machine installs the workspace, runs the same `prebuild` and Gradle build, and signs the APK with a key EAS creates and keeps for you. You get a link and a QR code for the APK. The free plan queues builds and limits how many you run each month. It's also the way to build for iOS without a Mac.
+
+**What you need:** a free account at [expo.dev](https://expo.dev). Nothing to install globally: the CLI runs through `pnpm dlx eas-cli`.
+
+**Once:**
+
+```sh
+cd apps/mobile
+pnpm dlx eas-cli login
+pnpm dlx eas-cli init          # creates the project on expo.dev and prints its id
+```
+
+`app.config.ts` is code, so `eas init` can't edit it: add the id it prints as `extra: { eas: { projectId: '<id>' } }` in the config, and commit it (it isn't a secret).
+
+**Profiles** (`eas.json`), both an installable APK with internal distribution (a link, not the Play Store):
+
+| Profile       | What it builds                                                         | Command                                                   |
+| ------------- | ---------------------------------------------------------------------- | --------------------------------------------------------- |
+| `development` | The development build (`expo-dev-client`): loads JavaScript from Metro | `pnpm dlx eas-cli build --profile development -p android` |
+| `preview`     | A release build with the JavaScript inside, to keep on the phone       | `pnpm dlx eas-cli build --profile preview -p android`     |
+
+How the monorepo builds there:
+
+- `base` pins **Node 24.13.1** and turns on **Corepack**, so the build machine uses the pnpm version in the root `package.json`, exactly as CI does.
+- EAS installs from the repository root, then runs this package's **`eas-build-post-install`** script, which builds `@agenda/tokens` and `@agenda/core`. The app imports their `dist/`, which isn't committed, so without this step Metro can't find them.
+- `app.config.ts` and the cleartext plugin run **on the build machine**, so `AGENDA_DEV_HOSTS` in your terminal doesn't reach them. Each profile names an EAS environment (`development`, `preview`): set the variable there, e.g. `pnpm dlx eas-cli env:create --name AGENDA_DEV_HOSTS --value 192.168.1.20 --environment development --environment preview --visibility plaintext`. Without it, plain HTTP still works to `localhost` (with `adb reverse`) and the emulator.
+
+**Local or EAS?** Local, day to day: you already have the SDK, and a rebuild is incremental. EAS when the PC without Android Studio has to build, for iOS later, and for a Play Store release (an AAB signed with an upload key EAS manages).
+
+### In CI
+
+The main job runs this package's lint, typecheck, Jest tests (with the 90% coverage gate) and `build`, which is `expo export --platform android`: it bundles the JavaScript with Metro exactly as a release build would, so a broken import or a module Metro can't resolve fails CI. CI doesn't build an APK: Gradle with the NDK takes 10 to 20 minutes and gigabytes of SDK on every run, for little more than this check catches.
 
 ## How it works
 

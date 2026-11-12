@@ -143,15 +143,15 @@ Each phase ends with something usable and merged to `master`. Work in small PRs,
 - Tabs: Today · Calendar · Search · Settings; editor as a bottom sheet
 - Reuses `packages/core` (types, validation, API client, parsing). The UI is native and only the design **tokens** are shared.
 - Local reminders via `expo-notifications`
-- Dev build and a release APK on my own phone, built locally with Android Studio's SDK (`expo run:android`); EAS later
+- Dev build and a release APK on my own phone, built locally with Android Studio's SDK (`expo run:android`) or in the cloud with EAS Build (`development` and `preview` profiles)
 
 **Done when:** the app is on my phone home screen and reminders fire with the app closed.
 
-**Status:** `apps/mobile` (Expo SDK 58, Expo Router, Android only): token login as "Android phone" with the token in expo-secure-store, a Server URL setting shown on the login screen, the "Can't reach" screen, Today (QuickAdd with its preview, the "now" marker, past events muted), Calendar (month grid and the day's list), Search, the editor as a bottom sheet with the web's validation, swipe to delete with Undo, Settings (theme, week start, clock, Server URL, reminders, devices, log out). Reminders are exact alarms through expo-notifications, rebuilt in full whenever the app opens or events change. Screens use core's `EventRepository`, so Phase 7 can put SQLite behind it. CI runs lint, typecheck, Jest (90% coverage) and the Metro bundle. To check by hand: [ ] logged in on the phone, added "Lunch with Sara tomorrow 1pm" with QuickAdd, saw it on the web and desktop, edited it in the sheet, swiped it away and pressed Undo; [ ] a reminder fired with the app swiped away.
+**Status:** `apps/mobile` (Expo SDK 58, Expo Router, Android only): token login as "Android phone" with the token in expo-secure-store, a Server URL setting shown on the login screen, the "Can't reach" screen, Today (QuickAdd with its preview, the "now" marker, past events muted), Calendar (month grid and the day's list), Search, the editor as a bottom sheet with the web's validation, swipe to delete with Undo, Settings (theme, week start, clock, Server URL, reminders, devices, log out). Reminders are exact alarms through expo-notifications, rebuilt in full whenever the app opens or events change. Screens use core's `EventRepository`, so Phase 7 can put SQLite behind it. Builds: local with Android Studio (`expo run:android`) for every day, and EAS Build set up too (`apps/mobile/eas.json`: `development` and `preview` APK profiles on Node 24.13.1 with Corepack). CI runs lint, typecheck, Jest (90% coverage) and the Metro bundle. To check by hand: [ ] logged in on the phone, added "Lunch with Sara tomorrow 1pm" with QuickAdd, saw it on the web and desktop, edited it in the sheet, swiped it away and pressed Undo; [ ] a reminder fired with the app swiped away.
 
 **Not done yet (on purpose):**
 
-- **EAS Build and the Play Store.** Local builds are free and teach the Gradle side; EAS is worth it for iOS or a store release. A store build needs a real upload key, and Play reviews `USE_EXACT_ALARM`.
+- **The Play Store.** A store build is an AAB signed with an upload key (EAS can manage it with a `production` profile), and Play reviews `USE_EXACT_ALARM`.
 - **Background refresh.** An event changed on another device reaches the phone's reminders the next time the app opens. Refreshing in the background (expo-background-task) comes with sync in Phase 7.
 - **iOS.** Needs a Mac or EAS Build, and an Apple developer account.
 

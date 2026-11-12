@@ -77,6 +77,7 @@ Mobile (Expo, Android; needs Android Studio's SDK, JDK and environment variables
 pnpm --filter @agenda/mobile android      # build + install the development build, start Metro (emulator: API at 10.0.2.2:4001)
 pnpm --filter @agenda/mobile dev          # Metro only, for an installed development build
 pnpm --filter @agenda/mobile exec expo run:android --variant release   # release APK for your own phone
+cd apps/mobile && pnpm dlx eas-cli build --profile preview -p android   # the same APK on EAS (or --profile development)
 ```
 
 Plain HTTP from the phone works only to localhost, 10.0.2.2 and `AGENDA_DEV_HOSTS` (set before prebuild); the API needs `HOST=0.0.0.0` for a phone on Wi-Fi.
