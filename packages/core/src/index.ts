@@ -129,7 +129,12 @@ export { TRAY_EMPTY, TRAY_LIMIT, TRAY_SIGNED_OUT, trayItems } from './tray.js';
 export type { TrayOptions } from './tray.js';
 export { DEFAULT_SHORTCUT, SHORTCUT_MESSAGES, shortcutFromKeys, shortcutKeys } from './shortcut.js';
 export type { KeyPress, ShortcutResult } from './shortcut.js';
-export { DEFAULT_SERVER_URL, normalizeServerUrl, SERVER_URL_MESSAGES } from './server-url.js';
+export {
+  DEFAULT_SERVER_URL,
+  isLocalServer,
+  normalizeServerUrl,
+  SERVER_URL_MESSAGES,
+} from './server-url.js';
 export type { ServerUrlResult } from './server-url.js';
 /** The locale type formatEventTime takes, so apps and ui need no direct date-fns import. */
 export type { Locale } from 'date-fns';
@@ -171,3 +176,5 @@ export type {
   EventCreateInput,
   EventPatch,
 } from './types.js';
+export { createApiEventRepository, SEARCH_LIMIT } from './repository.js';
+export type { EventRepository } from './repository.js';

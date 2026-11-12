@@ -8,7 +8,7 @@ Agenda is a personal agenda and calendar. It started as a small teaching project
 - an **API** (Hono + Drizzle + SQLite): **done**
 - a **desktop** app for Windows (Tauri): **done**, talking to the API on your PC until there is a server
 - a **Chrome extension** (Manifest V3, WXT): **done**
-- a **mobile** app (Expo): later
+- a **mobile** app for Android (Expo): **done**, built locally
 
 See [docs/PLAN.md](docs/PLAN.md) for the phases.
 
@@ -41,6 +41,14 @@ See [docs/PLAN.md](docs/PLAN.md) for the phases.
 - **Side panel** with this week, and a **toolbar badge** with what's still to come today.
 - **Reminders in Chrome** if you want them (off by default, so the desktop app's aren't doubled).
 - Asks only for what it uses: no content scripts, and access to your server only.
+
+## Features (Android)
+
+- **Today, Calendar and Search** in bottom tabs, with QuickAdd and its preview on Today.
+- **Editor in a bottom sheet,** with the same rules and messages as the web.
+- **Swipe left to delete,** with Undo.
+- **Reminders that fire with the app closed,** on time even while the phone sleeps.
+- **A Server URL setting** for the API on your PC (see [apps/mobile/README.md](apps/mobile/README.md)); plain HTTP only to local addresses.
 
 ## Screenshots
 
@@ -86,6 +94,7 @@ apps/
   web/        Vite + React app (PWA); also the desktop app's UI
   desktop/    Tauri 2 desktop app: the Rust core around apps/web (see apps/desktop/README.md)
   extension/  Chrome extension (WXT, MV3): popup, side panel, Add to Agenda (see apps/extension/README.md)
+  mobile/     Android app (Expo, Expo Router): tabs, bottom-sheet editor, reminders (see apps/mobile/README.md)
   e2e/        Playwright smoke test against the built api + web
 packages/
   core/       Shared types, validation, dates, layout, quick add and the API client
@@ -137,7 +146,7 @@ All scripts run through [Turborepo](https://turborepo.com), which orders tasks b
 | `pnpm build`     | Build every package and app (`dist/`)                            |
 | `pnpm lint`      | ESLint across the workspace                                      |
 | `pnpm typecheck` | `tsc --noEmit` in every package                                  |
-| `pnpm test`      | Vitest in every package (with coverage gates)                    |
+| `pnpm test`      | Vitest in every package, Jest in mobile (with coverage gates)    |
 | `pnpm e2e`       | Playwright smoke test on the built apps (run `pnpm build` first) |
 | `pnpm format`    | Format the repo with Prettier (`format:check` to verify)         |
 

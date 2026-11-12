@@ -69,6 +69,10 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # `pnpm test` runs at most two packages' suites at once (--concurrency=2 in the root
+      # package.json). Each suite already uses several cores (Vitest threads, Jest workers),
+      # and running them all together starved the slow ones (the API's startup test, the
+      # mobile screens) into timeouts on CI's 4-core runners and on laptops alike.
       - name: Test
         run: pnpm test
 

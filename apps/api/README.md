@@ -29,13 +29,14 @@ After changing `src/db/schema.ts`, generate a migration and commit the SQL it wr
 pnpm --filter @agenda/api db:generate
 ```
 
-| Variable               | Default                 | Meaning                                                         |
-| ---------------------- | ----------------------- | --------------------------------------------------------------- |
-| `AGENDA_PASSWORD_HASH` | (required)              | Output of `hash-password`; the password itself is never stored  |
-| `NODE_ENV`             | `production`            | `development` drops the cookie's Secure flag for plain http     |
-| `CORS_ORIGINS`         | (none)                  | Comma-separated web app origins allowed to use cookies and CORS |
-| `DATABASE_URL`         | `file:./data/agenda.db` | libSQL URL (`file:`, `:memory:`, Turso)                         |
-| `PORT`                 | `4001`                  | Port to listen on                                               |
+| Variable               | Default                 | Meaning                                                              |
+| ---------------------- | ----------------------- | -------------------------------------------------------------------- |
+| `AGENDA_PASSWORD_HASH` | (required)              | Output of `hash-password`; the password itself is never stored       |
+| `NODE_ENV`             | `production`            | `development` drops the cookie's Secure flag for plain http          |
+| `CORS_ORIGINS`         | (none)                  | Comma-separated web app origins allowed to use cookies and CORS      |
+| `DATABASE_URL`         | `file:./data/agenda.db` | libSQL URL (`file:`, `:memory:`, Turso)                              |
+| `PORT`                 | `4001`                  | Port to listen on                                                    |
+| `HOST`                 | `localhost`             | Interface to listen on; `0.0.0.0` lets a phone on the Wi-Fi reach it |
 
 ## Code layout
 

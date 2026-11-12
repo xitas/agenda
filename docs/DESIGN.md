@@ -74,7 +74,7 @@ Color is **never the only signal**: events also show their title and time, and c
 
 ### Icons
 
-Lucide (web: `lucide-react`; mobile: `lucide-react-native`), 20 px in UI and 16 px inline, with a 1.75 stroke.
+Lucide (`lucide-react`) on web, desktop and the extension, 20 px in UI and 16 px inline, with a 1.75 stroke. Mobile uses Ionicons outline icons (`@expo/vector-icons`, bundled with Expo) for its four tabs: `lucide-react-native` would add `react-native-svg`, a native module, for four icons.
 
 ## 3. Core components
 
@@ -111,7 +111,14 @@ Lucide (web: `lucide-react`; mobile: `lucide-react-native`), 20 px in UI and 16 
 
 **Times in day lists** (side panel, popup): each card shows what happens on that day: "16:00 – 17:00", or "23:30 →" and "→ 01:30" for an overnight event, and "All day" for all-day events.
 
-**Mobile:** bottom tabs (Today · Calendar · Search · Settings), a floating **+** button bottom-right (or QuickAdd at the top of Today), and the editor as a bottom sheet. Swipe left on an event to delete (with Undo).
+**Mobile (Android):** bottom tabs (Today · Calendar · Search · Settings) with outline icons, the accent for the current tab. System font (Roboto), touch targets at least 44 dp (`size` tokens), and light or dark from the theme setting ("System" follows the phone).
+
+- **Today:** the long date as the title ("Monday 2 November"), QuickAdd with its preview under the field, today's events, then **New event** (starts at the next whole hour). The "now" marker is an accent line between the event before and after it; events that have ended are muted. Empty: "Nothing today. Enjoy the space."
+- **Calendar:** the month as the title, Previous · Today · Next, the 6-week grid (a dot under days with events, an accent ring on today, the selected day filled with the accent), then the selected day's list. Empty: "Nothing planned."
+- **Search:** one field ("Title, place or notes"), results with their day above each, "Nothing matches “…”." when empty.
+- **Editor:** a bottom sheet titled "New event" or "Edit event", the web's fields and messages (dates and times through Android's own dialogs), Save, Delete (when editing) and Cancel.
+- **Swipe left** on a row reveals Delete; tap it, or swipe on past it, to delete. The snackbar ("Deleted “Dentist”." · Undo) stays 5 seconds, `toastOffset.narrow` above the bottom plus the navigation bar's inset. TalkBack users get a "Delete" accessibility action on each row.
+- **Login:** "Agenda", "Log in to see your agenda.", the password, and the server it will use ("Server: http://…") with Change.
 
 ## 5. Interaction and shortcuts (web/desktop)
 

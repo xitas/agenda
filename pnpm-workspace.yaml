@@ -1,5 +1,11 @@
 packages:
   - apps/*
   - packages/*
+# Dependencies allowed (true) or denied (false) to run install scripts. pnpm fails the
+# install when a package with a script is in neither list.
 allowBuilds:
   esbuild: true
+  # Jest's file watcher (via jest-haste-map, in mobile). Its install script only compiles
+  # it from source when no prebuilt binary fits; the prebuilt ones arrive as optional
+  # dependencies, so there is nothing to build.
+  '@parcel/watcher': false
